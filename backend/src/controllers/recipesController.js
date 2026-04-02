@@ -1,6 +1,6 @@
 const recipes = [
-  { id: 1, title: 'Pasta Carbonara', createdBy: 'zaida' },
-  { id: 2, title: 'Vegansk Chili', createdBy: 'ali' },
+  { id: 1, title: 'Biff med Tomat', createdBy: 'Zaida' },
+  { id: 2, title: 'Vietnamesiska vårrullar', createdBy: 'Zaida' },
 ];
 
 exports.getAllRecipes = (req, res) => {
