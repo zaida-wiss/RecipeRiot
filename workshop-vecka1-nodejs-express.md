@@ -98,8 +98,8 @@ module.exports = router;
 **src/controllers/recipesController.js**
 ```js
 const recipes = [
-  { id: 1, title: 'Clean Code', author: 'Robert C. Martin' },
-  { id: 2, title: 'You Don\'t Know JS', author: 'Kyle Simpson' },
+  { id: 1, title: 'Carbonara', author: 'Robert C. Martin' },
+  { id: 2, title: 'Vietnamesiska vårrullar', author: 'Kyle Simpson' },
 ];
 
 exports.getAllRecipes = (req, res) => {

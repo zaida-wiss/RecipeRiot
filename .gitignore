@@ -1,3 +1,4 @@
 # Ignorera kursvecka-markdownfiler
 kursvecka*.md
+workshop*.md
 node_modules
