@@ -11,6 +11,10 @@ router.get('/', recipesController.getAllRecipes);
 router.get('/:id', recipesController.getRecipeById);
 // När någon gör POST /recipes anropas funktionen som skapar ett nytt recept.
 router.post('/', recipesController.createRecipe);
+// När någon gör DELETE /recipes/:id anropas funktionen som tar bort ett recept via id.
+router.delete('/:id', recipesController.deleteRecipe);
+// När någon gör PATCH /recipes/:id anropas funktionen som uppdaterar delar av ett befintligt recept via id.
+router.patch('/:id', recipesController.updateRecipe);
 
 // Exporterar routern så den kan användas i app.js med app.use(...).
 module.exports = router;
