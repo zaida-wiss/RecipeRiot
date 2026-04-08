@@ -21,7 +21,9 @@
   },
   "homepage": "https://github.com/zaida-wiss/RecipeRiot#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "morgan": "^1.10.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
