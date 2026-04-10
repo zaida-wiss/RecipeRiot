@@ -1,19 +1,83 @@
-.steps {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 3rem;
-}
-
-.steps div {
+.how-section {
+  /* Tvingar vit bakgrund för att bryta av mot din globala beiga body */
+  background-color: #ffffff !important; 
   text-align: center;
+  width: 100%;
 }
 
-.steps div::before {
-  content: "";
+.how-main-title {
+  /* Playfair Display ärvs från din index.css h2 */
+  font-size: 3rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 4rem;
+  margin-top: 0;
+}
+
+.how-grid {
+  display: grid;
+  /* Skapar 4 kolumner på desktop, minskar automatiskt */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  align-items: start;
+}
+
+.how-step-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 10px;
+}
+
+/* De stora, bleka siffrorna */
+.how-step-number {
+  font-family: "Playfair Display", serif;
+  font-size: 5.5rem;
+  font-weight: 700;
+  color: #f3e6dc; /* Den exakta beige-rosa tonen från bilden */
+  line-height: 0.8; /* Drar upp texten under siffran */
+  margin-bottom: 1rem;
   display: block;
-  margin: 0 auto 1rem;
-  width: 40px;
-  height: 40px;
-  background: #c56a2d;
-  border-radius: 50%;
+}
+
+/* Rubriken för varje steg */
+.how-step-heading {
+  /* Tvingar sans-serif för stegen enligt bilden */
+  font-family: "Inter", sans-serif !important;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #2d2d2d;
+  margin: 0 0 0.75rem 0;
+  letter-spacing: -0.01em;
+}
+
+/* Beskrivningen */
+.how-step-description {
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #666;
+  max-width: 240px; /* Håller textblocken snygga som i bilden */
+  margin: 0;
+}
+
+/* Responsiv justering för mindre skärmar */
+@media (max-width: 1024px) {
+  .how-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4rem 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .how-main-title {
+    font-size: 2.2rem;
+  }
+  .how-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  .how-step-number {
+    font-size: 4.5rem;
+  }
 }
