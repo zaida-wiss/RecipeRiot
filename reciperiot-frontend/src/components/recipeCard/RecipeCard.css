@@ -1,0 +1,42 @@
+.card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  transition: 0.25s;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+}
+
+.card img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.card-info {
+  padding: 1.2rem;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #777;
+}
+
+.difficulty {
+  background: #f2ede7;
+  padding: 4px 10px;
+  border-radius: 20px;
+}
+
+.tags span {
+  background: #f6f1eb;
+  padding: 4px 8px;
+  border-radius: 10px;
+  margin-right: 5px;
+  font-size: 0.75rem;
+}

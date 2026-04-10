@@ -1,0 +1,18 @@
+.features {
+  background: #efe7de;
+  text-align: center;
+}
+
+.feature-grid {
+  margin-top: 3rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+}
+
+.feature {
+  background: white;
+  padding: 2rem;
+  border-radius: 14px;
+  text-align: left;
+}

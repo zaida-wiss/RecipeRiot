@@ -1,0 +1,17 @@
+.recipes {
+  text-align: center;
+}
+
+.recipes h2 {
+  font-size: 2.2rem;
+}
+
+.recipes p {
+  color: #777;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
