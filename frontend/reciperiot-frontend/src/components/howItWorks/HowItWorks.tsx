@@ -25,8 +25,8 @@ const HowItWorks = () => {
   ];
 
   return (
-    <section className="how-section section">
-      <div className="container">
+    <section className="how-section">
+      <div className="how-inner-content">
         <h2 className="how-main-title">Så funkar det</h2>
         
         <div className="how-grid">

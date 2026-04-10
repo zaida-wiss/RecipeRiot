@@ -14,13 +14,13 @@
   font-family: "Playfair Display", serif;
   font-size: 2.5rem;
   margin-bottom: 0.5rem;
-  color: #1a1a1a;
+  color: #201b16;
   text-align: center;
 }
 
 .features-subtitle {
   font-family: "Inter", sans-serif;
-  color: #666;
+  color: #8f8880;
   margin-bottom: 4rem;
   font-size: 1.1rem;
   text-align: center;
@@ -30,23 +30,21 @@
   display: grid;
   /* Tvingar 3 kolumner på desktop */
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: 24px;
 }
 
 .feature-card {
-  background: #ffffff !important;
-  padding: 40px;
+  background: #f5f4ef;
+  /* Mindre padding uppe/nere (30px) och mer på sidorna (40px) gör det "lägre" */
+  padding: 26px 40px; 
   border-radius: 14px;
-  text-align: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.05); /* Ger definition mot bakgrunden */
-  display: flex;
-  align-items: center;
-  flex-direction: column;
+  text-align: left; /* Ändrat till vänsterställt som på bilden */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .feature-icon-wrapper {
-  background-color: #fdf5f0;
+  background-color: #ede5db;
   color: #c56a2d;
   width: 48px;
   height: 48px;
@@ -62,7 +60,7 @@
   font-size: 1.2rem;
   font-weight: 700;
   margin: 0 0 12px 0;
-  color: #2d2d2d;
+  color: #201b16;
 }
 
 .feature-card-desc {
