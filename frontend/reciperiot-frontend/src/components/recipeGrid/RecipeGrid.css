@@ -1,0 +1,28 @@
+.recipes {
+  padding: 6rem 0;
+}
+
+.recipes-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.recipes-header h2 {
+  font-size: 2.6rem;
+  margin-bottom: 0.5rem;
+}
+
+.recipes-header p {
+  color: #777;
+  font-size: 1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}

@@ -1,0 +1,19 @@
+.steps {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 3rem;
+}
+
+.steps div {
+  text-align: center;
+}
+
+.steps div::before {
+  content: "";
+  display: block;
+  margin: 0 auto 1rem;
+  width: 40px;
+  height: 40px;
+  background: #c56a2d;
+  border-radius: 50%;
+}
