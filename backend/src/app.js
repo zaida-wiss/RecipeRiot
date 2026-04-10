@@ -1,10 +1,11 @@
 
-const express = require("express");
+const express = require('express');
+const recipesRouter = require('./routes/recipe');
+const logger = require('./middleware/logger');
+
 const app = express();
-const port = 3000;
-app.get("/", (req, res) => {
-  res.send("Hej från min server!");
-});
-app.listen(port, () => {
-  console.log(`Servern lyssnar på http://localhost:${port}"`);
-});
+app.use(express.json());
+app.use(logger);
+app.use('/recipes', recipesRouter);
+
+module.exports = app;

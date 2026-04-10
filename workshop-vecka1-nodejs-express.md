@@ -44,9 +44,9 @@ src/
   app.js
   server.js
   routes/
-    books.js
+    recipes.js
   controllers/
-    booksController.js
+    recipesController.js
   middleware/
     logger.js
 ```
@@ -58,13 +58,13 @@ src/
 **src/app.js**
 ```js
 const express = require('express');
-const booksRouter = require('./routes/books');
+const recipesRouter = require('./routes/recipes');
 const logger = require('./middleware/logger');
 
 const app = express();
 app.use(express.json());
 app.use(logger);
-app.use('/books', booksRouter);
+app.use('/recipes', recipesRouter);
 
 module.exports = app;
 ```
@@ -82,44 +82,44 @@ app.listen(port, () => {
 
 ## 5. Routing och controllers
 
-**src/routes/books.js**
+**src/routes/recipes.js**
 ```js
 const express = require('express');
 const router = express.Router();
-const booksController = require('../controllers/booksController');
+const recipesController = require('../controllers/recipesController');
 
-router.get('/', booksController.getAllBooks);
-router.get('/:id', booksController.getBookById);
-router.post('/', booksController.createBook);
+router.get('/', recipesController.getAllRecipes);
+router.get('/:id', recipesController.getRecipeById);
+router.post('/', recipesController.createRecipe);
 
 module.exports = router;
 ```
 
-**src/controllers/booksController.js**
+**src/controllers/recipesController.js**
 ```js
-const books = [
+const recipes = [
   { id: 1, title: 'Clean Code', author: 'Robert C. Martin' },
   { id: 2, title: 'You Don\'t Know JS', author: 'Kyle Simpson' },
 ];
 
-exports.getAllBooks = (req, res) => {
-  res.json(books);
+exports.getAllRecipes = (req, res) => {
+  res.json(recipes);
 };
 
-exports.getBookById = (req, res) => {
+exports.getRecipeById = (req, res) => {
   const id = parseInt(req.params.id);
-  const book = books.find(b => b.id === id);
-  if (!book) {
+  const recipe = recipes.find(b => b.id === id);
+  if (!recipe) {
     return res.status(404).json({ message: 'Boken hittades inte' });
   }
-  res.json(book);
+  res.json(recipe);
 };
 
-exports.createBook = (req, res) => {
+exports.createRecipe = (req, res) => {
   const { title, author } = req.body;
-  const newBook = { id: books.length + 1, title, author };
-  books.push(newBook);
-  res.status(201).json(newBook);
+  const newRecipe = { id: recipes.length + 1, title, author };
+  recipes.push(newRecipe);
+  res.status(201).json(newRecipe);
 };
 ```
 
@@ -141,9 +141,9 @@ module.exports = (req, res, next) => {
 
 - Starta servern: `npm run dev`
 - Testa endpoints med Thunder Client eller Postman:
-  - `GET http://localhost:3000/books`
-  - `GET http://localhost:3000/books/1`
-  - `POST http://localhost:3000/books` med JSON-body `{ "title": "Eloquent JavaScript", "author": "Marijn Haverbeke" }`
+  - `GET http://localhost:3000/recipes`
+  - `GET http://localhost:3000/recipes/1`
+  - `POST http://localhost:3000/recipes` med JSON-body `{ "title": "Eloquent JavaScript", "author": "Marijn Haverbeke" }`
 
 ---
 
@@ -159,7 +159,7 @@ module.exports = (req, res, next) => {
 ## 9. Stretch goals
 
 - Lägg till en DELETE-route för att ta bort en bok
-- Lägg till validering av indata i `createBook`
+- Lägg till validering av indata i `createRecipe`
 - Skapa en route `/health` som returnerar `{ status: 'ok' }`
 - Dela upp kod i fler moduler (t.ex. för users)
 
