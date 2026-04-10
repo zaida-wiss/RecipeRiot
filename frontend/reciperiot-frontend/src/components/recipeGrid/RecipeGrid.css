@@ -1,5 +1,16 @@
-.recipes {
+/* Denna sektion sträcker sig över hela skärmens bredd */
+.recipes-section {
+  width: 100%;
+  background-color: #ffffff; /* Krispigt vit bakgrund */
   padding: 6rem 0;
+  margin: 0;
+}
+
+/* Denna div centrerar innehållet på sidan */
+.recipes-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
 }
 
 .recipes-header {
@@ -10,6 +21,7 @@
 .recipes-header h2 {
   font-size: 2.6rem;
   margin-bottom: 0.5rem;
+  color: #1a1a1a;
 }
 
 .recipes-header p {
@@ -17,12 +29,21 @@
   font-size: 1rem;
 }
 
+/* Själva rutnätet för korten */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  /* Justera 300px om du vill att korten ska vara bredare eller smalare */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
+}
 
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 0 2rem;
+/* Responsiv justering för mobilen */
+@media (max-width: 768px) {
+  .recipes-section {
+    padding: 3rem 0;
+  }
+  
+  .recipes-header h2 {
+    font-size: 2rem;
+  }
 }

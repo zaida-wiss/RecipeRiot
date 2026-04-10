@@ -6,25 +6,26 @@ import HowItWorks from "../howItWorks/HowItWorks";
 
 const Home = () => {
   return (
-<>
-  <Navbar />
+    <>
+      <Navbar />
 
-  <Hero />
+      <Hero />
 
-  <div className="container">
-    <div className="section">
+      {/* 1. Vi lägger RecipeGrid helt utanför .container */}
       <RecipeGrid />
-    </div>
 
-    <div className="section">
-      <Features />
-    </div>
+      {/* 2. De andra sektionerna som ska ha beige bakgrund och vara smalare 
+          ligger kvar i containern */}
+      <div className="container">
+        <div className="section">
+          <Features />
+        </div>
 
-    <div className="section">
-      <HowItWorks />
-    </div>
-  </div>
-</>
+        <div className="section">
+          <HowItWorks />
+        </div>
+      </div>
+    </>
   );
 };
 

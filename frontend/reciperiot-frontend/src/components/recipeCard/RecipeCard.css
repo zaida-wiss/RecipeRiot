@@ -1,9 +1,31 @@
+/* Denna del skapar den beiga "ön" på den vita sidan */
+.recipe-section-wrapper {
+  padding: 60px 20px;
+  background-color: #FFFFFF; /* Bakgrunden utanför boxen */
+}
+
+.recipe-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #f6f1eb; /* Din beiga färg */
+  padding: 60px 40px;
+  border-radius: 40px; /* Rundade hörn på beiga boxen */
+}
+
+.recipe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 25px;
+}
+
 .card {
   background: white;
-  border-radius: 16px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
-  transition: 0.25s;
+  /* En mjuk skugga som på bilden */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); 
+  border: 1px solid rgba(0, 0, 0, 0.03); /* Knappt märkbar kant */
+  transition: transform 0.25s ease;
 }
 
 .card:hover {
@@ -18,19 +40,36 @@
 
 .card-info {
   padding: 1.2rem;
+  text-align: left;
 }
 
 .top {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   font-size: 0.8rem;
   color: #777;
+  margin-bottom: 10px;
 }
 
 .difficulty {
   background: #f2ede7;
   padding: 4px 10px;
   border-radius: 20px;
+  font-weight: 500;
+}
+
+.card-info h3 {
+  margin: 10px 0;
+  font-family: "Playfair Display", serif;
+  font-size: 1.4rem;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
 }
 
 .tags span {
@@ -39,4 +78,5 @@
   border-radius: 10px;
   margin-right: 5px;
   font-size: 0.75rem;
+  color: #c56a2d;
 }

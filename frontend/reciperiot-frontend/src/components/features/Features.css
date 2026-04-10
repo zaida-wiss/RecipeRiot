@@ -1,18 +1,90 @@
-.features {
-  background: #efe7de;
+.features-section {
+  width: 100%;
+  display: block;
+  padding-bottom: 40px;
+}
+
+.features-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.features-main-title {
+  font-family: "Playfair Display", serif;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+.features-subtitle {
+  font-family: "Inter", sans-serif;
+  color: #666;
+  margin-bottom: 4rem;
+  font-size: 1.1rem;
   text-align: center;
 }
 
 .feature-grid {
-  margin-top: 3rem;
   display: grid;
+  /* Tvingar 3 kolumner på desktop */
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  gap: 20px;
 }
 
-.feature {
-  background: white;
-  padding: 2rem;
+.feature-card {
+  background: #ffffff !important;
+  padding: 40px;
   border-radius: 14px;
-  text-align: left;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05); /* Ger definition mot bakgrunden */
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.feature-icon-wrapper {
+  background-color: #fdf5f0;
+  color: #c56a2d;
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.feature-card-title {
+  font-family: "Inter", sans-serif !important;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+  color: #2d2d2d;
+}
+
+.feature-card-desc {
+  font-family: "Inter", sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #555;
+  margin: 0;
+}
+
+/* Responsivitet */
+@media (max-width: 1024px) {
+  .feature-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .feature-grid {
+    grid-template-columns: 1fr;
+  }
+  .features-section {
+    padding: 60px 20px;
+  }
 }
