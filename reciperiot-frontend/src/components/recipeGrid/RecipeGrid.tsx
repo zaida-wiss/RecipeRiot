@@ -5,8 +5,10 @@ import { recipes } from "../../data/mockRecipies";
 const RecipeGrid = () => {
   return (
     <section className="recipes">
-      <h2>Trendande recept</h2>
-      <p>De mest forkade och älskade recepten just nu</p>
+      <div className="recipes-header">
+        <h2>Trendande recept</h2>
+        <p>De mest älskade och forkade recepten just nu</p>
+      </div>
 
       <div className="grid">
         {recipes.map((r) => (
