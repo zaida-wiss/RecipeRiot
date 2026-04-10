@@ -1,25 +1,27 @@
 .how-section {
-  /* Tvingar vit bakgrund för att bryta av mot din globala beiga body */
-  background-color: #ffffff !important; 
+  background-color: #f9f8f5;
   text-align: center;
   width: 100%;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
 .how-main-title {
-  /* Playfair Display ärvs från din index.css h2 */
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 4rem;
+  color: #201b16;
+  margin-bottom: 5rem;
   margin-top: 0;
 }
 
 .how-grid {
   display: grid;
-  /* Skapar 4 kolumner på desktop, minskar automatiskt */
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 2rem;
   align-items: start;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
 }
 
 .how-step-card {
@@ -29,20 +31,17 @@
   padding: 0 10px;
 }
 
-/* De stora, bleka siffrorna */
 .how-step-number {
   font-family: "Playfair Display", serif;
   font-size: 5.5rem;
   font-weight: 700;
-  color: #f3e6dc; /* Den exakta beige-rosa tonen från bilden */
-  line-height: 0.8; /* Drar upp texten under siffran */
+  color: #e8dacf;
+  line-height: 0.8;
   margin-bottom: 1rem;
   display: block;
 }
 
-/* Rubriken för varje steg */
 .how-step-heading {
-  /* Tvingar sans-serif för stegen enligt bilden */
   font-family: "Inter", sans-serif !important;
   font-size: 1.15rem;
   font-weight: 800;
@@ -51,7 +50,6 @@
   letter-spacing: -0.01em;
 }
 
-/* Beskrivningen */
 .how-step-description {
   font-family: "Inter", sans-serif;
   font-size: 0.95rem;
@@ -61,8 +59,11 @@
   margin: 0;
 }
 
-/* Responsiv justering för mindre skärmar */
 @media (max-width: 1024px) {
+  .how-section {
+    padding-top: 2rem;
+  }
+
   .how-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 4rem 2rem;
@@ -75,7 +76,7 @@
   }
   .how-grid {
     grid-template-columns: 1fr;
-    gap: 3rem;
+    gap: 1rem;
   }
   .how-step-number {
     font-size: 4.5rem;
