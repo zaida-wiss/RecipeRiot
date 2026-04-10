@@ -5,8 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+<<<<<<< HEAD
     "start": "node backend/src/server.js",
     "dev": "nodemon backend/src/server.js"
+=======
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev",
+    "build": "cd backend && npm run build"
+>>>>>>> fio
   },
   "repository": {
     "type": "git",

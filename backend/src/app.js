@@ -1,27 +1,30 @@
-
-// Importerar Express-biblioteket för att skapa en webbserver.
+// src/app.js
 const express = require('express');
-// Importerar routern som innehåller alla recept-endpoints.
-const recipesRouter = require('./routes/recipe');
-// Importerar loggermiddleware som loggar alla inkommande requests.
-const logger = require('./middleware/logger');
-// Importerar CORS-middleware så att klienter från andra origin kan anropa API:t.
 const cors = require('cors');
-// Importerar Morgan för tydlig HTTP-loggning i terminalen.
 const morgan = require('morgan');
 
-// Skapar en ny Express-applikation.
-const app = express();
-// Aktiverar CORS innan routes så att externa klienter får göra requests.
-app.use(cors());
-// Middleware som tolkar inkommande JSON-data från request body.
-app.use(express.json());
-// Morgan loggar varje request med formatet dev.
-app.use(morgan('dev'));
-// Middleware som loggar HTTP-metod och sökväg för varje request.
-app.use(logger);
-// Kopplar receptrouterna till /recipes-vägen, t.ex. /api/v1/recipes.
-app.use('/api/v1/recipes', recipesRouter);
+const recipesRouter = require('./routes/recipes');
+const usersRouter = require('./routes/users');
 
-// Exporterar appen så server.js kan starta den.
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(morgan('dev'));
+
+// Health-kontroll
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+// Routes
+app.use('/api/v1/recipes', recipesRouter);
+app.use('/api/v1/users', usersRouter);
+
+// 404 - om ingen route matchar
+app.use((req, res) => {
+  res.status(404).json({ message: 'Sidan finns inte' });
+});
+
 module.exports = app;

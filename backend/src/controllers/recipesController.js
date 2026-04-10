@@ -1,107 +1,73 @@
-// En enkel in-memory lista med recept (försvinner när servern startas om).
+// src/controllers/recipesController.js
+// Logiken för recipe-endpoints
+// Enkel lista ersätter databasen tills vidare - samma mönster som studiematerialet
+
 const recipes = [
-  { id: 1, title: 'Biff med Tomat', createdBy: 'Zaida', createdAt: '2026-04-02T10:00:00Z', updatedAt: '2026-04-02T10:00:00Z' },
-  { id: 2, title: 'Vietnamesiska vårrullar', createdBy: 'Zaida', createdAt: '2026-04-02T10:00:00Z', updatedAt: '2026-04-02T10:00:00Z' },
+  { id: 1, title: 'Köttbullar', description: 'Klassiska svenska köttbullar', authorId: 1, difficulty: 'easy' },
+  { id: 2, title: 'Pasta Carbonara', description: 'Krämig italiensk pasta', authorId: 2, difficulty: 'medium' },
 ];
 
-// Hämtar och returnerar alla recept.
-exports.getAllRecipes = (req, res) => {
-  // Skickar hela arrayen som JSON-svar.
+// GET /api/v1/recipes
+const getAllRecipes = (req, res) => {
   res.json(recipes);
 };
 
-// Hämtar ett recept baserat på id från URL-parametern.
-exports.getRecipeById = (req, res) => {
-  // Konverterar id från text till nummer, t.ex. "1" -> 1.
-  const id = Number(req.params.id);
-  // Letar upp receptet vars id matchar parametern.
-  const recipe = recipes.find((item) => item.id === id);
+// GET /api/v1/recipes/:id
+const getRecipeById = (req, res) => {
+  const id = parseInt(req.params.id);
+  const recipe = recipes.find(r => r.id === id);
 
-  // Om inget recept hittas returneras 404 Not Found.
   if (!recipe) {
     return res.status(404).json({ message: 'Receptet hittades inte' });
   }
 
-  // Om recept hittas returneras det som JSON.
-  return res.json(recipe);
+  res.json(recipe);
 };
 
-// Skapar ett nytt recept från data i request body.
-exports.createRecipe = (req, res) => {
-  // Plockar ut fälten title och createdBy från inkommande JSON.
-  const { title, createdBy } = req.body;
+// POST /api/v1/recipes
+const createRecipe = (req, res) => {
+  const { title, authorId } = req.body;
 
-  // Enkel validering: båda fälten måste finnas.
-  if (!title || !createdBy) {
-    return res.status(400).json({ message: 'title och createdBy krävs' });
+  if (!title || !authorId) {
+    return res.status(400).json({ message: 'title och authorId krävs' });
   }
 
-  // Bygger ett nytt receptobjekt med nästa lediga id.
   const newRecipe = {
     id: recipes.length + 1,
     title,
-    createdBy,
-    createdAt: new Date().toISOString(),  // Sätts nu
-    updatedAt: new Date().toISOString()   // Samma som createdAt initialt
+    description: req.body.description || '',
+    authorId,
+    difficulty: req.body.difficulty || 'easy',
   };
 
-  // Lägger till det nya receptet i listan.
   recipes.push(newRecipe);
-  // Returnerar 201 Created med det nyskapade receptet.
-  return res.status(201).json(newRecipe);
+  res.status(201).json(newRecipe);
 };
 
-exports.deleteRecipe = (req, res) => {
-  // Hämtar id från URL-parametern.
-  const id = Number(req.params.id);
+// PUT /api/v1/recipes/:id
+const updateRecipe = (req, res) => {
+  const id = parseInt(req.params.id);
+  const index = recipes.findIndex(r => r.id === id);
 
-  // Hittar indexet på receptet i arrayen.
-  const index = recipes.findIndex((item) => item.id === id);
-
-  // Om receptet inte finns returneras 404.
   if (index === -1) {
     return res.status(404).json({ message: 'Receptet hittades inte' });
   }
 
-  // Tar bort receptet från arrayen.
-  recipes.splice(index, 1);
-
-  // Returnerar 204 No Content (framgång utan svardata).
-  return res.status(204).send();
+  recipes[index] = { id, ...req.body };
+  res.json(recipes[index]);
 };
 
-exports.updateRecipe = (req, res) => {
-  // Hämtar id från URL-parametern.
-  const id = Number(req.params.id);
+// DELETE /api/v1/recipes/:id
+const deleteRecipe = (req, res) => {
+  const id = parseInt(req.params.id);
+  const index = recipes.findIndex(r => r.id === id);
 
-  // Plockar ut möjliga värden från request body.
-  const { title, createdBy } = req.body;
-
-  // Hittar receptet.
-  const recipe = recipes.find((item) => item.id === id);
-
-  // Om receptet inte finns returneras 404.
-  if (!recipe) {
+  if (index === -1) {
     return res.status(404).json({ message: 'Receptet hittades inte' });
   }
 
-  // Validering för PATCH: minst ett tillåtet fält måste skickas.
-  if (title === undefined && createdBy === undefined) {
-    return res.status(400).json({ message: 'Skicka minst ett fält: title eller createdBy' });
-  }
-
-  // Uppdaterar bara de fält som faktiskt skickas in.
-  if (title !== undefined) {
-    recipe.title = title;
-  }
-
-  if (createdBy !== undefined) {
-    recipe.createdBy = createdBy;
-  }
-
-  // createdAt lämnas orörd, updatedAt ändras vid uppdatering.
-  recipe.updatedAt = new Date().toISOString();
-
-  // Returnerar det uppdaterade receptet.
-  return res.json(recipe);
+  recipes.splice(index, 1);
+  res.status(204).send();
 };
+
+module.exports = { getAllRecipes, getRecipeById, createRecipe, updateRecipe, deleteRecipe };
