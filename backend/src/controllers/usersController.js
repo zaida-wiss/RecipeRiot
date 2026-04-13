@@ -32,10 +32,22 @@ const createUser = (req, res) => {
     return res.status(400).json({ message: 'username och email krävs' });
   }
 
+  const normalizedEmail = String(email).trim().toLowerCase();
+  const normalizedUsername = String(username).trim();
+
+  if (!normalizedUsername || !normalizedEmail) {
+    return res.status(400).json({ message: 'username och email krävs' });
+  }
+
+  const existingUser = users.find(u => u.email.toLowerCase() === normalizedEmail);
+  if (existingUser) {
+    return res.status(409).json({ message: 'E-postadressen är redan registrerad' });
+  }
+
   const newUser = {
     id: users.length + 1,
-    username,
-    email,
+    username: normalizedUsername,
+    email: normalizedEmail,
   };
 
   users.push(newUser);
@@ -49,6 +61,17 @@ const updateUser = (req, res) => {
 
   if (index === -1) {
     return res.status(404).json({ message: 'Användaren hittades inte' });
+  }
+
+  if (req.body.email) {
+    const normalizedEmail = String(req.body.email).trim().toLowerCase();
+    const emailOwner = users.find(u => u.email.toLowerCase() === normalizedEmail && u.id !== id);
+
+    if (emailOwner) {
+      return res.status(409).json({ message: 'E-postadressen är redan registrerad' });
+    }
+
+    req.body.email = normalizedEmail;
   }
 
   users[index] = { id, ...req.body };
