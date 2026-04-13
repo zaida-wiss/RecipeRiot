@@ -1,11 +1,29 @@
+import { useState } from 'react';
+import { ChefHat, Plus, UtensilsCrossed, ArrowLeft, GitFork } from 'lucide-react';
 import './WeeklyPlanner.css';
-import { ChefHat } from 'lucide-react';
 
 const WeeklyPlanner = () => {
   const days = [
     'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 
     'Fredag', 'Lördag', 'Söndag'
   ];
+
+  const [activeDay, setActiveDay] = useState<string | null>(null);
+  const [selectedMeals, setSelectedMeals] = useState<Record<string, string>>({});
+
+  const savedRecipes = [
+    { id: 1, title: "Krämig Pasta med Basilika" },
+    { id: 2, title: "Hemgjorda Tacos" },
+    { id: 3, title: "Linssoppa med Citron" },
+    { id: 4, title: "Smashed Burgers" }
+  ];
+
+  const selectRecipe = (recipeTitle: string) => {
+    if (activeDay) {
+      setSelectedMeals((prev) => ({ ...prev, [activeDay]: recipeTitle }));
+      setActiveDay(null);
+    }
+  };
 
   return (
     <div className="planner-page-wrapper">
@@ -16,45 +34,90 @@ const WeeklyPlanner = () => {
         </header>
 
         <div className="planner-content">
-          {/* Vänster: Listan med dagar */}
           <div className="days-list">
             {days.map((day) => (
-              <div key={day} className="day-row">
+              <div 
+                key={day} 
+                className={`day-row ${activeDay === day ? 'active-row' : ''}`}
+              >
                 <div className="day-label">{day}</div>
-                <button className="add-meal-btn">
-                  <span className="plus-icon">+</span> Lägg till måltid
+                <button 
+                  className="add-meal-btn" 
+                  onClick={() => setActiveDay(day)}
+                >
+                  {selectedMeals[day] ? (
+                    <div className="selected-meal-text">
+                      <UtensilsCrossed size={18} /> 
+                      <span>{selectedMeals[day]}</span>
+                    </div>
+                  ) : (
+                    <div className="btn-content">
+                      <Plus size={18} /> 
+                      <span>
+                        {activeDay === day 
+                          ? 'Välj recept i menyn till höger...' 
+                          : 'Lägg till måltid'}
+                      </span>
+                    </div>
+                  )}
                 </button>
               </div>
             ))}
           </div>
 
-          {/* Höger: Inköpslista info */}
           <aside className="info-sidebar">
             <div className="info-card">
-            <div className="chef-hat-icon">
-                {/* Här byter vi ut emojin mot Lucide-komponenten */}
-                <ChefHat size={48} strokeWidth={1.5} color="#9f9e9c" />
+              {activeDay ? (
+                <div className="recipe-selector">
+                  <button className="back-btn" onClick={() => setActiveDay(null)}>
+                    <ArrowLeft size={16} /> Tillbaka
+                  </button>
+                  <h3>Mina recept</h3>
+                  <p className="selector-subtitle">Välj ett recept för {activeDay}:</p>
+                  <div className="recipe-list">
+                    {savedRecipes.map((recipe) => (
+                      <div 
+                        key={recipe.id} 
+                        className="recipe-item"
+                        onClick={() => selectRecipe(recipe.title)}
+                      >
+                        {recipe.title}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              <p>Välj recept för varje dag så genereras din inköpslista automatiskt</p>
+              ) : (
+                <div className="default-info">
+                  <div className="chef-hat-icon">
+                    <ChefHat size={48} strokeWidth={1.5} />
+                  </div>
+                  <p>Välj recept för varje dag så genereras din inköpslista automatiskt</p>
+                </div>
+              )}
             </div>
           </aside>
         </div>
       </div>
 
-      {/* Footer längst ner */}
       <footer className="footer">
         <div className="footer-content">
+          {/* VÄNSTER */}
           <div className="footer-left">
-            <span className="footer-logo">🍳 RecipeRiot</span>
-            <span className="footer-copyright">
-              © 2026 RecipeRiot. Recept förtjänar att leva vidare.
+            <span className="footer-logo">
+              <GitFork size={20} /> RecipeRiot
             </span>
           </div>
-          
+
+          {/* MITTEN */}
+          <span className="footer-copyright">
+            © 2026 RecipeRiot. Recept förtjänar att leva vidare.
+          </span>
+
+          {/* HÖGER */}
           <div className="footer-links">
-            <a href="/om-oss">Om oss</a>
-            <a href="/integritet">Integritet</a>
-            <a href="/kontakt">Kontakt</a>
+            <a href="#om">Om oss</a>
+            <a href="#integritet">Integritet</a>
+            <a href="#kontakt">Kontakt</a>
           </div>
         </div>
       </footer>
