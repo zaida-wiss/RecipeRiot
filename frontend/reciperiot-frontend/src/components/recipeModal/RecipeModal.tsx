@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "./RecipeModal.css";
+import "./recipes.css";
 import type { Recipe } from "../../types";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
