@@ -11,20 +11,18 @@ const Home = () => {
 
       <Hero />
 
-      {/* 1. Vi lägger RecipeGrid helt utanför .container */}
+      {/* Vit sektion som går kant-till-kant */}
       <RecipeGrid />
 
-      {/* 2. De andra sektionerna som ska ha beige bakgrund och vara smalare 
-          ligger kvar i containern */}
+      {/* Beige sektion (Features stannar i containern) */}
       <div className="container">
         <div className="section">
           <Features />
         </div>
-
-        <div className="section">
-          <HowItWorks />
-        </div>
       </div>
+
+      {/* Vit sektion som går kant-till-kant */}
+      <HowItWorks />
     </>
   );
 };

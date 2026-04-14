@@ -1,13 +1,3 @@
-# Dependencies
-node_modules
-package-lock.json
-yarn.lock
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
 # Logs
 logs
 *.log
@@ -17,9 +7,13 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Build outputs
+node_modules
 dist
-build
+
+# Environment variables
+.env
+.env.local
+.env.*.local
 
 # Editor directories and files
 .vscode/*
@@ -31,7 +25,3 @@ build
 *.njsproj
 *.sln
 *.sw?
-
-# OS files
-.DS_Store
-Thumbs.db
