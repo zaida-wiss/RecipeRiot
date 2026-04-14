@@ -1,7 +1,7 @@
 /* Denna del skapar den beiga "ön" på den vita sidan */
 .recipe-section-wrapper {
   padding: 60px 20px;
-  background-color: #FFFFFF; /* Bakgrunden utanför boxen */
+  background-color: #f9f8f5;
 }
 
 .recipe-container {
@@ -19,7 +19,7 @@
 }
 
 .card {
-  background: white;
+  background: #f5f4ef;
   border-radius: 12px;
   overflow: hidden;
   /* En mjuk skugga som på bilden */
