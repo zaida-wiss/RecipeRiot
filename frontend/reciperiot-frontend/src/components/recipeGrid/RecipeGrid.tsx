@@ -7,7 +7,7 @@ import RecipeModal from "../recipemodal/RecipeModal";
 
 // Byt ut denna när backend är klar 
 const USE_MOCK = true; // sätt till false när backend finns
-const API_URL = "http://localhost:8080/api/recipes"; // din backend-URL
+const API_URL = "http://localhost:8080/api/recipes"; // backend-URL
 
 const RecipeGrid = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
