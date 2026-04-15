@@ -2,9 +2,12 @@ import "./Navbar.css";
 
 type NavbarProps = {
   onLoginClick: () => void;
+  onLogoutClick: () => void;
+  isLoggedIn: boolean;
+  username?: string;
 };
 
-const Navbar = ({ onLoginClick }: NavbarProps) => {
+const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, username }: NavbarProps) => {
   return (
     <nav className="navbar">
       <div className="logo">🍳 RecipeRiot</div>
@@ -17,7 +20,10 @@ const Navbar = ({ onLoginClick }: NavbarProps) => {
       </div>
 
       <div className="nav-actions">
-        <button className="login" onClick={onLoginClick}>Logga in</button>
+        {isLoggedIn && <span className="welcome">Hej, {username}</span>}
+        <button className="login" onClick={isLoggedIn ? onLogoutClick : onLoginClick}>
+          {isLoggedIn ? "Logga ut" : "Logga in"}
+        </button>
         <button className="cta">Kom igång</button>
       </div>
     </nav>

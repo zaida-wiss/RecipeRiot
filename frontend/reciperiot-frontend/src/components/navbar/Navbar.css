@@ -47,6 +47,11 @@ background: rgba(255, 255, 255, 0.85);
   cursor: pointer;
 }
 
+.nav-actions .welcome {
+  font-size: 0.9rem;
+  color: #5a4a3d;
+}
+
 .nav-actions .cta {
   background: #c56a2d;
   color: white;
