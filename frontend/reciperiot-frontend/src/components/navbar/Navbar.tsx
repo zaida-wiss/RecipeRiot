@@ -1,6 +1,10 @@
 import "./Navbar.css";
 
-const Navbar = () => {
+type NavbarProps = {
+  onLoginClick: () => void;
+};
+
+const Navbar = ({ onLoginClick }: NavbarProps) => {
   return (
     <nav className="navbar">
       <div className="logo">🍳 RecipeRiot</div>
@@ -13,7 +17,7 @@ const Navbar = () => {
       </div>
 
       <div className="nav-actions">
-        <button className="login">Logga in</button>
+        <button className="login" onClick={onLoginClick}>Logga in</button>
         <button className="cta">Kom igång</button>
       </div>
     </nav>
