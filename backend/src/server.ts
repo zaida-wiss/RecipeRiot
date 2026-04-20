@@ -1,7 +1,5 @@
-// src/server.js
-// Startar servern - separerad från app.js
-
-const app = require('./app');
+// src/server.ts
+import app from './app';
 
 const port = 3000;
 

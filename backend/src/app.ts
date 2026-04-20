@@ -1,11 +1,12 @@
-javascript// src/app.js
-const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
-const logger = require('./middleware/logger');
+// src/app.ts
+import express from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
 
 const recipesRouter = require('./routes/recipes');
 const usersRouter = require('./routes/users');
+const logger = require('./middleware/logger');
+
 
 const app = express();
 
@@ -16,7 +17,7 @@ app.use(morgan('dev'));
 app.use(logger);
 
 // Health-kontroll
-app.get('/health', (req, res) => {
+app.get('/health', (_req: express.Request, res: express.Response) => {
   res.json({ status: 'ok' });
 });
 
@@ -25,8 +26,8 @@ app.use('/api/v1/recipes', recipesRouter);
 app.use('/api/v1/users', usersRouter);
 
 // 404 - om ingen route matchar
-app.use((req, res) => {
+app.use((_req: express.Request, res: express.Response) => {
   res.status(404).json({ message: 'Sidan finns inte' });
 });
 
-module.exports = app;
+export default app;
