@@ -7,6 +7,7 @@ const recipesRouter = require('./routes/recipes');
 const usersRouter = require('./routes/users');
 const logger = require('./middleware/logger');
 
+
 const app = express();
 
 // Middleware
@@ -16,7 +17,7 @@ app.use(morgan('dev'));
 app.use(logger);
 
 // Health-kontroll
-app.get('/health', (req, res) => {
+app.get('/health', (req: express.Request, res: express.Response) => {
   res.json({ status: 'ok' });
 });
 
@@ -25,8 +26,8 @@ app.use('/api/v1/recipes', recipesRouter);
 app.use('/api/v1/users', usersRouter);
 
 // 404 - om ingen route matchar
-app.use((req, res) => {
+app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({ message: 'Sidan finns inte' });
 });
 
-module.exports = app;
+export default app;
