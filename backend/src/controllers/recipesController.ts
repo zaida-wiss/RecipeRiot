@@ -4,8 +4,8 @@ import { Recipe } from '../types';
 
 // En enkel in-memory lista med recept (försvinner när servern startas om).
 const recipes: Recipe[] = [
-  { id: 1, title: 'Biff med Tomat', createdBy: 'Zaida', createdAt: '2026-04-02T10:00:00Z', updatedAt: '2026-04-02T10:00:00Z' },
-  { id: 2, title: 'Vietnamesiska vårrullar', createdBy: 'Zaida', createdAt: '2026-04-02T10:00:00Z', updatedAt: '2026-04-02T10:00:00Z' },
+  { id: 1, title: 'Biff med Tomat', createdBy: 'Zaida', ingredients: [], steps: [], createdAt: '2026-04-02T10:00:00Z', updatedAt: '2026-04-02T10:00:00Z' },
+  { id: 2, title: 'Vietnamesiska vårrullar', createdBy: 'Zaida', ingredients: [], steps: [], createdAt: '2026-04-02T10:00:00Z', updatedAt: '2026-04-02T10:00:00Z' },
 ];
 
 // Hämtar och returnerar alla recept.
