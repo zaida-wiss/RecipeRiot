@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import Navbar from "./components/navbar/Navbar";
 import Home from "./components/pages/Home";
+import ExplorePage from "./components/explorePage/ExplorePage";
 import WeeklyPlanner from "./components/weeklyPlanner/WeeklyPlanner";
 import Footer from "./components/footer/Footer";
 
@@ -43,21 +44,28 @@ function App() {
         username={currentUser?.username}
       />
 
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Home
-              isLoginOpen={isLoginOpen}
-              setIsLoginOpen={setIsLoginOpen}
-              onAuthSuccess={handleAuthSuccess}
-            />
-          }
-        />
+      {/* Vi lägger en wrapper runt Routes för att kontrollera avståndet från Navbaren */}
+      <main className="main-content">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Home
+                isLoginOpen={isLoginOpen}
+                setIsLoginOpen={setIsLoginOpen}
+                onAuthSuccess={handleAuthSuccess}
+              />
+            }
+          />
 
-        <Route path="/veckomeny" element={<WeeklyPlanner />} />
-      </Routes>
-        <Footer />
+          {/* Din nya route som matchar länken i Navbaren */}
+          <Route path="/utforska" element={<ExplorePage />} />
+
+          <Route path="/veckomeny" element={<WeeklyPlanner />} />
+        </Routes>
+      </main>
+
+      <Footer />
     </Router>
   );
 }
