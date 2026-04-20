@@ -20,6 +20,9 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true
   },
+  "ts-node": {
+    "esm": false
+  },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

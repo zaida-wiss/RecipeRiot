@@ -9,7 +9,7 @@ const users: User[] = [
 ];
 
 // GET /api/v1/users
-const getAllUsers = (req: Request, res: Response) => {
+const getAllUsers = (_req: Request, res: Response) => {
   res.json(users);
 };
 
@@ -22,7 +22,7 @@ const getUserById = (req: Request, res: Response) => {
     return res.status(404).json({ message: 'Användaren hittades inte' });
   }
 
-  res.json(user);
+  return res.json(user);
 };
 
 // POST /api/v1/users
@@ -40,7 +40,7 @@ const createUser = (req: Request, res: Response) => {
   };
 
   users.push(newUser);
-  res.status(201).json(newUser);
+  return res.status(201).json(newUser);
 };
 
 // PUT /api/v1/users/:id
@@ -53,7 +53,7 @@ const updateUser = (req: Request, res: Response) => {
   }
 
   users[index] = { id, ...req.body };
-  res.json(users[index]);
+  return res.json(users[index]);
 };
 
 // DELETE /api/v1/users/:id
@@ -66,7 +66,7 @@ const deleteUser = (req: Request, res: Response) => {
   }
 
   users.splice(index, 1);
-  res.status(204).send();
+  return res.status(204).send();
 };
 
 module.exports = { getAllUsers, getUserById, createUser, updateUser, deleteUser };

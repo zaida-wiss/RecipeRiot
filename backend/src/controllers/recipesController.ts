@@ -9,7 +9,7 @@ const recipes: Recipe[] = [
 ];
 
 // Hämtar och returnerar alla recept.
-exports.getAllRecipes = (req: Request, res: Response) => {
+exports.getAllRecipes = (_req: Request, res: Response) => {
   res.json(recipes);
 };
 
