@@ -4,6 +4,7 @@ import { useState } from "react";
 import Navbar from "./components/navbar/Navbar";
 import Home from "./components/pages/Home";
 import WeeklyPlanner from "./components/weeklyPlanner/WeeklyPlanner";
+import Footer from "./components/footer/Footer";
 
 import { clearAuthData, getAuthData } from "./api/authApi";
 
@@ -56,6 +57,7 @@ function App() {
 
         <Route path="/veckomeny" element={<WeeklyPlanner />} />
       </Routes>
+        <Footer />
     </Router>
   );
 }
