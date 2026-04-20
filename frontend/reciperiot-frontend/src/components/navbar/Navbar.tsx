@@ -1,4 +1,5 @@
 import "./Navbar.css";
+import { Link } from "react-router-dom";
 
 type NavbarProps = {
   onLoginClick: () => void;
@@ -7,23 +8,33 @@ type NavbarProps = {
   username?: string;
 };
 
-const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, username }: NavbarProps) => {
+const Navbar = ({
+  onLoginClick,
+  onLogoutClick,
+  isLoggedIn,
+  username,
+}: NavbarProps) => {
   return (
     <nav className="navbar">
       <div className="logo">🍳 RecipeRiot</div>
 
       <div className="nav-links">
-        <a>Utforska</a>
-        <a>Mina forks</a>
-        <a>Veckomeny</a>
-        <a>Inköpslista</a>
+        <Link to="/">Utforska</Link>
+        <Link to="/mina-forks">Mina forks</Link>
+        <Link to="/veckomeny">Veckomeny</Link>
+        <Link to="/inkopslista">Inköpslista</Link>
       </div>
 
       <div className="nav-actions">
         {isLoggedIn && <span className="welcome">Hej, {username}</span>}
-        <button className="login" onClick={isLoggedIn ? onLogoutClick : onLoginClick}>
+
+        <button
+          className="login"
+          onClick={isLoggedIn ? onLogoutClick : onLoginClick}
+        >
           {isLoggedIn ? "Logga ut" : "Logga in"}
         </button>
+
         <button className="cta">Kom igång</button>
       </div>
     </nav>
