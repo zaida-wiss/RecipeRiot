@@ -1,46 +1,40 @@
 import React, { useState, useMemo } from 'react';
 import { recipes } from '../data/mockRecipes';
 import { Search, Clock, Tag } from 'lucide-react';
+import RecipeModal from '../recipeModal/RecipeModal';
+import type { Recipe } from '../../types'; // Se till att typen finns tillgänglig
 import './ExplorePage.css';
 
 const ExplorePage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTag, setActiveTag] = useState('Alla');
   const [activeDifficulty, setActiveDifficulty] = useState('Alla');
+  
+  // State för att hantera modalen
+  const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
-  // 1. Skapa unika kategorier/taggar dynamiskt från din mockdata
   const allTags = useMemo(() => {
     const tags = recipes.flatMap((r) => r.tags);
-    // Skapar en unik lista och lägger till "Alla" först
     return ['Alla', ...Array.from(new Set(tags))];
   }, []);
 
   const difficulties = ['Alla', 'Lätt', 'Medel', 'Svår'];
 
-  // 2. Filtreringslogik som körs varje gång state ändras
   const filteredRecipes = recipes.filter((recipe) => {
-    const matchesSearch = recipe.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesTag = 
-      activeTag === 'Alla' || recipe.tags.includes(activeTag);
-    const matchesDiff = 
-      activeDifficulty === 'Alla' || recipe.difficulty === activeDifficulty;
-    
+    const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTag = activeTag === 'Alla' || recipe.tags.includes(activeTag);
+    const matchesDiff = activeDifficulty === 'Alla' || recipe.difficulty === activeDifficulty;
     return matchesSearch && matchesTag && matchesDiff;
   });
 
   return (
     <div className="explore-page-wrapper">
       <div className="explore-container">
-        
-        {/* Header - Matchar din WeeklyPlanner stil */}
         <header className="explore-header">
           <h1>Utforska recept</h1>
           <p>Hitta inspiration bland hundratals recept från vår gemenskap</p>
         </header>
 
-        {/* Sökfält */}
         <div className="search-wrapper">
           <Search className="search-icon-svg" size={20} color="#817878" />
           <input
@@ -52,9 +46,7 @@ const ExplorePage: React.FC = () => {
           />
         </div>
 
-        {/* Filter-sektion */}
         <div className="filter-section">
-          {/* Kategorier/Taggar */}
           <div className="filter-group">
             {allTags.map((tag) => (
               <button
@@ -67,7 +59,6 @@ const ExplorePage: React.FC = () => {
             ))}
           </div>
 
-          {/* Svårighetsgrad */}
           <div className="filter-group">
             {difficulties.map((diff) => (
               <button
@@ -81,17 +72,16 @@ const ExplorePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Recept-grid */}
         <div className="recipe-grid">
           {filteredRecipes.length > 0 ? (
             filteredRecipes.map((recipe) => (
-              <article key={recipe.id} className="recipe-card">
+              <article 
+                key={recipe.id} 
+                className="recipe-card"
+                onClick={() => setSelectedRecipe(recipe)} // <-- Öppna modal vid klick
+              >
                 <div className="image-container">
-                  <img 
-                    src={recipe.image} 
-                    alt={recipe.title} 
-                    className="recipe-image" 
-                  />
+                  <img src={recipe.image} alt={recipe.title} className="recipe-image" />
                 </div>
                 
                 <div className="recipe-content">
@@ -122,6 +112,14 @@ const ExplorePage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Renderar modalen endast om ett recept är valt */}
+      {selectedRecipe && (
+        <RecipeModal 
+          recipe={selectedRecipe} 
+          onClose={() => setSelectedRecipe(null)} 
+        />
+      )}
     </div>
   );
 };
