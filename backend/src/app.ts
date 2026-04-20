@@ -1,11 +1,11 @@
-javascript// src/app.js
-const express = require('express');
-const cors = require('cors');
-const morgan = require('morgan');
-const logger = require('./middleware/logger');
+// src/app.ts
+import express from 'express';
+import cors from 'cors';
+import morgan from 'morgan';
 
 const recipesRouter = require('./routes/recipes');
 const usersRouter = require('./routes/users');
+const logger = require('./middleware/logger');
 
 const app = express();
 

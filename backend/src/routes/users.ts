@@ -1,10 +1,8 @@
-// src/routes/users.js
-// Kopplar URL:er till rätt controller-funktion
-// Ingen logik här - bara en karta
-
-const express = require('express');
-const router = express.Router();
+// src/routes/users.ts
+import { Router } from 'express';
 const usersController = require('../controllers/usersController');
+
+const router = Router();
 
 router.get('/', usersController.getAllUsers);
 router.get('/:id', usersController.getUserById);
