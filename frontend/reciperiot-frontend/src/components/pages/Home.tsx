@@ -1,11 +1,8 @@
-import { useState } from "react";
-import Navbar from "../navbar/Navbar";
 import Hero from "../hero/Hero";
 import RecipeGrid from "../recipeGrid/RecipeGrid";
 import Features from "../features/Feature";
 import HowItWorks from "../howItWorks/HowItWorks";
 import UserLogin from "../userLogin/UserLogin";
-import { clearAuthData, getAuthData } from "../../api/authApi";
 
 type AuthUser = {
   id: number;
@@ -13,50 +10,32 @@ type AuthUser = {
   username: string;
 };
 
-const Home = () => {
-  const initialAuth = getAuthData();
-  const [isLoginOpen, setIsLoginOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<AuthUser | null>(initialAuth?.user ?? null);
+type HomeProps = {
+  isLoginOpen: boolean;
+  setIsLoginOpen: (value: boolean) => void;
+  onAuthSuccess: (user: AuthUser) => void;
+};
 
-  const isLoggedIn = currentUser !== null;
-
-  const openLogin = () => setIsLoginOpen(true);
-  const closeLogin = () => setIsLoginOpen(false);
-
-  const handleAuthSuccess = (user: AuthUser) => {
-    setCurrentUser(user);
-  };
-
-  const handleLogout = () => {
-    clearAuthData();
-    setCurrentUser(null);
-  };
-
+const Home = ({ isLoginOpen, setIsLoginOpen, onAuthSuccess }: HomeProps) => {
   return (
     <>
-      <Navbar
-        onLoginClick={openLogin}
-        onLogoutClick={handleLogout}
-        isLoggedIn={isLoggedIn}
-        username={currentUser?.username}
-      />
-
       <Hero />
 
-      {/* Vit sektion som går kant-till-kant */}
       <RecipeGrid />
 
-      {/* Beige sektion (Features stannar i containern) */}
       <div className="container">
         <div className="section">
           <Features />
         </div>
       </div>
 
-      {/* Vit sektion som går kant-till-kant */}
       <HowItWorks />
 
-      <UserLogin isOpen={isLoginOpen} onClose={closeLogin} onAuthSuccess={handleAuthSuccess} />
+      <UserLogin
+        isOpen={isLoginOpen}
+        onClose={() => setIsLoginOpen(false)}
+        onAuthSuccess={onAuthSuccess}
+      />
     </>
   );
 };
