@@ -1,5 +1,6 @@
 import "./Navbar.css";
 import { Link } from "react-router-dom";
+import { GitFork } from "lucide-react";
 
 type NavbarProps = {
   onLoginClick: () => void;
@@ -16,10 +17,13 @@ const Navbar = ({
 }: NavbarProps) => {
   return (
     <nav className="navbar">
-      <div className="logo">🍳 RecipeRiot</div>
+    <Link to="/" className="logo">
+      <GitFork size={20} />
+      <span>RecipeRiot</span>
+    </Link>
 
       <div className="nav-links">
-        <Link to="/">Utforska</Link>
+        <Link to="/utforska">Utforska</Link>
         <Link to="/mina-forks">Mina forks</Link>
         <Link to="/veckomeny">Veckomeny</Link>
         <Link to="/inkopslista">Inköpslista</Link>
