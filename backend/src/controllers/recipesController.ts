@@ -1,80 +1,66 @@
 // src/controllers/recipesController.ts
 import { Request, Response } from 'express';
-import { Recipe } from '../types';
+import mongoose from "mongoose";
+import { RecipeModel } from '../models/Recipe';
 
-// En enkel in-memory lista med recept (försvinner när servern startas om).
-const recipes: Recipe[] = [
-  { id: 1, title: 'Biff med Tomat', createdBy: 'Zaida', ingredients: [], steps: [], createdAt: '2026-04-02T10:00:00Z', updatedAt: '2026-04-02T10:00:00Z' },
-  { id: 2, title: 'Vietnamesiska vårrullar', createdBy: 'Zaida', ingredients: [], steps: [], createdAt: '2026-04-02T10:00:00Z', updatedAt: '2026-04-02T10:00:00Z' },
-];
+//Hjälpfunktion som håller samma id-fält i API-svaret
+const toRecipeResponse = (doc: any) => ({
+  id: doc._id.toString(),
+  title: doc.title,
+  createdBy: doc.createdBy,
+  ingredients: doc.ingredients ?? [],
+  steps: doc.steps ??[],
+  createdAt: doc.createdAt,
+  updatedAt: doc.updatedAt,
+});
 
-// Hämtar och returnerar alla recept.
-exports.getAllRecipes = (_req: Request, res: Response) => {
-  res.json(recipes);
+exports.getAllRecipes = async (_req: Request, res: Response) => {
+  const recipes = await RecipeModel.find().sort({ createdAt: -1});
+  return res.json(recipes.map(toRecipeResponse));
 };
 
-// Hämtar ett recept baserat på id från URL-parametern.
-exports.getRecipeById = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const recipe = recipes.find((item) => item.id === id);
+exports.getRecipeById = async (req: Request, res: Response) => {
+  const { id } = req.params;
 
+  //Returnerar 400 om id-formatet inte är giltigt ObjectId
+  if(!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: 'Ogiltigt id-format' });
+  }
+
+  const recipe = await RecipeModel.findById(id);
+
+  //Returnerar 404 om dokumentet inte finns
   if (!recipe) {
-    return res.status(404).json({ message: 'Receptet hittades inte' });
+    return res.status(404).json({message: 'Recept hittades inte'});
   }
 
-  return res.json(recipe);
+  return res.json(toRecipeResponse(recipe));
 };
 
-// Skapar ett nytt recept från data i request body.
-exports.createRecipe = (req: Request, res: Response) => {
-  const { title, createdBy } = req.body;
+exports.createRecipe = async (req: Request, res: Response) => {
+  const {title, createdBy, ingredients, steps} = req.body;
 
-  if (!title || !createdBy) {
-    return res.status(400).json({ message: 'title och createdBy krävs' });
+  //Enkel validering enligt ditt nuvarande API-upplägg
+  if(!title || !createdBy) {
+    return res.status(400).json({message: 'title och createdBy krävs'});
   }
 
-  const newRecipe: Recipe = {
-    id: recipes.length + 1,
+  const createdRecipe = await RecipeModel.create({
     title,
     createdBy,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
+    ingredients: ingredients ?? [],
+    steps: steps ?? [],
+  });
 
-  recipes.push(newRecipe);
-  return res.status(201).json(newRecipe);
+  return res.status(201).json(toRecipeResponse(createdRecipe));
 };
 
-// Tar bort ett recept.
-exports.deleteRecipe = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const index = recipes.findIndex((item) => item.id === id);
-
-  if (index === -1) {
-    return res.status(404).json({ message: 'Receptet hittades inte' });
-  }
-
-  recipes.splice(index, 1);
-  return res.status(204).send();
+//Behåller endpointen men markerar att den ej ingår i vecka-4 minimum
+exports.updateRecipe = async (_req: Request, res: Response) => {
+  return res.status(501).json({message: 'Inte implementerad ännu'});
 };
 
-// Uppdaterar delar av ett recept.
-exports.updateRecipe = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const { title, createdBy } = req.body;
-  const recipe = recipes.find((item) => item.id === id);
-
-  if (!recipe) {
-    return res.status(404).json({ message: 'Receptet hittades inte' });
-  }
-
-  if (title === undefined && createdBy === undefined) {
-    return res.status(400).json({ message: 'Skicka minst ett fält: title eller createdBy' });
-  }
-
-  if (title !== undefined) recipe.title = title;
-  if (createdBy !== undefined) recipe.createdBy = createdBy;
-
-  recipe.updatedAt = new Date().toISOString();
-  return res.json(recipe);
+//Behåller endpointen men markerar att den ej ingår i vecka-4 minimum
+exports.deleteRecipe = async (_req: Request, res: Response) => {
+  return res.status(501).json({message: 'Inte implementerat ännu'});
 };
