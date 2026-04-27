@@ -62,10 +62,10 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
   const handleRegister = async () => {
     validateRegisterInput();
 
-    const user = await registerUser(username, email);
+    const user = await registerUser({ username, email });
     const authUser = { id: user.id, email: user.email, username: user.username };
 
-    saveAuthData("demo-token", authUser);
+    saveAuthData({ token: "demo-token", user: authUser });
     onAuthSuccess(authUser);
     setSuccess("Registreringen lyckades! Välkommen till RecipeRiot.");
   };
@@ -73,7 +73,7 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
   const handleLogin = async () => {
     const result = await loginUser(email);
 
-    saveAuthData(result.token, result.user);
+    saveAuthData(result);
     onAuthSuccess(result.user);
     setSuccess("Inloggningen lyckades! Välkommen tillbaka.");
   };
@@ -142,15 +142,15 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
           )}
 
           <label className="user-login-label" htmlFor="user-login-email">
-            E-post
+            Användarnamn eller e-post
           </label>
           <input
             id="user-login-email"
             className="user-login-input"
-            type="email"
+            type="text"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            placeholder="namn@email.com"
+            placeholder="ditt_användarnamn eller namn@email.com"
             required
           />
 

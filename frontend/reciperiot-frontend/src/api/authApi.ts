@@ -22,18 +22,26 @@ async function getResponseErrorMessage(response: Response): Promise<string> {
   }
 }
 
+function isNetworkFailure(error: unknown): error is Error {
+  return error instanceof Error && (error.name === 'AbortError' || error.message === 'Failed to fetch');
+}
+
+async function getSuccessfulResponse(url: string, init?: RequestInit): Promise<Response> {
+  const response = await fetchWithTimeout(url, init);
+
+  if (!response.ok) {
+    throw new Error(await getResponseErrorMessage(response));
+  }
+
+  return response;
+}
+
 async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   try {
-    const response = await fetchWithTimeout(url, init);
-
-    if (!response.ok) {
-      const message = await getResponseErrorMessage(response);
-      throw new Error(message);
-    }
-
+    const response = await getSuccessfulResponse(url, init);
     return response.json();
   } catch (error) {
-    if (error instanceof Error && (error.name === 'AbortError' || error.message === 'Failed to fetch')) {
+    if (isNetworkFailure(error)) {
       throw new Error('Kunde inte ansluta till servern');
     }
 
@@ -41,7 +49,18 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
   }
 }
 
-export async function registerUser(username: string, email: string): Promise<{ id: number; username: string; email: string }> {
+function matchesLoginIdentifier(user: { email: string; username: string }, identifier: string): boolean {
+  const normalizedIdentifier = identifier.trim().toLowerCase();
+
+  return (
+    user.email.toLowerCase() === normalizedIdentifier ||
+    user.username.toLowerCase() === normalizedIdentifier
+  );
+}
+
+export async function registerUser(payload: { username: string; email: string }): Promise<{ id: number; username: string; email: string }> {
+  const { username, email } = payload;
+
   return requestJson(`${BASE_URL}/api/v1/users`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -49,12 +68,12 @@ export async function registerUser(username: string, email: string): Promise<{ i
   });
 }
 
-export async function loginUser(email: string): Promise<{ token: string; user: { id: number; email: string; username: string } }> {
+export async function loginUser(identifier: string): Promise<{ token: string; user: { id: number; email: string; username: string } }> {
   const users = await requestJson<Array<{ id: number; email: string; username: string }>>(`${BASE_URL}/api/v1/users`);
 
-  const user = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
+  const user = users.find((u) => matchesLoginIdentifier(u, identifier));
   if (!user) {
-    throw new Error('E-postadressen hittades inte');
+    throw new Error('Användarnamnet eller e-postadressen hittades inte');
   }
 
   return {
@@ -63,9 +82,9 @@ export async function loginUser(email: string): Promise<{ token: string; user: {
   };
 }
 
-export function saveAuthData(token: string, user: { id: number; email: string; username: string }): void {
-  localStorage.setItem('authToken', token);
-  localStorage.setItem('user', JSON.stringify(user));
+export function saveAuthData(auth: { token: string; user: { id: number; email: string; username: string } }): void {
+  localStorage.setItem('authToken', auth.token);
+  localStorage.setItem('user', JSON.stringify(auth.user));
 }
 
 export function getAuthData(): { token: string; user: { id: number; email: string; username: string } } | null {
