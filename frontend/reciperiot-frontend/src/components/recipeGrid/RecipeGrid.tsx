@@ -4,9 +4,8 @@ import RecipeCard from "../recipeCard/RecipeCard";
 import RecipeModal from "../recipeModal/RecipeModal";
 import type { Recipe } from "../../types";
 
-// ─── Byt ut denna när backend är klar ────────────────────────────────────────
-const USE_MOCK = true; // sätt till false när backend finns
-const API_URL = "http://localhost:8080/api/recipes"; // backend-URL
+const USE_MOCK = true;
+const API_URL = "http://localhost:8080/api/recipes";
 
 const RecipeGrid = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -18,13 +17,10 @@ const RecipeGrid = () => {
     const fetchRecipes = async () => {
       try {
         setLoading(true);
-
         if (USE_MOCK) {
-          // Används tills backend är klar
           const { recipes: mockData } = await import("../data/mockRecipes");
           setRecipes(mockData);
         } else {
-          // Aktiveras när backend är klar – byt bara USE_MOCK till false
           const res = await fetch(API_URL);
           if (!res.ok) throw new Error("Kunde inte hämta recept");
           const data: Recipe[] = await res.json();
@@ -65,8 +61,9 @@ const RecipeGrid = () => {
     <section className="recipes-section">
       <div className="recipes-content">
         <div className="recipes-header">
-          <h2>Trendande recept</h2>
-          <p>De mest älskade och forkade recepten just nu</p>
+          <span className="section-label">Trendande nu</span>
+          <h2>Veckans mest älskade recept</h2>
+          <p>De mest forkade recepten från vår community</p>
         </div>
 
         <div className="grid">

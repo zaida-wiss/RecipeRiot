@@ -1,44 +1,34 @@
-import './HowItWorks.css';
+import "./HowItWorks.css";
+
+const steps = [
+  { num: "01", title: "Hitta inspiration", desc: "Bläddra bland tusentals recept från kockar världen över" },
+  { num: "02", title: "Forka & anpassa", desc: "Gör receptet till ditt eget – byt ingredienser och proportioner" },
+  { num: "03", title: "Planera veckan", desc: "Dra favoritrecept till veckomenyn med drag-and-drop" },
+  { num: "04", title: "Handla smart", desc: "Få en automatisk inköpslista och börja laga" },
+];
 
 const HowItWorks = () => {
-  const steps = [
-    {
-      num: "01",
-      title: "Hitta inspiration",
-      desc: "Bläddra bland tusentals recept från kockar världen över",
-    },
-    {
-      num: "02",
-      title: "Forka & anpassa",
-      desc: "Gör receptet till ditt eget. Byt ingredienser, ändra proportioner",
-    },
-    {
-      num: "03",
-      title: "Planera veckan",
-      desc: "Dra dina favoritrecept till veckomenyn",
-    },
-    {
-      num: "04",
-      title: "Handla smart",
-      desc: "Få en automatisk inköpslista och börja laga",
-    },
-  ];
-
   return (
-    <section className="how-section">
-      <div className="how-inner-content">
-        <h2 className="how-main-title">Så funkar det</h2>
-        
-        <div className="how-grid">
-          {steps.map((step) => (
-            <div key={step.num} className="how-step-card">
+    <section className="how-section" aria-labelledby="how-heading">
+      <div className="how-header">
+        <span className="section-label">Så funkar det</span>
+        <h2 className="how-main-title" id="how-heading">Från inspiration till tallrik</h2>
+        <p className="how-subtitle">Fyra enkla steg för att komma igång</p>
+      </div>
+
+      <ol className="how-grid" aria-label="Steg för att komma igång">
+        {steps.map((step) => (
+          <li key={step.num} className="how-step-card">
+            <div className="how-step-number-wrap" aria-hidden="true">
               <span className="how-step-number">{step.num}</span>
+            </div>
+            <div className="how-step-text">
               <h3 className="how-step-heading">{step.title}</h3>
               <p className="how-step-description">{step.desc}</p>
             </div>
-          ))}
-        </div>
-      </div>
+          </li>
+        ))}
+      </ol>
     </section>
   );
 };

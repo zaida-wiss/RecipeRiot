@@ -1,84 +1,90 @@
-.how-section {
-  background-color: #f9f8f5;
-  text-align: center;
-  width: 100%;
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-}
+/* Mobile first */
+.how-section { background: #fff; padding: 52px 1.25rem; }
+
+.how-header { text-align: center; margin-bottom: 36px; }
 
 .how-main-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #201b16;
-  margin-bottom: 5rem;
-  margin-top: 0;
+  font-family: "Playfair Display", serif;
+  font-size: 1.9rem; font-weight: 700;
+  color: #1a1a1a; margin: 0 0 6px;
 }
 
+.how-subtitle { color: #999; font-size: 0.9rem; margin: 0; }
+
+/* Single column on mobile, numbered list style */
 .how-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 2rem;
-  align-items: start;
-  max-width: 1200px;
+  grid-template-columns: 1fr;
+  gap: 28px;
+  max-width: 480px;
   margin: 0 auto;
-  padding: 0 2rem;
+  position: relative;
 }
 
 .how-step-card {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 0 10px;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 18px;
+  text-align: left;
+}
+
+.how-step-number-wrap {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #ddd5cc;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
 }
 
 .how-step-number {
   font-family: "Playfair Display", serif;
-  font-size: 5.5rem;
-  font-weight: 700;
-  color: #e8dacf;
-  line-height: 0.8;
-  margin-bottom: 1rem;
-  display: block;
+  font-size: 1rem; font-weight: 700; color: #c56a2d;
 }
 
+.how-step-text { padding-top: 8px; }
 .how-step-heading {
-  font-family: "Inter", sans-serif !important;
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #2d2d2d;
-  margin: 0 0 0.75rem 0;
-  letter-spacing: -0.01em;
-}
-
-.how-step-description {
+  font-size: 0.95rem; font-weight: 700;
+  color: #1a1a1a; margin: 0 0 4px;
   font-family: "Inter", sans-serif;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  color: #666;
-  max-width: 240px; /* Håller textblocken snygga som i bilden */
-  margin: 0;
 }
+.how-step-description { font-size: 0.85rem; color: #999; line-height: 1.6; margin: 0; }
 
-@media (max-width: 1024px) {
-  .how-section {
-    padding-top: 2rem;
-  }
+/* Desktop — horizontal layout with connecting line */
+@media (min-width: 900px) {
+  .how-section { padding: 72px 6%; }
+  .how-header { margin-bottom: 52px; }
+  .how-main-title { font-size: 2.2rem; }
 
   .how-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 4rem 2rem;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    max-width: 1100px;
+    position: relative;
   }
-}
 
-@media (max-width: 600px) {
-  .how-main-title {
-    font-size: 2.2rem;
+  .how-grid::before {
+    content: "";
+    position: absolute;
+    top: 24px; left: 12.5%; right: 12.5%;
+    height: 1px; background: #e0d4c8;
   }
-  .how-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+
+  .how-step-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0 14px;
+    gap: 0;
   }
-  .how-step-number {
-    font-size: 4.5rem;
+
+  .how-step-number-wrap {
+    width: 56px; height: 56px;
+    margin-bottom: 18px;
+    position: relative; z-index: 1;
   }
+
+  .how-step-text { padding-top: 0; }
+  .how-step-description { max-width: 160px; margin: 0 auto; }
 }

@@ -1,59 +1,67 @@
-import './Features.css';
-
+import { GitFork, Calendar, ShoppingCart, Users, Shield, BookOpen } from "lucide-react";
+import "./Features.css";
+ 
+const featureData = [
+  {
+    title: "Forka recept",
+    desc: "Skapa variationer av andras recept. Se versionshistorik och jämför ändringar.",
+    icon: GitFork,
+  },
+  {
+    title: "Veckomenyplanering",
+    desc: "Planera veckans alla måltider med drag-and-drop.",
+    icon: Calendar,
+  },
+  {
+    title: "Smart inköpslista",
+    desc: "Generera automatiskt en inköpslista baserad på din veckomeny.",
+    icon: ShoppingCart,
+  },
+  {
+    title: "Följ kockar",
+    desc: "Följ favoritkockar och se deras senaste recept i ditt flöde.",
+    icon: Users,
+  },
+  {
+    title: "GDPR & allergier",
+    desc: "Dina allergier skyddas med extra säkerhet. Full kontroll över dina data.",
+    icon: Shield,
+  },
+  {
+    title: "Steg-för-steg",
+    desc: "Tydliga instruktioner med svårighetsgrad och tidsuppskattningar.",
+    icon: BookOpen,
+  },
+];
+ 
 const Features = () => {
-  const featureData = [
-    {
-      title: "Forka recept",
-      desc: "Skapa variationer av andras recept, precis som på GitHub. Se versionshistorik och jämför ändringar.",
-      icon: "🍴" // Du kan byta ut dessa mot Lucide-react eller SVG senare
-    },
-    {
-      title: "Veckomenyplanering",
-      desc: "Planera veckans alla måltider med drag-and-drop. Dina forkade recept samlade på ett ställe.",
-      icon: "📅"
-    },
-    {
-      title: "Smart inköpslista",
-      desc: "Generera automatiskt en inköpslista baserad på din veckomeny. Slå ihop dubbletter och sortera per butiksdel.",
-      icon: "🛒"
-    },
-    {
-      title: "Följ kockar",
-      desc: "Följ dina favoritkockar och se deras senaste recept och forks i ditt personliga flöde.",
-      icon: "👥"
-    },
-    {
-      title: "GDPR & allergier",
-      desc: "Dina allergier och matpreferenser skyddas med extra säkerhet. Fullständig kontroll över dina data.",
-      icon: "🛡️"
-    },
-    {
-      title: "Steg-för-steg",
-      desc: "Tydliga instruktioner med svårighetsgrad, taggar och tidsuppskattningar för varje recept.",
-      icon: "📖"
-    }
-  ];
-
   return (
     <section className="features-section">
       <div className="container">
-        <h2 className="features-main-title">Allt du behöver</h2>
-        <p className="features-subtitle">Kraftfulla verktyg för att laga, dela och planera</p>
-
+        <div className="features-header">
+          <span className="section-label">Funktioner</span>
+          <h2 className="features-main-title">Allt du behöver</h2>
+          <p className="features-subtitle">Verktyg för att laga, dela och planera</p>
+        </div>
+ 
         <div className="feature-grid">
-          {featureData.map((f, index) => (
-            <div key={index} className="feature-card">
-              <div className="feature-icon-wrapper">
-                <span className="feature-icon">{f.icon}</span>
+          {featureData.map((f) => {
+            const Icon = f.icon;
+            return (
+              <div key={f.title} className="feature-card">
+                <div className="feature-icon-wrapper">
+                  <Icon size={18} strokeWidth={1.8} />
+                </div>
+                <h3 className="feature-card-title">{f.title}</h3>
+                <p className="feature-card-desc">{f.desc}</p>
               </div>
-              <h3 className="feature-title">{f.title}</h3>
-              <p className="feature-desc">{f.desc}</p>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
   );
 };
-
+ 
 export default Features;
+ 
