@@ -22,32 +22,42 @@ function mapDbUser(dbUser: any) {
   return { id: dbUser._id.toString(), username: dbUser.username, email: dbUser.email };
 }
 
+// ======== Helper Functions ========
+// Check if database is ready (replaces repeated compound condition)
+function dbReady(): boolean {
+  return Boolean(UserModel && mongoose.connection.readyState === 1);
+}
+
+// Wrap database operations with fallback error handling
+async function tryDb<T>(fn: () => Promise<T | null>): Promise<T | null> {
+  if (!dbReady()) return null;
+  try {
+    return await fn();
+  } catch (err) {
+    console.warn('DB error:', err);
+    return null;
+  }
+}
+
 // GET /api/v1/users
 const getAllUsers = async (_req: Request, res: Response) => {
-  if (UserModel && mongoose.connection.readyState === 1) {
-    try {
-      const users = await UserModel.find().lean();
-      return res.json(users.map(mapDbUser));
-    } catch (err) {
-      console.warn('DB error in getAllUsers, falling back to in-memory', err);
-    }
+  const users = await tryDb(() => UserModel.find().lean() as any);
+  if (users && Array.isArray(users)) {
+    return res.json(users.map(mapDbUser));
   }
-
   return res.json(inMemoryUsers);
 };
 
 // GET /api/v1/users/:id
 const getUserById = async (req: Request, res: Response) => {
   const id = req.params.id;
+  const isValidMongoId = mongoose.isValidObjectId(id);
 
-  if (UserModel && mongoose.isValidObjectId(id) && mongoose.connection.readyState === 1) {
-    try {
-      const user = await UserModel.findById(id).lean();
-      if (!user) return res.status(404).json({ message: 'Användaren hittades inte' });
-      return res.json(mapDbUser(user));
-    } catch (err) {
-      console.warn('DB error in getUserById, falling back to in-memory', err);
-    }
+  const dbUser = await tryDb(() =>
+    isValidMongoId ? UserModel.findById(id).lean() : Promise.resolve(null)
+  );
+  if (dbUser) {
+    return res.json(mapDbUser(dbUser));
   }
 
   // fallback: treat id as numeric index id
@@ -66,13 +76,9 @@ const createUser = async (req: Request, res: Response) => {
   const { username, email } = req.body;
   if (!username || !email) return res.status(400).json({ message: 'username och email krävs' });
 
-  if (UserModel && mongoose.connection.readyState === 1) {
-    try {
-      const created = await UserModel.create({ username, email });
-      return res.status(201).json(mapDbUser(created));
-    } catch (err) {
-      console.warn('DB error in createUser, falling back to in-memory', err);
-    }
+  const created = await tryDb(() => UserModel.create({ username, email }));
+  if (created) {
+    return res.status(201).json(mapDbUser(created));
   }
 
   const newUser = { id: inMemoryUsers.length + 1, username, email };
@@ -83,15 +89,13 @@ const createUser = async (req: Request, res: Response) => {
 // PUT /api/v1/users/:id
 const updateUser = async (req: Request, res: Response) => {
   const id = req.params.id;
+  const isValidMongoId = mongoose.isValidObjectId(id);
 
-  if (UserModel && mongoose.isValidObjectId(id) && mongoose.connection.readyState === 1) {
-    try {
-      const updated = await UserModel.findByIdAndUpdate(id, req.body, { new: true }).lean();
-      if (!updated) return res.status(404).json({ message: 'Användaren hittades inte' });
-      return res.json(mapDbUser(updated));
-    } catch (err) {
-      console.warn('DB error in updateUser, falling back to in-memory', err);
-    }
+  const updated = await tryDb(() =>
+    isValidMongoId ? UserModel.findByIdAndUpdate(id, req.body, { new: true }).lean() : Promise.resolve(null)
+  );
+  if (updated) {
+    return res.json(mapDbUser(updated));
   }
 
   const numericId = parseInt(id, 10);
@@ -108,15 +112,13 @@ const updateUser = async (req: Request, res: Response) => {
 // DELETE /api/v1/users/:id
 const deleteUser = async (req: Request, res: Response) => {
   const id = req.params.id;
+  const isValidMongoId = mongoose.isValidObjectId(id);
 
-  if (UserModel && mongoose.isValidObjectId(id) && mongoose.connection.readyState === 1) {
-    try {
-      const deleted = await UserModel.findByIdAndDelete(id).lean();
-      if (!deleted) return res.status(404).json({ message: 'Användaren hittades inte' });
-      return res.status(204).send();
-    } catch (err) {
-      console.warn('DB error in deleteUser, falling back to in-memory', err);
-    }
+  const deleted = await tryDb(() =>
+    isValidMongoId ? UserModel.findByIdAndDelete(id).lean() : Promise.resolve(null)
+  );
+  if (deleted) {
+    return res.status(204).send();
   }
 
   const numericId = parseInt(id, 10);
