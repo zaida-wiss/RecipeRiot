@@ -1,0 +1,365 @@
+
+.page {
+  background-color: #f5efe6;
+  min-height: 100vh;
+  padding: 100px 2rem 40px 2rem;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 16px;
+}
+
+.layout {
+  display: flex;
+  gap: 2.5rem;
+  align-items: flex-start;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.left,
+.right {
+  flex: 1;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #f0f0f0;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+  color: #1d1813;
+}
+
+.header h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.6rem;
+  margin: 0;
+}
+
+.empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #999;
+}
+
+.list {
+  list-style: none;
+  padding: 0;
+  margin: 1.5rem 0;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 12px 14px;
+  margin-bottom: 10px;
+
+  border-radius: 12px;
+  background: #faf7f5;
+  border: 1px solid #f0ebe8;
+
+  transition: 0.2s;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  color: #1d1813;
+}
+
+.item:hover {
+  background: #f3eee9;
+}
+
+.itemRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1rem;
+  color: #1d1813;
+}
+
+.row input[type="checkbox"] {
+  display: none;
+}
+
+.row input[type="checkbox"] + span::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+
+  border: 2px solid #d6ccc6;
+  background: #fff;
+
+  margin-right: 10px;
+  vertical-align: middle;
+
+  transition: 0.2s;
+}
+
+.row input[type="checkbox"]:checked + span::before {
+  background: #c56a2d;
+  border-color: #c56a2d;
+}
+
+.checked {
+  text-decoration: line-through;
+  color: #1d1813;
+}
+
+.amount {
+  color: #817878;
+  font-size: 16px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.deleteButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+
+  color: #b9b0ac;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 6px;
+  border-radius: 8px;
+
+  opacity: 0;
+  transition: 0.2s;
+}
+
+.item:hover .deleteButton {
+  opacity: 1;
+}
+
+.deleteButton:hover {
+  color: #c56a2d;
+  background: #faf4f2;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+
+  border-top: 1px solid #f0ebe8;
+}
+
+.input {
+  flex: 2;
+
+  padding: 12px 14px;
+  border-radius: 10px;
+
+  border: 1px solid #e6e0dc;
+  background: #fff;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+  color: #1d1813;
+
+  transition: 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #c56a2d;
+}
+
+/* MÄNGD */
+.amountInput {
+  width: 90px;
+
+  padding: 12px;
+  border-radius: 10px;
+
+  border: 1px solid #e6e0dc;
+  background: #fff;
+
+  text-align: center;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+
+  transition: 0.2s;
+}
+
+.amountInput:focus {
+  outline: none;
+  border-color: #c56a2d;
+}
+
+/* ENHET */
+.unitSelect {
+  width: 85px;
+
+  padding: 12px;
+  border-radius: 10px;
+
+  border: 1px solid #e6e0dc;
+  background: #fff;
+  color: #817878;
+
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 16px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.unitSelect:focus {
+  outline: none;
+  border-color: #c56a2d;
+}
+
+/* ADD BUTTON */
+.button {
+  width: 42px;
+  height: 42px;
+
+  border-radius: 10px;
+  border: none;
+
+  background: #c56a2d;
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition: 0.2s;
+}
+
+.button:hover {
+  background: #a95422;
+}
+
+/* =========================
+   RECIPES
+========================= */
+
+.recipeGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recipeCard {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+
+  cursor: pointer;
+
+  padding: 10px;
+  border-radius: 12px;
+
+  background: #faf7f5;
+  border: 1px solid #f0ebe8;
+
+  transition: 0.2s;
+}
+
+.recipeCard:hover {
+  background: #f0ebe8;
+}
+
+.recipeCard img {
+  width: 55px;
+  height: 55px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.recipeCard h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #1d1813;
+  font-family: "Playfair Display", serif;
+}
+
+/* =========================
+   INGREDIENTS
+========================= */
+
+.ingredients {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ingredients li {
+  display: flex;
+  align-items: center;
+
+  padding: 10px 12px;
+  border-radius: 10px;
+
+  background: #faf7f5;
+  border: 1px solid #f0ebe8;
+}
+
+.ingredients li label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ingredients li input {
+  accent-color: #c56a2d;
+}
+
+/* =========================
+   BACK BUTTON
+========================= */
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  background: none;
+  border: none;
+
+  color: #817878;
+  font-size: 1rem;
+
+  cursor: pointer;
+
+  padding: 6px 10px;
+  border-radius: 8px;
+
+  transition: 0.2s;
+  margin-bottom: 1rem;
+}
+
+.backButton:hover {
+  background: #faf4f2;
+  color: #c56a2d;
+}
