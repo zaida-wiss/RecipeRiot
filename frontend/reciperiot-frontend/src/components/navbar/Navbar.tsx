@@ -1,6 +1,6 @@
 import { useState, type KeyboardEvent } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Search, GitFork, LogIn, LogOut, Menu, X } from "lucide-react";
+import { Search, GitFork, LogIn, LogOut, Menu, X, Calendar, ShoppingCart } from "lucide-react";
 import "./Navbar.css";
 
 type NavbarProps = {
@@ -11,9 +11,9 @@ type NavbarProps = {
 };
 
 const navLinks = [
-  { to: "/utforska", label: "Utforska" },
-  { to: "/veckomeny", label: "Veckomeny" },
-  { to: "/inkopslista", label: "Inköpslista" },
+  { to: "/utforska", label: "Utforska", icon: Search },
+  { to: "/veckomeny", label: "Veckomeny", icon: Calendar },
+  { to: "/inkopslista", label: "Inköpslista", icon: ShoppingCart },
 ];
 
 const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, username }: NavbarProps) => {
@@ -46,7 +46,7 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, username }: NavbarPro
         {/* Logo */}
         <NavLink to="/" className="navbar-logo" aria-label="RecipeRiot – startsidan">
           <span className="navbar-logo-icon" aria-hidden="true">
-            <GitFork size={14} strokeWidth={2} />
+            <GitFork size={13} strokeWidth={2} />
           </span>
           <span className="navbar-logo-name">RecipeRiot</span>
         </NavLink>
@@ -84,17 +84,26 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, username }: NavbarPro
           {isLoggedIn ? (
             <>
               <span className="navbar-welcome" aria-live="polite">Hej, {username}</span>
-              <button className="navbar-btn navbar-btn--ghost" onClick={onLogoutClick} aria-label="Logga ut">
-                <LogOut size={14} strokeWidth={2} aria-hidden="true" />
+              <button
+                className="navbar-btn navbar-btn--ghost"
+                onClick={onLogoutClick}
+                aria-label="Logga ut"
+              >
+                <LogOut size={14} aria-hidden="true" />
                 Logga ut
               </button>
             </>
           ) : (
             <>
-              <button className="navbar-btn navbar-btn--ghost" onClick={onLoginClick} aria-label="Logga in">
-                <LogIn size={14} strokeWidth={2} aria-hidden="true" />
+              <button
+                className="navbar-btn navbar-btn--ghost"
+                onClick={onLoginClick}
+                aria-label="Logga in"
+              >
+                <LogIn size={14} aria-hidden="true" />
                 Logga in
               </button>
+              {/* Dold på mobil via CSS */}
               <NavLink to="/utforska" className="navbar-btn navbar-btn--cta">
                 Kom igång
               </NavLink>
@@ -102,7 +111,7 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, username }: NavbarPro
           )}
         </div>
 
-        {/* Hamburger — mobile */}
+        {/* Hamburger — mobil */}
         <button
           className="navbar-hamburger"
           aria-label={menuOpen ? "Stäng meny" : "Öppna meny"}
@@ -110,7 +119,10 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, username }: NavbarPro
           aria-controls="mobile-drawer"
           onClick={() => setMenuOpen((v) => !v)}
         >
-          {menuOpen ? <X size={18} /> : <Menu size={18} />}
+          {menuOpen
+            ? <X size={17} strokeWidth={2} />
+            : <Menu size={17} strokeWidth={2} />
+          }
         </button>
       </nav>
 
@@ -120,7 +132,6 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, username }: NavbarPro
         className={`navbar-drawer${menuOpen ? " open" : ""}`}
         aria-hidden={!menuOpen}
       >
-        {/* Sökfält i drawer */}
         <div className="navbar-drawer-search" role="search">
           <label htmlFor="drawer-search-input" className="sr-only">Sök bland recept</label>
           <span className="navbar-drawer-search-icon" aria-hidden="true">
@@ -140,14 +151,15 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, username }: NavbarPro
 
         <div className="navbar-drawer-divider" aria-hidden="true" />
 
-        {navLinks.map((link) => (
+        {navLinks.map(({ to, label, icon: Icon }) => (
           <NavLink
-            key={link.to}
-            to={link.to}
+            key={to}
+            to={to}
             className={drawerLinkClass}
             onClick={() => setMenuOpen(false)}
           >
-            {link.label}
+            <Icon size={16} strokeWidth={1.8} aria-hidden="true" />
+            {label}
           </NavLink>
         ))}
       </div>

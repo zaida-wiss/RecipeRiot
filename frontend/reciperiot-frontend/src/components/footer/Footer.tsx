@@ -1,28 +1,40 @@
-import { GitFork } from "lucide-react";
+import { NavLink } from "react-router-dom";
+import { GitFork, ExternalLink, Mail } from "lucide-react";
 import "./Footer.css";
 
 const Footer = () => {
   return (
-    <footer className="footer">
-      <div className="footer-content">
+    <footer className="footer" aria-label="Sidfot">
+      <div className="footer-inner">
 
-        {/* VÄNSTER */}
-        <div className="footer-left">
-          <span className="footer-logo">
-            <GitFork size={20} /> RecipeRiot
-          </span>
+        <div className="footer-top">
+          <div className="footer-brand">
+            <NavLink to="/" className="footer-logo" aria-label="RecipeRiot – startsidan">
+              <span className="footer-logo-icon" aria-hidden="true">
+                <GitFork size={13} strokeWidth={2} />
+              </span>
+              <span className="footer-logo-name">RecipeRiot</span>
+            </NavLink>
+            <p className="footer-tagline">Recept som lever vidare</p>
+          </div>
+
+          <nav className="footer-links" aria-label="Footerlänkar">
+            <a href="#om">Om oss</a>
+            <a href="#integritet">Integritet</a>
+            <a href="#kontakt">Kontakt</a>
+          </nav>
         </div>
 
-        {/* MITTEN */}
-        <span className="footer-copyright">
-          © 2026 RecipeRiot. Recept förtjänar att leva vidare.
-        </span>
-
-        {/* HÖGER */}
-        <div className="footer-links">
-          <a href="#om">Om oss</a>
-          <a href="#integritet">Integritet</a>
-          <a href="#kontakt">Kontakt</a>
+        <div className="footer-bottom">
+          <span className="footer-copy">© 2026 RecipeRiot</span>
+          <div className="footer-social">
+            <a href="#" className="social-btn" aria-label="Kontakta oss via mail">
+              <Mail size={13} strokeWidth={2} aria-hidden="true" />
+            </a>
+            <a href="https://github.com/zaida-wiss/RecipeRiot" className="social-btn" aria-label="Extern länk">
+              <ExternalLink size={13} strokeWidth={2} aria-hidden="true" />
+            </a>
+          </div>
         </div>
 
       </div>

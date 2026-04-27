@@ -1,454 +1,147 @@
-/* ─── Fonts ──────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap');
 
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:wght@400;500;600;700&display=swap');
-
-/* ─── Reset & Base ───────────────────────────────────────────────────────── */
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  background: #f5efe6;
-  font-family: 'Lora', Georgia, serif;
-}
-
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #d4c0a8;
-  border-radius: 10px;
-}
-
-/* ─── Animations ─────────────────────────────────────────────────────────── */
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translate(-50%, calc(-50% + 30px));
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%);
-  }
-}
-
-/* ─── Page ───────────────────────────────────────────────────────────────── */
-
-.page {
-  min-height: 100vh;
-  background: #f5efe6;
-  padding: 60px 24px;
-}
-
-.page__header {
-  text-align: center;
-  margin-bottom: 48px;
-}
-
-.page__title {
-  font-family: 'Playfair Display', Georgia, serif;
-  font-size: clamp(36px, 6vw, 56px);
-  font-weight: 700;
-  color: #1e1208;
-  margin: 0 0 12px;
-}
-
-.page__subtitle {
-  color: #7a6a5e;
-  font-size: 16px;
-  margin: 0;
-  font-family: 'Lora', serif;
-}
-
-.recipe-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 28px;
-  max-width: 1100px;
-  margin: 0 auto;
-}
-
-/* ─── Recipe Card ────────────────────────────────────────────────────────── */
-
-.recipe-card {
-  background: #fdfaf6;
-  border-radius: 16px;
-  overflow: hidden;
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(100, 60, 30, 0.08);
-  transition: box-shadow 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
-              transform  0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-  font-family: 'Lora', Georgia, serif;
-}
-
-.recipe-card:hover {
-  box-shadow: 0 16px 40px rgba(100, 60, 30, 0.18);
-  transform: translateY(-4px);
-}
-
-.recipe-card__image-wrap {
-  height: 220px;
-  overflow: hidden;
-}
-
-.recipe-card__image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.4s ease;
-}
-
-.recipe-card:hover .recipe-card__image {
-  transform: scale(1.05);
-}
-
-.recipe-card__body {
-  padding: 16px 20px 20px;
-}
-
-.recipe-card__meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.recipe-card__time {
-  font-size: 13px;
-  color: #8a7a6e;
-}
-
-.recipe-card__title {
-  margin: 0 0 10px;
-  font-size: 20px;
-  font-weight: 700;
-  color: #2a1e16;
-  font-family: 'Playfair Display', serif;
-}
-
-.recipe-card__tags {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.recipe-card__tag {
-  font-size: 12px;
-  color: #c1693a;
-  font-weight: 600;
-}
-
-/* ─── Difficulty Badge ───────────────────────────────────────────────────── */
-
-.badge {
-  border-radius: 20px;
-  padding: 2px 12px;
-  font-size: 13px;
-  font-weight: 600;
-  font-family: 'Lora', Georgia, serif;
-}
-
-.badge--easy {
-  background: rgba(76, 175, 80, 0.094);
-  color: #4caf50;
-  border: 1px solid rgba(76, 175, 80, 0.267);
-}
-
-.badge--medium {
-  background: rgba(255, 152, 0, 0.094);
-  color: #ff9800;
-  border: 1px solid rgba(255, 152, 0, 0.267);
-}
-
-.badge--hard {
-  background: rgba(229, 57, 53, 0.094);
-  color: #e53935;
-  border: 1px solid rgba(229, 57, 53, 0.267);
-}
-
-/* ─── Star Rating ────────────────────────────────────────────────────────── */
-
-.star-rating {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* ─── Modal Backdrop ─────────────────────────────────────────────────────── */
-
+/* ── Backdrop ── */
 .modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(20, 15, 10, 0.55);
+  position: fixed; inset: 0;
+  background: rgba(20,15,10,0.55);
   backdrop-filter: blur(4px);
   z-index: 100;
   animation: fadeIn 0.2s ease;
 }
 
-/* ─── Modal Panel ────────────────────────────────────────────────────────── */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp {
+  from { opacity: 0; transform: translate(-50%, calc(-50% + 24px)); }
+  to   { opacity: 1; transform: translate(-50%, -50%); }
+}
 
+/* ── Modal panel ── */
 .modal {
   position: fixed;
-  top: 50%;
-  left: 50%;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   z-index: 101;
-  width: min(780px, 95vw);
+  width: min(680px, 95vw);
   max-height: 90vh;
   overflow-y: auto;
-  background: #fdfaf6;
-  border-radius: 20px;
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.25);
-  animation: slideUp 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
-  font-family: 'Lora', Georgia, serif;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #ede8e2;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+  animation: slideUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-family: "Inter", sans-serif;
 }
 
-/* ─── Modal Hero ─────────────────────────────────────────────────────────── */
-
+/* ── Hero image ── */
 .modal__hero {
-  position: relative;
-  height: 280px;
-  overflow: hidden;
-  border-radius: 20px 20px 0 0;
+  position: relative; height: 220px;
+  overflow: hidden; border-radius: 16px 16px 0 0;
 }
-
-.modal__hero-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
+.modal__hero-image { width: 100%; height: 100%; object-fit: cover; display: block; }
 .modal__hero-gradient {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(20, 10, 5, 0.6) 0%, transparent 60%);
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(20,10,5,0.65) 0%, transparent 55%);
 }
-
 .modal__close {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  position: absolute; top: 12px; right: 12px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: #fff;
-  font-size: 20px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.25);
+  color: #fff; font-size: 18px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: background 0.15s;
   line-height: 1;
-  transition: background 0.15s ease;
 }
-
-.modal__close:hover {
-  background: rgba(255, 255, 255, 0.35);
-}
-
+.modal__close:hover { background: rgba(255,255,255,0.28); }
+.modal__close:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
 .modal__hero-title-wrap {
-  position: absolute;
-  bottom: 20px;
-  left: 28px;
-  right: 60px;
+  position: absolute; bottom: 16px; left: 20px; right: 52px;
 }
-
 .modal__hero-title {
-  margin: 0;
-  color: #fff;
-  font-size: 30px;
-  font-weight: 700;
-  font-family: 'Playfair Display', Georgia, serif;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  margin: 0; color: #fff;
+  font-family: "Playfair Display", serif;
+  font-size: 1.4rem; font-weight: 700; line-height: 1.1;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.35);
 }
 
-/* ─── Modal Body ─────────────────────────────────────────────────────────── */
-
-.modal__body {
-  padding: 24px 28px 32px;
-}
+/* ── Body ── */
+.modal__body { padding: 18px 20px 24px; }
 
 .modal__meta-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap; margin-bottom: 12px;
 }
-
 .modal__meta-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  color: #6b5e52;
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; color: #888;
 }
+.modal__rating-wrap { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.modal__rating-text { font-size: 12px; color: #bbb; }
 
-.modal__rating-wrap {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.modal__rating-text {
-  font-size: 13px;
-  color: #9e8e82;
-}
-
-.modal__tags {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 18px;
-  flex-wrap: wrap;
-}
-
+.modal__tags { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
 .modal__tag {
-  font-size: 13px;
-  color: #c1693a;
-  font-weight: 600;
-  background: #fff0e8;
-  border-radius: 20px;
-  padding: 2px 12px;
+  font-size: 11px; color: #c56a2d; font-weight: 600;
+  background: #fff5ef; border-radius: 999px; padding: 3px 10px;
 }
 
 .modal__description {
-  margin: 0 0 24px;
-  font-size: 15px;
-  line-height: 1.7;
-  color: #4a3e35;
+  margin: 0 0 16px; font-size: 13px; line-height: 1.65; color: #666;
 }
 
-.modal__divider {
-  height: 1px;
-  background: #ede3d8;
-  margin-bottom: 24px;
-}
+.modal__divider { height: 1px; background: #f0ebe6; margin-bottom: 14px; }
 
-/* ─── Tabs ───────────────────────────────────────────────────────────────── */
-
+/* ── Tabs ── */
 .tabs {
-  display: flex;
-  gap: 0;
-  margin-bottom: 24px;
-  background: #f0e9df;
-  border-radius: 12px;
-  padding: 4px;
+  display: flex; background: #f5f2ef;
+  border-radius: 10px; padding: 3px; gap: 3px; margin-bottom: 16px;
 }
-
 .tabs__btn {
-  flex: 1;
-  padding: 10px 0;
-  border: none;
-  border-radius: 9px;
-  background: transparent;
-  color: #7a6a5e;
-  font-family: 'Lora', Georgia, serif;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  flex: 1; padding: 8px 0; border: none; border-radius: 8px;
+  background: transparent; color: #888;
+  font-family: "Inter", sans-serif; font-size: 13px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.15s, color 0.15s;
 }
+.tabs__btn--active { background: #fff; color: #c56a2d; }
+.tabs__btn:focus-visible { outline: 2px solid #c56a2d; outline-offset: 2px; }
 
-.tabs__btn--active {
-  background: #fff;
-  color: #c1693a;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-/* ─── Ingredients List ───────────────────────────────────────────────────── */
-
-.ingredient-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
+/* ── Ingredients ── */
+.ingredient-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 7px; }
 .ingredient-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-size: 14px;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 12px; border-radius: 9px; font-size: 13px;
 }
-
-.ingredient-item--even {
-  background: #faf5ef;
-}
-
-.ingredient-item--odd {
-  background: #fdf9f5;
-}
-
-.ingredient-item__name {
-  color: #3d2e24;
-  font-weight: 500;
-}
-
+.ingredient-item--even { background: #faf7f5; }
+.ingredient-item--odd  { background: #fdf9f6; }
+.ingredient-item__name { color: #2a1e16; font-weight: 500; }
 .ingredient-item__amount {
-  color: #c1693a;
-  font-weight: 700;
-  background: #fff0e8;
-  border-radius: 8px;
-  padding: 2px 10px;
-  font-size: 13px;
+  font-size: 12px; color: #c56a2d; font-weight: 700;
+  background: #fff0e8; border-radius: 6px; padding: 2px 8px;
 }
 
-/* ─── Steps List ─────────────────────────────────────────────────────────── */
-
-.step-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.step-item {
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-}
-
+/* ── Steps ── */
+.step-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 12px; }
+.step-item { display: flex; gap: 14px; align-items: flex-start; }
 .step-item__number {
-  flex-shrink: 0;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: #c1693a;
-  color: #fff;
-  font-family: 'Playfair Display', serif;
-  font-weight: 700;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+  background: #c56a2d; color: #fff;
+  font-family: "Playfair Display", serif; font-weight: 700; font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
 }
+.step-item__text { margin: 0; font-size: 13px; line-height: 1.65; color: #555; padding-top: 3px; }
 
-.step-item__text {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.65;
-  color: #4a3e35;
-  padding-top: 4px;
+/* ── Difficulty badges ── */
+.badge { border-radius: 999px; padding: 3px 10px; font-size: 11px; font-weight: 700; }
+.badge--easy   { background: rgba(76,175,80,0.1);  color: #4caf50; border: 1px solid rgba(76,175,80,0.25); }
+.badge--medium { background: rgba(255,152,0,0.1);  color: #ff9800; border: 1px solid rgba(255,152,0,0.25); }
+.badge--hard   { background: rgba(229,57,53,0.1);  color: #e53935; border: 1px solid rgba(229,57,53,0.25); }
+
+/* ── Star rating ── */
+.star-rating { display: flex; align-items: center; gap: 3px; }
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  .modal { width: 100%; max-height: 95vh; border-radius: 16px 16px 0 0; top: auto; bottom: 0; left: 0; transform: none; animation: none; }
+  .modal-backdrop { align-items: flex-end; }
 }
