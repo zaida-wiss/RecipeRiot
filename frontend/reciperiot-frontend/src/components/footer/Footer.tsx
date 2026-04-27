@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { GitFork, ExternalLink, Mail } from "lucide-react";
+import { GitFork, ExternalLink } from "lucide-react";
 import "./Footer.css";
 
 const Footer = () => {
@@ -28,9 +28,6 @@ const Footer = () => {
         <div className="footer-bottom">
           <span className="footer-copy">© 2026 RecipeRiot</span>
           <div className="footer-social">
-            <a href="#" className="social-btn" aria-label="Kontakta oss via mail">
-              <Mail size={13} strokeWidth={2} aria-hidden="true" />
-            </a>
             <a href="https://github.com/zaida-wiss/RecipeRiot" className="social-btn" aria-label="Extern länk">
               <ExternalLink size={13} strokeWidth={2} aria-hidden="true" />
             </a>
