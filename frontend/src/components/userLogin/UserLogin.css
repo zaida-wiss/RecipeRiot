@@ -1,144 +1,95 @@
+/* 🔹 Backdrop: Används för att mörka ner bakgrunden och fokusera på modalen */
 .user-login-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 2000;
+  position: fixed; /* Låser fast elementet över hela vyn */
+  inset: 0;        /* Likvärdigt med top:0, left:0, bottom:0, right:0 */
+  background: rgba(31, 21, 13, 0.6); /* Mörkbrun semi-transparent färg */
+  backdrop-filter: blur(4px); /* "Glas-effekt" som gör bakgrunden suddig */
   display: grid;
-  place-items: center;
-  padding: 16px;
-  background: rgba(21, 17, 13, 0.56);
-  backdrop-filter: blur(6px);
+  place-items: center; /* Det enklaste sättet att centrera innehåll i en box */
+  z-index: 1000;       /* Ser till att modalen ligger över allt annat */
+  padding: 1rem;
 }
 
+/* 🔹 Modalen: Huvudbehållaren för innehållet */
 .user-login-modal {
-  position: relative;
-  width: min(460px, 100%);
-  border-radius: 18px;
-  border: 1px solid #eadfce;
-  background: linear-gradient(180deg, #fffdf9 0%, #f7efe5 100%);
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.24);
-  padding: 26px;
+  background: #ffffff;
+  padding: 2.5rem;
+  border-radius: 16px; /* Mjuka hörn för en modern känsla */
+  width: 100%;
+  max-width: 400px;
+  position: relative; /* Krävs för att positionera stäng-knappen absolut */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 .user-login-close {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  width: 36px;
-  height: 36px;
+  top: 1rem;
+  right: 1rem;
+  background: none;
   border: none;
-  border-radius: 50%;
-  background: #f0e7db;
-  color: #4b3a2d;
+  font-size: 1.5rem;
   cursor: pointer;
-  font-size: 22px;
-  line-height: 1;
+  color: #6e5a4b;
 }
 
 .user-login-title {
-  margin: 0;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
   color: #1f150d;
-  font-size: 2rem;
-  line-height: 1.1;
+  font-size: 1.75rem;
 }
 
-.user-login-subtitle {
-  margin: 8px 0 20px;
-  color: #6e5a4b;
-  font-size: 0.98rem;
-}
-
-.user-login-error {
-  margin-bottom: 16px;
-  padding: 12px 14px;
-  background: #ffe0e0;
-  border: 1px solid #f5a1a1;
-  border-radius: 8px;
-  color: #c33;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.user-login-success {
-  margin-bottom: 16px;
-  padding: 12px 14px;
-  background: #e0f5e0;
-  border: 1px solid #a1f5a1;
-  border-radius: 8px;
-  color: #3a7d3a;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
+/* 🔹 Formuläret: Använder flexbox för snygg vertikal layout */
 .user-login-form {
-  display: grid;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Skapar luft mellan varje rad (input/label) */
 }
 
-.user-login-label {
-  color: #3f2f22;
-  font-weight: 600;
-}
-
-.user-login-input {
+/* 🔹 Input-fält: Stilrena och tillgängliga */
+.user-login-form input {
   width: 100%;
+  padding: 0.8rem;
   border: 1px solid #d7c8b5;
-  border-radius: 10px;
-  padding: 12px;
-  font-size: 0.95rem;
-  background: #fffdfb;
+  border-radius: 8px;
+  box-sizing: border-box; /* Viktigt: gör att padding inte påverkar totalbredden */
+  font-size: 1rem;
 }
 
-.user-login-input:focus {
-  border-color: #c56a2d;
+.user-login-form input:focus {
   outline: none;
-  box-shadow: 0 0 0 4px rgba(197, 106, 45, 0.18);
+  border-color: #c56a2d; /* Märkesfärg vid fokus */
+  box-shadow: 0 0 0 3px rgba(197, 106, 45, 0.2);
 }
 
-.user-login-submit {
-  margin-top: 8px;
-  border: none;
-  border-radius: 10px;
-  padding: 12px;
+/* 🔹 Knappar: Primär knapp för inloggning/register */
+.user-login-form button[type="submit"] {
   background: #c56a2d;
-  color: #fff;
-  font-weight: 700;
+  color: white;
+  border: none;
+  padding: 0.9rem;
+  border-radius: 8px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease, opacity 0.2s ease;
+  transition: background 0.2s; /* Mjuk färgövergång vid hover */
 }
 
-.user-login-submit:hover:not(:disabled) {
-  filter: brightness(0.95);
+.user-login-form button[type="submit"]:hover {
+  background: #a35824;
 }
 
-.user-login-submit:disabled {
-  opacity: 0.7;
+.user-login-form button:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
 }
 
-.user-login-toggle {
-  margin-top: 16px;
-  text-align: center;
-  font-size: 0.95rem;
-  color: #6e5a4b;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
+/* 🔹 Feedback-boxar: Används för fel och succé */
+.user-login-error, .user-login-success {
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
 }
 
-.user-login-toggle-text {
-  margin: 0;
-}
-
-.user-login-toggle-btn {
-  border: none;
-  background: none;
-  color: #c56a2d;
-  font-weight: 600;
-  cursor: pointer;
-  text-decoration: underline;
-}
-
-.user-login-toggle-btn:hover {
-  color: #a85220;
-}
+.user-login-error { background: #fee2e2; color: #991b1b; }
+.user-login-success { background: #dcfce7; color: #166534; }
