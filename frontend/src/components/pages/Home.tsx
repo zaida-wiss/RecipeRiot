@@ -2,7 +2,7 @@ import Hero from "../hero/Hero";
 import RecipeGrid from "../recipeGrid/RecipeGrid";
 import Features from "../features/Feature";
 import HowItWorks from "../howItWorks/HowItWorks";
-import UserLogin from "../userLogin/UserLogin";
+import UserLogin from "../UserLogin/UserLogin";
 
 type AuthUser = {
   id: number;
