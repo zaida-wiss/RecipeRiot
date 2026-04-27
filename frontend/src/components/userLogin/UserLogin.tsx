@@ -1,44 +1,46 @@
-import { useEffect, useState, type FormEvent, type MouseEvent } from "react";
-import { loginUser, registerUser, saveAuthData } from "../../api/authApi";
+import { useEffect, useState, type FormEvent } from "react";
+// Vi importerar funktionerna och typen User.
+// Att importera typer (type User) är "best practice" för att hålla koden typsäker.
+import { loginUser, registerUser, saveAuthData, type User } from "../../api/authApi";
 import "./UserLogin.css";
 
-// 🔹 Typdefinition för props – beskriver vad komponenten förväntar sig
+// 🔹 Props-definition: Definierar vad komponenten kräver utifrån.
+// Användning av 'readonly' gör att vi inte kan ändra dessa värden inifrån komponenten, vilket minskar buggar.
 type UserLoginProps = {
-  readonly isOpen: boolean; // styr om modalen visas
-  readonly onClose: () => void; // funktion för att stänga modalen
-  readonly onAuthSuccess: (user: { id: number; email: string; username: string }) => void; // callback efter lyckad auth
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly onAuthSuccess: (user: User) => void;
 };
 
-// 🔹 Själva React-komponenten (funktionell komponent med hooks)
 const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
 
-  // 🔹 State: styr UI och användarinput
-  const [isRegisterMode, setIsRegisterMode] = useState(false); // login vs register
+  // 🔹 State (Hooks): 'useState' används för att hålla koll på UI-data som förändras över tid.
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [username, setUsername] = useState("");
-  const [error, setError] = useState(""); // felmeddelande till användaren
-  const [success, setSuccess] = useState(""); // success message
-  const [isLoading, setIsLoading] = useState(false); // loader state
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  // 🔹 useEffect: hanterar side effects (lyssnar på ESC-tangent)
+  // 🔹 useEffect: Hanterar "side effects".
+  // Här använder vi den för att lyssna på tangentbordet (Escape) och stänga modalen.
   useEffect(() => {
-    if (!isOpen) return; // kör bara när modalen är öppen
+    if (!isOpen) return; // Kör bara logik om modalen faktiskt visas
 
     const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose(); // stäng modalen vid ESC
-      }
+      if (event.key === "Escape") onClose();
     };
 
     window.addEventListener("keydown", handleEsc);
 
-    // cleanup: viktigt för att undvika memory leaks
+    // Cleanup-funktion: Tar bort lyssnaren när komponenten stängs/unmountas.
+    // Detta förhindrar "minnesläckor" (memory leaks).
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isOpen, onClose]);
 
-  // 🔹 Reset av formulär – återanvändbar funktion
+  // Hjälpfunktion för att nollställa formulärvärden
   const resetForm = () => {
     setEmail("");
     setPassword("");
@@ -48,114 +50,87 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     setSuccess("");
   };
 
-  // 🔹 Växla mellan login och register
+  // Växlar mellan inloggnings- och registreringsvy
   const toggleMode = () => {
-    resetForm(); // rensa formulär vid byte
+    resetForm();
     setIsRegisterMode(!isRegisterMode);
   };
 
-  // 🔹 Validering (frontend-säkerhet + UX)
+  // Validering: Vi kastar fel som sedan fångas upp av vår 'catch'-block i handleSubmit.
   const validateRegisterInput = () => {
-    const validationRules: Array<[boolean, string]> = [
-      [password !== passwordConfirm, "Lösenorden matchar inte"],
-      [password.length < 6, "Lösenordet måste vara minst 6 tecken"],
-      [!username.trim(), "Användarnamn krävs"],
-    ];
-
-    // hittar första regel som failar
-    const validationMessage = validationRules.find(([isInvalid]) => isInvalid)?.[1];
-
-    if (validationMessage) {
-      throw new Error(validationMessage); // kastar error → fångas i try/catch
-    }
+    if (password !== passwordConfirm) throw new Error("Lösenorden matchar inte");
+    if (password.length < 6) throw new Error("Lösenordet måste vara minst 6 tecken");
+    if (!username.trim()) throw new Error("Användarnamn krävs");
   };
 
-  // 🔹 Registreringslogik (API-anrop)
+  // Registreringslogik: Notera att vi skickar in ett OBJEKT { username, email }
+  // Detta är en "Data Transfer Object"-pattern för att undvika "String Heavy Arguments"-problemet.
   const handleRegister = async () => {
     validateRegisterInput();
 
     const user = await registerUser(username, email);
+
+    // formaterar användarobjekt
     const authUser = { id: user.id, email: user.email, username: user.username };
 
-    saveAuthData("demo-token", authUser);
-    onAuthSuccess(authUser);
+    saveAuthData("demo-token", authUser); // sparar i localStorage (eller liknande)
+    onAuthSuccess(authUser); // skickar upp till parent
     setSuccess("Registreringen lyckades! Välkommen till RecipeRiot.");
   };
 
-  // 🔹 Inloggning
+  // Inloggningslogik
   const handleLogin = async () => {
-    const result = await loginUser(email);
+    const result = await loginUser({ email });
 
-    saveAuthData(result);
+    saveAuthData(result.token, result.user);
     onAuthSuccess(result.user);
     setSuccess("Inloggningen lyckades! Välkommen tillbaka.");
   };
 
-  // 🔹 Form submit – central controller
+  // Form submit: Hanterar både register och login beroende på state
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault(); // stoppar reload
-
+    event.preventDefault(); // Hindrar webbläsaren från att ladda om sidan
     setError("");
     setSuccess("");
-    setIsLoading(true);
+    setIsLoading(true); // Visar laddningsindikator
 
     try {
-      // conditional logic beroende på mode
       if (isRegisterMode) {
         await handleRegister();
       } else {
         await handleLogin();
       }
-
-      // stäng modalen efter delay
+      // Väntar 2 sekunder innan vi stänger modalen så användaren hinner läsa "succé"-meddelandet
       setTimeout(onClose, 2000);
-
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Ett fel inträffade";
-      setError(message); // visar fel i UI
+      // Hanterar fel och visar dem för användaren
+      setError(err instanceof Error ? err.message : "Ett fel inträffade");
     } finally {
-      setIsLoading(false); // alltid körs
+      setIsLoading(false); // Stänger av laddningsindikatorn oavsett resultat (success eller fail)
     }
   };
 
-  // 🔹 Stoppar click bubbling (för att inte stänga modal)
-  const stopModalClose = (event: MouseEvent<HTMLDivElement>) => {
-    event.stopPropagation();
-  };
-
-  // 🔹 Conditional rendering – rendera inget om stängd
-  if (!isOpen) {
-    return null;
-  }
+  // Rendera inget om modalen är stängd
+  if (!isOpen) return null;
 
   return (
     <div className="user-login-backdrop" onClick={onClose}>
-      <div className="user-login-modal" onClick={stopModalClose}>
+      {/* stopPropagation förhindrar att click-eventet bubblar upp till backdropen */}
+      <div className="user-login-modal" onClick={(e) => e.stopPropagation()}>
 
-        {/* Stäng-knapp */}
-        <button className="user-login-close" type="button" aria-label="Stäng" onClick={onClose}>
-          ×
-        </button>
+        <button className="user-login-close" type="button" onClick={onClose}>×</button>
 
-        {/* Dynamisk titel */}
         <h2 className="user-login-title">
           {isRegisterMode ? "Registrera dig" : "Logga in"}
         </h2>
 
-        {/* UX-text */}
-        <p className="user-login-subtitle">
-          {isRegisterMode
-            ? "Skapa ett konto för att börja dela recept"
-            : "Välkommen tillbaka till RecipeRiot."}
-        </p>
-
-        {/* Feedback till användaren */}
+        {/* Conditional rendering: Visar fel/succé-meddelanden endast om de finns */}
         {error && <div className="user-login-error">{error}</div>}
         {success && <div className="user-login-success">{success}</div>}
 
         <form className="user-login-form" onSubmit={handleSubmit}>
 
-          {/* Conditional rendering: username bara vid register */}
+          {/* Rendera användarnamn endast i registreringsläge */}
           {isRegisterMode && (
             <>
               <label htmlFor="user-login-username">Användarnamn</label>
@@ -164,14 +139,13 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                required={isRegisterMode}
+                required
               />
             </>
           )}
 
-          <label className="user-login-label" htmlFor="user-login-email">
-            E-post
-          </label>
+          {/* Email */}
+          <label htmlFor="user-login-email">E-post</label>
           <input
             id="user-login-email"
             className="user-login-input"
@@ -182,7 +156,6 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
             required
           />
 
-          {/* Password */}
           <label htmlFor="user-login-password">Lösenord</label>
           <input
             id="user-login-password"
@@ -192,7 +165,6 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
             required
           />
 
-          {/* Confirm password */}
           {isRegisterMode && (
             <>
               <label htmlFor="user-login-password-confirm">Bekräfta lösenord</label>
@@ -206,13 +178,11 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
             </>
           )}
 
-          {/* Submit */}
           <button type="submit" disabled={isLoading}>
             {isLoading ? "Laddar..." : isRegisterMode ? "Registrera" : "Logga in"}
           </button>
         </form>
 
-        {/* Toggle mellan login/register */}
         <div>
           <p>{isRegisterMode ? "Redan medlem?" : "Ny medlem?"}</p>
           <button type="button" onClick={toggleMode}>
