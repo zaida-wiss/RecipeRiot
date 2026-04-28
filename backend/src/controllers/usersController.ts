@@ -36,14 +36,18 @@ function getInMemoryUserIndex(id: string) {
   return inMemoryUsers.findIndex((user) => user.id === numericId);
 }
 
-function getInMemoryUser(id: string) {
+function handleInMemoryUser<T>(
+  id: string,
+  onFound: (user: { id: number; username: string; email: string }, index: number) => T,
+  onMissing: () => T
+) {
   const index = getInMemoryUserIndex(id);
 
   if (index === -1) {
-    return null;
+    return onMissing();
   }
 
-  return inMemoryUsers[index];
+  return onFound(inMemoryUsers[index], index);
 }
 
 function isMongoObjectId(id: string) {
@@ -83,12 +87,11 @@ const getUserById = async (req: Request, res: Response) => {
     return res.json(mapDbUser(dbUser));
   }
 
-  const user = getInMemoryUser(id);
-  if (user) {
-    return res.json(user);
-  }
-
-  return notFound(res);
+  return handleInMemoryUser(
+    id,
+    (user) => res.json(user),
+    () => notFound(res)
+  );
 };
 
 // POST /api/v1/users
@@ -114,14 +117,14 @@ const updateUser = async (req: Request, res: Response) => {
     return res.json(mapDbUser(updated));
   }
 
-  const index = getInMemoryUserIndex(id);
-  if (index !== -1) {
-    const numericId = parseInt(id, 10);
-    inMemoryUsers[index] = { id: numericId, ...req.body };
-    return res.json(inMemoryUsers[index]);
-  }
-
-  return notFound(res);
+  return handleInMemoryUser(
+    id,
+    (_user, index) => {
+      inMemoryUsers[index] = { id: inMemoryUsers[index].id, ...req.body };
+      return res.json(inMemoryUsers[index]);
+    },
+    () => notFound(res)
+  );
 };
 
 // DELETE /api/v1/users/:id
@@ -136,13 +139,14 @@ const deleteUser = async (req: Request, res: Response) => {
     return res.status(204).send();
   }
 
-  const index = getInMemoryUserIndex(id);
-  if (index !== -1) {
-    inMemoryUsers.splice(index, 1);
-    return res.status(204).send();
-  }
-
-  return notFound(res);
+  return handleInMemoryUser(
+    id,
+    (_user, index) => {
+      inMemoryUsers.splice(index, 1);
+      return res.status(204).send();
+    },
+    () => notFound(res)
+  );
 };
 
 module.exports = { getAllUsers, getUserById, createUser, updateUser, deleteUser };
