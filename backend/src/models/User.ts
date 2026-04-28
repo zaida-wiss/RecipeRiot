@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+//Data som ska in i databasen
 export interface IUser extends Document {
   username: string;
   email: string;
@@ -7,6 +8,7 @@ export interface IUser extends Document {
   updatedAt: Date;
 }
 
+//Nedanför finns reglerna för vad som ska in i databasen
 const UserSchema = new Schema<IUser>(
   {
     username: { type: String, required: true, trim: true },
