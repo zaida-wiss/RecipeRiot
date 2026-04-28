@@ -6,6 +6,7 @@ export interface IRecipe extends Document {
   createdBy: string;
   ingredients?: string[];
   steps?: string[];
+  originalRef?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,6 +30,10 @@ const RecipeSchema = new Schema<IRecipe>(
     steps: {
       type: [String],
       default: [],
+    },
+    originalRef: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Recipe', // referens till ett annat recept
     },
   },
   {

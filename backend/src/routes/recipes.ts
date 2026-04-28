@@ -9,5 +9,6 @@ router.get('/:id', recipesController.getRecipeById);
 router.post('/', recipesController.createRecipe);
 router.patch('/:id', recipesController.updateRecipe);
 router.delete('/:id', recipesController.deleteRecipe);
+router.post('/:id/fork', recipesController.forkRecipe);
 
 module.exports = router;

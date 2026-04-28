@@ -6,9 +6,9 @@ import { Recipe } from '../models/Recipe';
 exports.getAllRecipes = async (_req: Request, res: Response) => {
   try {
     const recipes = await Recipe.find();
-    res.json(recipes);
+    return res.json(recipes);
   } catch (error) {
-    res.status(500).json({ message: 'Något gick fel' });
+    return res.status(500).json({ message: 'Något gick fel' });
   }
 };
 
@@ -61,6 +61,30 @@ exports.deleteRecipe = async (req: Request, res: Response) => {
     }
     return res.status(204).send();
   } catch (error) {
+    return res.status(500).json({ message: 'Något gick fel' });
+  }
+};
+
+// POST /api/v1/recipes/:id/fork
+exports.forkRecipe = async (req: Request, res: Response) => {
+  try {
+    const original = await Recipe.findById(req.params.id);
+
+    if (!original) {
+      return res.status(404).json({ message: 'Receptet hittades inte' });
+    }
+
+    const forkedRecipe = await Recipe.create({
+      title: original.title,
+      createdBy: req.body.createdBy,
+      ingredients: original.ingredients,
+      steps: original.steps,
+      originalRef: original._id,
+    });
+
+    return res.status(201).json(forkedRecipe);
+  } catch (error) {
+    console.log('Fork fel:', error); // lägg till denna
     return res.status(500).json({ message: 'Något gick fel' });
   }
 };
