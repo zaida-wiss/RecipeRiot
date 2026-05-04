@@ -1,132 +1,117 @@
 // src/controllers/usersController.ts
 import { Request, Response } from 'express';
 import mongoose from 'mongoose';
+import type { Model } from 'mongoose';
+import type { IUser } from '../models/User';
 
-let UserModel: any;
+// Enkel, workshop-anpassad controller — inga avancerade hjälpfunktioner.
+let UserModel: Model<IUser> | null = null;
 try {
   UserModel = require('../models/User').User;
 } catch (e) {
   UserModel = null;
 }
 
-function mapDbUser(dbUser: any) {
-  return { id: dbUser._id.toString(), username: dbUser.username, email: dbUser.email };
+function mapDbUser(user: any) {
+  return { id: user._id?.toString?.() ?? String(user._id), username: user.username, email: user.email };
 }
 
-function isMongoObjectId(id: string) {
+function isValidId(id: string) {
   return mongoose.isValidObjectId(id);
 }
 
-function isDatabaseReady() {
-  return Boolean(UserModel && mongoose.connection.readyState === 1);
-}
-
-function serviceUnavailable(res: Response) {
-  return res.status(503).json({ message: 'Databasen är inte tillgänglig' });
-}
-
-function notFound(res: Response) {
-  return res.status(404).json({ message: 'Användaren hittades inte' });
-}
-
-function requireDatabase(res: Response) {
-  if (!isDatabaseReady()) {
-    return serviceUnavailable(res);
+function checkDb(res: Response): boolean {
+  if (!UserModel || mongoose.connection.readyState !== 1) {
+    res.status(503).json({ error: 'Database unavailable' });
+    return false;
   }
-
-  return null;
+  return true;
 }
 
-// Vi använder databasen som enda källa för användare.
-async function tryDb<T>(fn: () => Promise<T>): Promise<T | null> {
-  if (!isDatabaseReady()) return null;
-  try {
-    return await fn();
-  } catch (err) {
-    console.warn('DB error:', err);
-    return null;
+function validateId(id: string, res: Response): boolean {
+  if (!isValidId(id)) {
+    res.status(400).json({ error: 'Invalid id-format' });
+    return false;
   }
+  return true;
 }
 
 // GET /api/v1/users
 const getAllUsers = async (_req: Request, res: Response) => {
-  const unavailableResponse = requireDatabase(res);
-  if (unavailableResponse) return unavailableResponse;
+  if (!checkDb(res)) return;
 
-  const users = await tryDb(() => UserModel.find().lean() as any);
-  if (!users) {
-    return serviceUnavailable(res);
+  try {
+    const users = await UserModel!.find().lean();
+    return res.json({ data: users.map(mapDbUser) });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Could not fetch users' });
   }
-
-  return res.json((Array.isArray(users) ? users : []).map(mapDbUser));
 };
 
 // GET /api/v1/users/:id
 const getUserById = async (req: Request, res: Response) => {
-  const id = req.params.id;
-  const isValidMongoId = isMongoObjectId(id);
+  if (!validateId(req.params.id, res)) return;
+  if (!checkDb(res)) return;
 
-  const unavailableResponse = requireDatabase(res);
-  if (unavailableResponse) return unavailableResponse;
-
-  const dbUser = await tryDb(() =>
-    isValidMongoId ? UserModel.findById(id).lean() : Promise.resolve(null)
-  );
-  if (dbUser) {
-    return res.json(mapDbUser(dbUser));
+  try {
+    const user = await UserModel!.findById(req.params.id).lean();
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    return res.json({ data: mapDbUser(user) });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server error' });
   }
-
-  return notFound(res);
 };
 
 // POST /api/v1/users
 const createUser = async (req: Request, res: Response) => {
-  const unavailableResponse = requireDatabase(res);
-  if (unavailableResponse) return unavailableResponse;
-
   const { username, email } = req.body;
-  if (!username || !email) return res.status(400).json({ message: 'username och email krävs' });
+  if (!username || !email) return res.status(400).json({ error: 'username and email are required' });
+  if (!checkDb(res)) return;
 
-  const created = await tryDb(() => UserModel.create({ username, email }));
-  if (!created) {
-    return res.status(500).json({ message: 'Kunde inte skapa användare' });
-  } return res.status(201).json(mapDbUser(created));
+  try {
+    const created = await UserModel!.create({ username, email });
+    const payload = mapDbUser(created);
+    res.location(`/api/v1/users/${payload.id}`);
+    return res.status(201).json({ data: payload });
+  } catch (error: any) {
+    console.error(error);
+    if (error.name === 'ValidationError') return res.status(400).json({ error: error.message });
+    if (error.code === 11000) return res.status(400).json({ error: 'Duplicate key' });
+    return res.status(500).json({ error: "Couldn't create user" });
+  }
 };
 
-// PUT /api/v1/users/:id
+// PATCH /api/v1/users/:id
 const updateUser = async (req: Request, res: Response) => {
-  const id = req.params.id;
-  const isValidMongoId = isMongoObjectId(id);
+  if (!validateId(req.params.id, res)) return;
+  if (!checkDb(res)) return;
 
-  const unavailableResponse = requireDatabase(res);
-  if (unavailableResponse) return unavailableResponse;
-
-  const updated = await tryDb(() =>
-    isValidMongoId ? UserModel.findByIdAndUpdate(id, req.body, { new: true }).lean() : Promise.resolve(null)
-  );
-  if (updated) {
-    return res.json(mapDbUser(updated));
+  try {
+    const updated = await UserModel!.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true }).lean();
+    if (!updated) return res.status(404).json({ error: 'User not found' });
+    return res.json({ data: mapDbUser(updated) });
+  } catch (error: any) {
+    console.error(error);
+    if (error.name === 'ValidationError') return res.status(400).json({ error: error.message });
+    return res.status(500).json({ error: "Couldn't update user" });
   }
-
-  return notFound(res);
 };
 
 // DELETE /api/v1/users/:id
 const deleteUser = async (req: Request, res: Response) => {
-  const id = req.params.id;
-  const isValidMongoId = isMongoObjectId(id);
+  if (!validateId(req.params.id, res)) return;
+  if (!checkDb(res)) return;
 
-  const unavailableResponse = requireDatabase(res);
-  if (unavailableResponse) return unavailableResponse;
-
-  const deleted = await tryDb(() =>
-    isValidMongoId ? UserModel.findByIdAndDelete(id).lean() : Promise.resolve(null)
-  );
-  if (deleted) {
+  try {
+    const deleted = await UserModel!.findByIdAndDelete(req.params.id).lean();
+    if (!deleted) return res.status(404).json({ error: 'User not found' });
     return res.status(204).send();
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Couldn't delete user" });
   }
-
-  return notFound(res);
 };
 
 module.exports = { getAllUsers, getUserById, createUser, updateUser, deleteUser };
