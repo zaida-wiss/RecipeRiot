@@ -29,6 +29,7 @@ const usersSchema = new Schema<UserModelTypes>(
   passwordHash: {
     type: String,
     required: true,
+    select: false,
   },
 
   isActive: {
