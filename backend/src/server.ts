@@ -1,8 +1,4 @@
-// src/server.ts
-import 'dotenv/config';
-import app from './app';
-import { connectToDatabase } from './config/database';
-
+const app = require ("./app");
 const PORT = process.env.PORT || 3000;
 
 async function startServer() {
@@ -12,4 +8,15 @@ async function startServer() {
   });
 }
 
-startServer();
+
+
+
+
+
+// import 'dotenv/config';
+// import app from './app';
+// import { connectToDatabase } from './config/database';
+
+
+
+// startServer();
