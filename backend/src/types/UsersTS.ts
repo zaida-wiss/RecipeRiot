@@ -1,9 +1,5 @@
-// src/types/index.ts
-
-import { MongoUnexpectedServerResponseError } from "mongodb";
-
 //Internal Datamodel -- SSOT (Single Sourse of Truth)
-export interface UserModel {
+export interface UserModelTS {
   id: number;
   username: string;
   email: string;
@@ -15,14 +11,19 @@ export interface UserModel {
 }
 
 // API representation - everything but the sensitive
-export type UserResponse = Omit<UserModel, "passwordHash">
+export type UserResponseTS = Omit<UserModelTS, "passwordHash">
 
 
 // Body type for POST / users
 // Clients send username and email when registering
-export type CreateUserBody = Pick<UserModel, "email"> & {
+export type CreateUserBodyTS = Pick<UserModelTS, "username" | "email"> & {
   password: string;
 }
+
+//Body types for PATCH/users/:id
+//All fields are optional, we do not allow updating of id or hash
+export type UpdateUserBody = Partial<Pick<UserModelTS, "email" | "role">>;
+
 
 
 

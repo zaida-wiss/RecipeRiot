@@ -34,6 +34,10 @@ const usersSchema = new mongoose.Schema(
     type: Date,
   },
 
+  passwordHash: {
+    type: String,
+  }
+
   updatedAt: {
     type: Date,
   },
