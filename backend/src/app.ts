@@ -1,12 +1,12 @@
-// src/app.ts
+//Deklaration
 import express from 'express';
+
 import cors from 'cors';
 import morgan from 'morgan';
 
 const recipesRouter = require('./routes/recipes');
 const usersRouter = require('./routes/users');
 const logger = require('./middleware/logger');
-
 
 const app = express();
 
@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 app.use(logger);
 
-// Health-kontroll
+// Health-kontroll: Bekräftar att servern lever och kan ta emot requests
 app.get('/health', (_req: express.Request, res: express.Response) => {
   res.json({ status: 'ok' });
 });
