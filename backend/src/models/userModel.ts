@@ -1,4 +1,4 @@
-const mongoose = require ("mongoose");
+import mongoose, { Document, Model, Schema} from "mongoose";
 
 const usersSchema = new mongoose.Schema(
 {
@@ -25,6 +25,11 @@ const usersSchema = new mongoose.Schema(
     trim: true,
   },
 
+  role: {
+    type: Boolean,
+    required: true,
+  }
+
   createdAt: {
     type: Date,
   },
@@ -33,6 +38,7 @@ const usersSchema = new mongoose.Schema(
     type: Boolean,
     default: true,
   },
+
 },
 
 { timestamps: true }
