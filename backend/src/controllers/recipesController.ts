@@ -1,6 +1,6 @@
 // src/controllers/recipesController.ts
 import { Request, Response } from 'express';
-import { Recipe } from '../types/RecipesTS';
+import { Recipe } from '../types/recipesTypes';
 
 // En enkel in-memory lista med recept (försvinner när servern startas om).
 const recipes: Recipe[] = [

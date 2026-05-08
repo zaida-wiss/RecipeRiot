@@ -1,12 +1,12 @@
-import mongoose, { Document, Model, Schema} from "mongoose";
+import mongoose, { Schema} from "mongoose";
+import { UserModelTypes } from "../types/usersTypes"
 
-const usersSchema = new mongoose.Schema(
+const usersSchema = new Schema<UserModelTypes>(
 {
   id: {
     type: Number,
     required: true,
     unique: true,
-    trim: true,
   },
 
   username: {
@@ -26,20 +26,15 @@ const usersSchema = new mongoose.Schema(
   },
 
   role: {
-    type: Boolean,
+    type: String,
+    enum: ["admin", "user"],
+    default: "user",
     required: true,
-  },
-
-  createdAt: {
-    type: Date,
   },
 
   passwordHash: {
     type: String,
-  }
-
-  updatedAt: {
-    type: Date,
+    required: true,
   },
 
   isActive: {
@@ -51,3 +46,6 @@ const usersSchema = new mongoose.Schema(
 
 { timestamps: true }
 );
+
+
+export const userModel = mongoose.model<UserModelTypes>("User", usersSchema);
