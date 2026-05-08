@@ -28,9 +28,13 @@ const usersSchema = new mongoose.Schema(
   role: {
     type: Boolean,
     required: true,
-  }
+  },
 
   createdAt: {
+    type: Date,
+  },
+
+  updatedAt: {
     type: Date,
   },
 
