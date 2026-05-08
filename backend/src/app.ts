@@ -4,12 +4,12 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 
-const app = express();
-
 const recipesRouter = require('./routes/recipes');
 const usersRouter = require('./routes/users');
 const logger = require('./middleware/logger');
 
+
+const app = express();
 
 // Middleware
 app.use(cors());
@@ -31,4 +31,4 @@ app.use((_req: express.Request, res: express.Response) => {
   res.status(404).json({ message: 'Sidan finns inte' });
 });
 
-export default app;
+module.exports = app;
