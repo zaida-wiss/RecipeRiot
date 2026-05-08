@@ -12,7 +12,7 @@ const recipes: Recipe[] = [
 // Hämtar och returnerar alla recept.
 // req finns, men jag tänker inte använda den här, därför _req, för att undvika att ESLint eller TypeScript ska klaga
 export const getAllRecipes = (_req: Request, res: Response) => {
-  res.json(recipes);
+  return res.json(recipes);
 };
 
 
