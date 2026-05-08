@@ -6,7 +6,7 @@ import morgan from "morgan";
 import recipesRouter from "./routes/recipesRouter";
 import usersRouter from "./routes/usersRouter";
 
-import logger from "./middleware/logger";
+import logger from "./middleware/RequestConsoleLogger";
 
 const app = express();
 
