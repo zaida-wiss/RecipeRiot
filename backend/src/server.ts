@@ -1,11 +1,9 @@
 const app = require ("./app");
 const PORT = process.env.PORT || 3000;
 
-async function startServer() {
-  await connectToDatabase();
-  app.listen(PORT, () => {
-    console.log(`Servern lyssnar på http://localhost:${PORT}`);
-  });
+app.listen(PORT, () => {
+  console.log(`Servern lyssnar på http://localhost:${PORT}`);
+});
 }
 
 
@@ -17,6 +15,8 @@ async function startServer() {
 // import app from './app';
 // import { connectToDatabase } from './config/database';
 
+// async function startServer() {
+//   await connectToDatabase();
 
 
 // startServer();
