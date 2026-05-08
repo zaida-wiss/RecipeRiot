@@ -1,6 +1,12 @@
 // src/routes/usersController.ts
 import { Router } from "express";
-import { getAllUsers, getUserById, createUser, updateUserObject, updateUserField, deleteUser } from "../controllers/usersController"
+import {
+  getAllUsers,
+  getUserById,
+  createUser,
+  updateUserObject,
+  updateUserField,
+  deleteUser } from "../controllers/usersController";
 
 const router = Router();
 

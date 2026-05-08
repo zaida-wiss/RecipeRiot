@@ -1,15 +1,15 @@
 // Deklaration
-import express from 'express';
+import express from "express";
+import cors from "cors";
+import morgan from "morgan";
 
-import cors from 'cors';
-import morgan from 'morgan';
+import recipesRouter from "./routes/recipesRouter";
+import usersRouter from "./routes/usersRouter";
 
-const recipesRouter = require('./routes/recipes');
-const usersRouter = require('./routes/users');
-const logger = require('./middleware/logger');
-
+import logger from "./middleware/logger";
 
 const app = express();
+
 
 // Middleware
 app.use(cors());
@@ -31,4 +31,4 @@ app.use((_req: express.Request, res: express.Response) => {
   res.status(404).json({ message: 'Sidan finns inte' });
 });
 
-module.exports = app;
+export default app;
