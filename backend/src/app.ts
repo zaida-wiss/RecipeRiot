@@ -1,14 +1,15 @@
-//Deklaration
+// Deklaration
 import express from 'express';
 
 import cors from 'cors';
 import morgan from 'morgan';
 
+const app = express();
+
 const recipesRouter = require('./routes/recipes');
 const usersRouter = require('./routes/users');
 const logger = require('./middleware/logger');
 
-const app = express();
 
 // Middleware
 app.use(cors());
