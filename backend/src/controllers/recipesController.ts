@@ -9,12 +9,13 @@ const recipes: Recipe[] = [
 ];
 
 // Hämtar och returnerar alla recept.
-exports.getAllRecipes = (_req: Request, res: Response) => {
+// req finns, men jag tänker inte använda den här, därför _req, för att undvika att ESLint eller TypeScript ska klaga
+export const getAllRecipes = (_req: Request, res: Response) => {
   res.json(recipes);
 };
 
 // Hämtar ett recept baserat på id från URL-parametern.
-exports.getRecipeById = (req: Request, res: Response) => {
+export const getRecipeById = (req: Request, res: Response) => {
   const id = Number(req.params.id);
   const recipe = recipes.find((item) => item.id === id);
 
@@ -26,7 +27,7 @@ exports.getRecipeById = (req: Request, res: Response) => {
 };
 
 // Skapar ett nytt recept från data i request body.
-exports.createRecipe = (req: Request, res: Response) => {
+export const createRecipe = (req: Request, res: Response) => {
   const { title, createdBy } = req.body;
 
   if (!title || !createdBy) {
