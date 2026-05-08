@@ -6,7 +6,7 @@ import morgan from "morgan";
 import recipesRouter from "./routes/recipesRouter";
 import usersRouter from "./routes/usersRouter";
 
-import logger from "./middleware/requestConsoleLogger";
+import requestConsoleLogger from "./middleware/requestConsoleLogger";
 
 const app = express();
 
@@ -15,7 +15,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
-app.use(logger);
+app.use(requestConsoleLogger);
 
 // Health-kontroll: Bekräftar att servern lever och kan ta emot requests
 app.get('/health', (_req: express.Request, res: express.Response) => {

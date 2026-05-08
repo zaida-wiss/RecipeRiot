@@ -13,7 +13,7 @@ const router = Router();
 router.get('/', getAllRecipes);
 router.get('/:id', getRecipeById);
 router.post('/', createRecipe);
-router.put("./:id", updateRecipeObject)
+router.put("/:id", updateRecipeObject)
 router.patch('/:id', updateRecipeField);
 router.delete('/:id', deleteRecipe);
 
