@@ -1,6 +1,5 @@
 //Internal Datamodel -- SSOT (Single Source of Truth)
 export interface UserModelTypes {
-  id: number;
   username: string;
   email: string;
   role: "user" | "admin";

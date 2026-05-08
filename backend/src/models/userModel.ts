@@ -3,12 +3,6 @@ import { UserModelTypes } from "../types/usersTypes"
 
 const usersSchema = new Schema<UserModelTypes>(
 {
-  id: {
-    type: Number,
-    required: true,
-    unique: true,
-  },
-
   username: {
     type: String,
     required: true,
