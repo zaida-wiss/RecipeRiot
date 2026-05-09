@@ -1,11 +1,11 @@
 
 
-export interface Recipe {
-  id: number;
+export interface RecipeResponse {
+  id: string;
   title: string;
-  ingredients?: string[];
-  steps?: string[];
+  ingredients: string[];
+  steps: string[];
   createdBy: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
