@@ -1,6 +1,6 @@
 
 
-export interface RecipeResponse {
+export interface RecipeType {
   id: string;
   title: string;
   ingredients: string[];
