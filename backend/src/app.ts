@@ -28,7 +28,29 @@ app.use('/api/v1/users', usersRouter);
 
 // 404 - om ingen route matchar
 app.use((_req: express.Request, res: express.Response) => {
-  res.status(404).json({ message: 'Sidan finns inte' });
+  res.status(404).json({
+    error: {
+    message: "Sidan finns inte",
+    status: 404,
+    },
+  });
+});
+
+// 500 - central felhantering
+app.use((
+  error: Error,
+  _req: express.Request,
+  res: express.Response,
+  _next:express.NextFunction
+) => {
+  console.error(error);
+
+  res.status(500).json({
+    error: {
+    message: "Något gick fel på servern",
+    status: 500,
+    },
+  });
 });
 
 export default app;
