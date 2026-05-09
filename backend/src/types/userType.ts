@@ -10,6 +10,16 @@ interface UserType {
   isActive: boolean;
 }
 
+interface UserDocument {
+  username: string;
+  email: string;
+  role: "user" | "admin";
+  passwordHash: string;
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // API representation - everything but the sensitive
 type UserResponseType = Omit<UserType, "passwordHash">;
 
@@ -28,6 +38,7 @@ type UpdateUserBodyType = Partial<Pick<UserType, "username" | "email" | "isActiv
 
 export {
   UserType,
+  UserDocument,
   UserResponseType,
   CreateUserBodyType,
   UpdateUserBodyType,
