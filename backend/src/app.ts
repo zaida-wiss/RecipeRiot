@@ -3,10 +3,11 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 
+import errorHandler from "./middleware/errorHandler";
+import requestConsoleLogger from "./middleware/requestConsoleLogger";
+
 import recipesRouter from "./routes/recipesRouter";
 import usersRouter from "./routes/usersRouter";
-
-import requestConsoleLogger from "./middleware/requestConsoleLogger";
 
 const app = express();
 
@@ -30,27 +31,13 @@ app.use('/api/v1/users', usersRouter);
 app.use((_req: express.Request, res: express.Response) => {
   res.status(404).json({
     error: {
-    message: "Sidan finns inte",
-    status: 404,
+      message: "Sidan finns inte",
+      status: 404,
     },
   });
 });
 
 // 500 - central felhantering
-app.use((
-  error: Error,
-  _req: express.Request,
-  res: express.Response,
-  _next:express.NextFunction
-) => {
-  console.error(error);
-
-  res.status(500).json({
-    error: {
-    message: "Något gick fel på servern",
-    status: 500,
-    },
-  });
-});
+app.use(errorHandler);
 
 export default app;
