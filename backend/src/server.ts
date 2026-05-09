@@ -1,5 +1,5 @@
-import 'dotenv/config';
-import app from './app';
+import "dotenv/config";
+import app from "./app";
 import { connectToDatabase } from "./config/database";
 
 const PORT = process.env.PORT || 3000;
@@ -12,4 +12,7 @@ async function startServer() {
   });
 }
 
-startServer();
+startServer().catch((error) => {
+  console.error("Kunde inte starta servern:", error);
+  process.exit(1);
+});
