@@ -1,22 +1,15 @@
-const app = require ("./app");
+import 'dotenv/config';
+import app from './app';
+import { connectToDatabase } from "./config/database";
+
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-  console.log(`Servern lyssnar på http://localhost:${PORT}`);
-});
+async function startServer() {
+  await connectToDatabase();
 
+  app.listen(PORT, () => {
+    console.log(`Servern lyssnar på http://localhost:${PORT}`);
+  });
+}
 
-
-
-
-
-
-// import 'dotenv/config';
-// import app from './app';
-// import { connectToDatabase } from './config/database';
-
-// async function startServer() {
-//   await connectToDatabase();
-
-
-// startServer();
+startServer();
