@@ -2,6 +2,12 @@
 import { NextFunction, Request, Response } from "express";
 import { User } from "../models/userModel";
 
+const hasRequiredUserFields = (
+  username: unknown,
+  email: unknown,
+  password: unknown
+) => Boolean(username && email && password);
+
 
 //Hämtar och returnerar alla users.
 const getAllUsers = async (
@@ -51,7 +57,7 @@ const createUser = async (
   try{
     const { username, email, password } = req.body;
 
-    if (!username || !email || !password) {
+    if (!hasRequiredUserFields(username, email, password)) {
       return res.status(400).json({
         error: {
           message: "username, email och password krävs",
