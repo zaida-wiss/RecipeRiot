@@ -1,54 +1,57 @@
 import { RequestHandler } from "express";
+import { z } from "zod";
 import { AppError } from "./errorHandler";
 
-const hasRequiredRecipeFields = (
-  title: unknown,
-  createdBy: unknown,
-  ingredients: unknown,
-  steps: unknown
-) => {
-  const requiredTextFields = [title, createdBy];
-  const requiredListFields = [ingredients, steps];
+const recipeSchema = z.object({
+  title: z.string().min(1, "title krävs"),
+  createdBy: z.string().min(1, "createdBy krävs"),
+  ingredients: z.array(z.string(), "ingredients måste vara en array"),
+  steps: z.array(z.string(), "steps måste vara en array"),
+});
 
-  return requiredTextFields.every(Boolean) && requiredListFields.every(Array.isArray);
-};
+const updateRecipeFieldSchema = recipeSchema.partial().refine(
+  (data) =>
+    data.title !== undefined ||
+    data.createdBy !== undefined ||
+    data.ingredients !== undefined ||
+    data.steps !== undefined,
+  "Skicka minst ett fält att uppdatera."
+);
 
-const hasRecipeFieldToUpdate = (
-  title: unknown,
-  createdBy: unknown,
-  ingredients: unknown,
-  steps: unknown
-) => {
-  return [title, createdBy, ingredients, steps].some((field) => field !== undefined);
+const getValidationMessage = (error: z.ZodError) => {
+  return error.issues[0]?.message ?? "Ogiltig data";
 };
 
 const validateCreateRecipe: RequestHandler = (req, _res, next) => {
-  const { title, createdBy, ingredients, steps } = req.body;
+  const result = recipeSchema.safeParse(req.body);
 
-  if (!hasRequiredRecipeFields(title, createdBy, ingredients, steps)) {
-    return next(new AppError("title, createdBy, ingredients och steps krävs.", 400));
+  if (!result.success) {
+    return next(new AppError(getValidationMessage(result.error), 400));
   }
 
+  req.body = result.data;
   return next();
 };
 
 const validateUpdateRecipeObject: RequestHandler = (req, _res, next) => {
-  const { title, createdBy, ingredients, steps } = req.body;
+  const result = recipeSchema.safeParse(req.body);
 
-  if (!hasRequiredRecipeFields(title, createdBy, ingredients, steps)) {
-    return next(new AppError("title, createdBy, ingredients och steps krävs.", 400));
+  if (!result.success) {
+    return next(new AppError(getValidationMessage(result.error), 400));
   }
 
+  req.body = result.data;
   return next();
 };
 
 const validateUpdateRecipeField: RequestHandler = (req, _res, next) => {
-  const { title, createdBy, ingredients, steps } = req.body;
+  const result = updateRecipeFieldSchema.safeParse(req.body);
 
-  if (!hasRecipeFieldToUpdate(title, createdBy, ingredients, steps)) {
-    return next(new AppError("Skicka minst ett fält att uppdatera.", 400));
+  if (!result.success) {
+    return next(new AppError(getValidationMessage(result.error), 400));
   }
 
+  req.body = result.data;
   return next();
 };
 
