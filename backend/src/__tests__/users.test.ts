@@ -8,21 +8,21 @@ describe("Users API", () => {
     const response = await request(app)
       .post("/api/v1/users")
       .send({
-        username: "zaid",
-        email: "zaid@example.com",
+        username: "zaida",
+        email: "zaida@example.com",
         password: "password123",
       });
 
     expect(response.status).toBe(201);
-    expect(response.body.username).toBe("zaid");
-    expect(response.body.email).toBe("zaid@example.com");
+    expect(response.body.username).toBe("zaida");
+    expect(response.body.email).toBe("zaida@example.com");
   });
 
   it("returnerar 400 när create body saknar obligatoriska fält", async () => {
     const response = await request(app)
       .post("/api/v1/users")
       .send({
-        username: "zaid",
+        username: "zaida",
       });
 
     expect(response.status).toBe(400);
@@ -34,8 +34,8 @@ describe("Users API", () => {
     await request(app)
       .post("/api/v1/users")
       .send({
-        username: "zaid",
-        email: "zaid@example.com",
+        username: "zaida",
+        email: "zaida@example.com",
         password: "password123",
       });
 
@@ -43,7 +43,7 @@ describe("Users API", () => {
 
     expect(response.status).toBe(200);
     expect(response.body).toHaveLength(1);
-    expect(response.body[0].username).toBe("zaid");
+    expect(response.body[0].username).toBe("zaida");
   });
 
   it("returnerar 404 när användaren inte finns", async () => {
