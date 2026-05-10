@@ -1,38 +1,49 @@
 // src/controllers/usersController.ts
-import { Request, Response } from "express";
-import {
-  UserModelTypes,
-  UserResponseTypes,
-  CreateUserBodyTypes,
-  UpdateUserBodyTypes,
-} from "../types/usersTypes";
+import { NextFunction, Request, Response } from "express";
+import { User } from "../models/userModel";
 
-const users: UserModelTypes[] = [];
-
-const toUserResponse = (user: UserModelTypes): UserResponseTypes => {
-  const { passwordHash, ...userResponse } = user;
-  return userResponse;
-};
 
 //Hämtar och returnerar alla users.
-export const getAllUsers = (_req: Request, res: Response) => {
-  return res.json(users.map(toUserResponse));
+const getAllUsers = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try{
+    const users = await User.find();
+    return res.json(users);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 //Hämtar en användare baserat på id från URL-parametern.
-export const getUserById = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const user = users.find((item) => item.id === id);
+const getUserById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id);
 
-  if (!user) {
-    return res.status(404).json({ message: "Användaren hittades inte" });
+    if (!user) {
+      return res.status(404).json({
+        error: {
+           message: "Användaren hittades inte",
+          status: 404,
+         },
+    });
   }
 
-  return res.json(toUserResponse(user));
+    return res.json(user);
+  } catch (error) {
+    return next(error);
+  }
 };
 
 //Skapar en ny användare från data i request body.
-export const createUser = (req: Request, res: Response) => {
+const createUser = (req: Request, res: Response) => {
   const { username, email, password }: CreateUserBodyTypes = req.body;
 
   if (!username || !email || !password) {
@@ -55,71 +66,81 @@ export const createUser = (req: Request, res: Response) => {
   return res.status(201).json(toUserResponse(newUser));
 };
 
-//Uppdaterar hela användar-objektet.
-export const updateUserObject = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const index = users.findIndex((item) => item.id === id);
+// //Uppdaterar hela användar-objektet.
+// const updateUserObject = (req: Request, res: Response) => {
+//   const id = Number(req.params.id);
+//   const index = users.findIndex((item) => item.id === id);
 
-  if (index === -1) {
-    return res.status(404).json({ message: "Användaren hittades inte" });
-  }
+//   if (index === -1) {
+//     return res.status(404).json({ message: "Användaren hittades inte" });
+//   }
 
-  const { username, email, password }: CreateUserBodyTypes = req.body;
+//   const { username, email, password }: CreateUserBodyTypes = req.body;
 
-  if (!username || !email || !password) {
-    return res.status(400).json({ message: "username, email och password krävs" });
-  }
+//   if (!username || !email || !password) {
+//     return res.status(400).json({ message: "username, email och password krävs" });
+//   }
 
-  const updatedUser: UserModelTypes = {
-    id,
-    username,
-    email,
-    role: users[index].role,
-    passwordHash: `hashed-${password}`,
-    createdAt: users[index].createdAt,
-    updatedAt: new Date(),
-    isActive: users[index].isActive,
-  };
+//   const updatedUser: UserModelTypes = {
+//     id,
+//     username,
+//     email,
+//     role: users[index].role,
+//     passwordHash: `hashed-${password}`,
+//     createdAt: users[index].createdAt,
+//     updatedAt: new Date(),
+//     isActive: users[index].isActive,
+//   };
 
-  users[index] = updatedUser;
+//   users[index] = updatedUser;
 
-  return res.json(toUserResponse(updatedUser));
-};
+//   return res.json(toUserResponse(updatedUser));
+// };
 
-//Uppdaterar en eller flera användar-fält.
-export const updateUserField = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const user = users.find((item) => item.id === id);
+// //Uppdaterar en eller flera användar-fält.
+// const updateUserField = (req: Request, res: Response) => {
+//   const id = Number(req.params.id);
+//   const user = users.find((item) => item.id === id);
 
-  if (!user) {
-    return res.status(404).json({ message: "Användaren hittades inte" });
-  }
+//   if (!user) {
+//     return res.status(404).json({ message: "Användaren hittades inte" });
+//   }
 
-  const { username, email, isActive }: UpdateUserBodyTypes = req.body;
+//   const { username, email, isActive }: UpdateUserBodyTypes = req.body;
 
-  if (username === undefined && email === undefined && isActive === undefined) {
-    return res.status(400).json({ message: "Skicka minst ett fält att uppdatera" });
-  }
+//   if (username === undefined && email === undefined && isActive === undefined) {
+//     return res.status(400).json({ message: "Skicka minst ett fält att uppdatera" });
+//   }
 
-  if (username !== undefined) user.username = username;
-  if (email !== undefined) user.email = email;
-  if (isActive !== undefined) user.isActive = isActive;
+//   if (username !== undefined) user.username = username;
+//   if (email !== undefined) user.email = email;
+//   if (isActive !== undefined) user.isActive = isActive;
 
-  user.updatedAt = new Date();
+//   user.updatedAt = new Date();
 
-  return res.json(toUserResponse(user));
-};
+//   return res.json(toUserResponse(user));
+// };
 
-//Tar bort en användare.
-export const deleteUser = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const index = users.findIndex((item) => item.id === id);
+// //Tar bort en användare.
+// const deleteUser = (req: Request, res: Response) => {
+//   const id = Number(req.params.id);
+//   const index = users.findIndex((item) => item.id === id);
 
-  if (index === -1) {
-    return res.status(404).json({ message: "Användaren hittades inte" });
-  }
+//   if (index === -1) {
+//     return res.status(404).json({ message: "Användaren hittades inte" });
+//   }
 
-  users.splice(index, 1);
+//   users.splice(index, 1);
 
-  return res.status(204).send();
+//   return res.status(204).send();
+// };
+
+
+export {
+  getAllUsers,
+  getUserById,
+  createUser,
+  // updateUserObject,
+  // updateUserField,
+  // deleteUser
 };
