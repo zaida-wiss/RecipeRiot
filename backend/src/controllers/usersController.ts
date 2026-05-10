@@ -79,6 +79,54 @@ const createUser = async (
 };
 
 // //Uppdaterar hela användar-objektet.
+const updateUserObject = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = req.params.id;
+    const { username, email, password} = req. body;
+
+    if(!hasRequiredUserFields(username, email, password)) {
+      return res.status(400).json({
+        error: {
+          message: "username, email och password krävs.",
+          status: 400,
+        },
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      {
+        username,
+        email,
+        passwordHash: `hashed-${password}`,
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        error: {
+          message: "Användaren hittades inte",
+          status: 404,
+        },
+      });
+    }
+
+    return res.json(updatedUser);
+  } catch (error) {
+    return next(error);
+  }
+
+
+};
+
 // const updateUserObject = (req: Request, res: Response) => {
 //   const id = Number(req.params.id);
 //   const index = users.findIndex((item) => item.id === id);
@@ -152,7 +200,7 @@ export {
   getAllUsers,
   getUserById,
   createUser,
-  // updateUserObject,
+  updateUserObject,
   // updateUserField,
   // deleteUser
 };
