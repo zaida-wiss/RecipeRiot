@@ -8,14 +8,19 @@ import {
   updateUserField,
   deleteUser
 } from "../controllers/usersController";
+import {
+  validateCreateUser,
+  validateUpdateUserField,
+  validateUpdateUserObject,
+} from "../middleware/validateUser";
 
 const router = Router();
 
 router.get("/", getAllUsers);
 router.get("/:id", getUserById);
-router.post("/", createUser);
-router.put("/:id", updateUserObject);
-router.patch("/:id", updateUserField);
+router.post("/", validateCreateUser, createUser);
+router.put("/:id", validateUpdateUserObject, updateUserObject);
+router.patch("/:id", validateUpdateUserField, updateUserField);
 router.delete("/:id", deleteUser);
 
 export default router;

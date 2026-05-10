@@ -4,23 +4,6 @@ import { User } from "../models/userModel";
 import type { CreateUserBodyType, UpdateUserBodyType } from "../types/userType";
 import { AppError } from "../middleware/errorHandler";
 
-
-//helpers
-const hasRequiredUserFields = (
-  username: unknown,
-  email: unknown,
-  password: unknown
-) => Boolean(username && email && password);
-
-const hasUserFieldToUpdate = (
-  username: unknown,
-  email: unknown,
-  isActive: unknown
-) => {
-  return username !== undefined || email !== undefined || isActive !== undefined;
-};
-
-
 //Hämtar och returnerar alla users.
 const getAllUsers = async (
   _req: Request,
@@ -64,10 +47,6 @@ const createUser = async (
   try{
     const { username, email, password } = req.body as CreateUserBodyType;
 
-    if (!hasRequiredUserFields(username, email, password)) {
-      return next(new AppError("username, email och password krävs", 400));
-    }
-
     const newUser = await User.create({
       username,
       email,
@@ -95,10 +74,6 @@ const updateUserObject = async (
     }
 
     const { username, email, password } = req.body as CreateUserBodyType;
-
-    if (!hasRequiredUserFields(username, email, password)) {
-      return next(new AppError("username, email och password krävs", 400));
-    }
 
     user.username = username;
     user.email = email;
@@ -129,10 +104,6 @@ const updateUserField = async (
     }
 
     const { username, email, isActive } = req.body as UpdateUserBodyType;
-
-    if (!hasUserFieldToUpdate(username, email, isActive)) {
-      return next(new AppError("Uppdatera användarnamn, email eller aktivitetsläge.", 400));
-    }
 
     if (username !== undefined) {
       user.username = username;
