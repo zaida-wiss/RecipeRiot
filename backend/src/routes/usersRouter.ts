@@ -6,7 +6,7 @@ import {
   createUser,
   updateUserObject,
   updateUserField,
-  // deleteUser
+  deleteUser
 } from "../controllers/usersController";
 
 const router = Router();
@@ -16,6 +16,6 @@ router.get("/:id", getUserById);
 router.post("/", createUser);
 router.put("/:id", updateUserObject);
 router.patch("/:id", updateUserField);
-// router.delete("/:id", deleteUser);
+router.delete("/:id", deleteUser);
 
 export default router;

@@ -89,7 +89,7 @@ const createUser = async (
   }
 };
 
-// //Uppdaterar hela användar-objektet.
+//Uppdaterar hela användar-objektet.
 const updateUserObject = async (
   req: Request,
   res: Response,
@@ -133,7 +133,7 @@ const updateUserObject = async (
 
 
 
-// //Uppdaterar en eller flera användar-fält.
+//Uppdaterar en eller flera användar-fält.
 const updateUserField = async (
   req: Request,
   res: Response,
@@ -159,7 +159,7 @@ const updateUserField = async (
         error: {
           message: "Uppdatera användarnamn, email eller aktivitetsläge.",
           status: 400,
-        }
+        },
       });
     }
 
@@ -184,42 +184,35 @@ const updateUserField = async (
 };
 
 
-// const updateUserField = (req: Request, res: Response) => {
-//   const id = Number(req.params.id);
-//   const user = users.find((item) => item.id === id);
 
-//   if (!user) {
-//     return res.status(404).json({ message: "Användaren hittades inte" });
-//   }
 
-//   const { username, email, isActive }: UpdateUserBodyTypes = req.body;
+// Tar bort en användare.
+const deleteUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id);
 
-//   if (username === undefined && email === undefined && isActive === undefined) {
-//     return res.status(400).json({ message: "Skicka minst ett fält att uppdatera" });
-//   }
+    if (!user) {
+      return res.status(404).json({
+        error: {
+          message: "Användaren hittades inte",
+          status: 404,
+        },
+      });
+    }
 
-//   if (username !== undefined) user.username = username;
-//   if (email !== undefined) user.email = email;
-//   if (isActive !== undefined) user.isActive = isActive;
+    await user.deleteOne();
 
-//   user.updatedAt = new Date();
+    return res.status(204).send();
+  } catch (error) {
+    return next(error);
+  }
+};
 
-//   return res.json(toUserResponse(user));
-// };
-
-// //Tar bort en användare.
-// const deleteUser = (req: Request, res: Response) => {
-//   const id = Number(req.params.id);
-//   const index = users.findIndex((item) => item.id === id);
-
-//   if (index === -1) {
-//     return res.status(404).json({ message: "Användaren hittades inte" });
-//   }
-
-//   users.splice(index, 1);
-
-//   return res.status(204).send();
-// };
 
 
 export {
@@ -228,5 +221,5 @@ export {
   createUser,
   updateUserObject,
   updateUserField,
-  // deleteUser
+  deleteUser
 };
