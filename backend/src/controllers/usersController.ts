@@ -43,27 +43,33 @@ const getUserById = async (
 };
 
 //Skapar en ny användare från data i request body.
-const createUser = (req: Request, res: Response) => {
-  const { username, email, password }: CreateUserBodyTypes = req.body;
+const createUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try{
+    const { username, email, password } = req.body;
 
-  if (!username || !email || !password) {
-    return res.status(400).json({ message: "username, email och password krävs" });
+    if (!username || !email || !password) {
+      return res.status(400).json({
+        error: {
+          message: "username, email och password krävs",
+          status: 400,
+        },
+      });
+    }
+
+    const newUser = await User.create({
+      username,
+      email,
+      password,
+    });
+
+    return res.status(201).json(newUser);
+  } catch (error) {
+    return next(error);
   }
-
-  const newUser: UserModelTypes = {
-    id: users.length + 1,
-    username,
-    email,
-    role: "user",
-    passwordHash: `hashed-${password}`,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    isActive: true,
-  };
-
-  users.push(newUser);
-
-  return res.status(201).json(toUserResponse(newUser));
 };
 
 // //Uppdaterar hela användar-objektet.
