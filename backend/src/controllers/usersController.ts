@@ -63,7 +63,7 @@ const createUser = async (
     const newUser = await User.create({
       username,
       email,
-      password,
+      passwordHash: `hashed-${password}`,
     });
 
     return res.status(201).json(newUser);
