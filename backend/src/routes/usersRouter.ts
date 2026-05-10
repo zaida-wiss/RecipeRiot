@@ -1,4 +1,4 @@
-// src/routes/usersController.ts
+// src/routes/usersRouter.ts
 import { Router } from "express";
 import {
   getAllUsers,
@@ -6,7 +6,8 @@ import {
   createUser,
   updateUserObject,
   updateUserField,
-  deleteUser } from "../controllers/usersController";
+  deleteUser
+} from "../controllers/usersController";
 
 const router = Router();
 

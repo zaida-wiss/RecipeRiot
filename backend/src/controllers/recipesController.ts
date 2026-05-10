@@ -1,17 +1,15 @@
 // src/controllers/recipesController.ts
 import { Request, Response } from 'express';
-import { Recipe } from '../types/recipeType';
+import { RecipeType } from '../types/recipeType';
+import {Recipe} from "../models/recipeModel";
 
-// En enkel in-memory lista med recept (försvinner när servern startas om).
-const recipes: Recipe[] = [
-  { id: 1, title: 'Biff med Tomat', createdBy: 'Zaida', ingredients: [], steps: [], createdAt: '2026-04-02T10:00:00Z', updatedAt: '2026-04-02T10:00:00Z' },
-  { id: 2, title: 'Vietnamesiska vårrullar', createdBy: 'Zaida', ingredients: [], steps: [], createdAt: '2026-04-02T10:00:00Z', updatedAt: '2026-04-02T10:00:00Z' },
-];
+
+const recipes: RecipeType[] = [];
 
 
 // Hämtar och returnerar alla recept.
-// req finns, men jag tänker inte använda den här, därför _req, för att undvika att ESLint eller TypeScript ska klaga
-export const getAllRecipes = (_req: Request, res: Response) => {
+export const getAllRecipes = async (_req: Request, res: Response) => {
+  const recipes = await Recipe.find();
   return res.json(recipes);
 };
 
@@ -37,7 +35,7 @@ export const createRecipe = (req: Request, res: Response) => {
     return res.status(400).json({ message: 'title och createdBy krävs' });
   }
 
-  const newRecipe: Recipe = {
+  const newRecipe: RecipeType = {
     id: recipes.length + 1,
     title,
     createdBy,
