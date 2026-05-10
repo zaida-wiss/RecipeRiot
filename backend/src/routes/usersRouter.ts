@@ -13,6 +13,7 @@ import {
   validateUpdateUserField,
   validateUpdateUserObject,
 } from "../middleware/validateUser";
+import { validateObjectIdParam } from "../middleware/validateParams";
 
 const router = Router();
 
@@ -21,9 +22,9 @@ router.get("/", getAllUsers);
 router.get("/:id", getUserById);
 
 // Skriv-routes kör validation middleware innan controllern.
-router.post("/", validateCreateUser, createUser);
-router.put("/:id", validateUpdateUserObject, updateUserObject);
-router.patch("/:id", validateUpdateUserField, updateUserField);
-router.delete("/:id", deleteUser);
+router.post("/", validateObjectIdParam, validateCreateUser, createUser);
+router.put("/:id", validateObjectIdParam, validateUpdateUserObject, updateUserObject);
+router.patch("/:id", validateObjectIdParam, validateUpdateUserField, updateUserField);
+router.delete("/:id", validateObjectIdParam, deleteUser);
 
 export default router;
