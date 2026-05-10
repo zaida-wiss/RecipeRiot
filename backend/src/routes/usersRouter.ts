@@ -16,8 +16,11 @@ import {
 
 const router = Router();
 
+// Läs-routes behöver ingen body-validering.
 router.get("/", getAllUsers);
 router.get("/:id", getUserById);
+
+// Skriv-routes kör validation middleware innan controllern.
 router.post("/", validateCreateUser, createUser);
 router.put("/:id", validateUpdateUserObject, updateUserObject);
 router.patch("/:id", validateUpdateUserField, updateUserField);

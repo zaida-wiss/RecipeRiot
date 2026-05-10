@@ -4,6 +4,7 @@ import { connectToDatabase } from "./config/database";
 
 const PORT = process.env.PORT || 3000;
 
+// Servern startas först efter att databasanslutningen fungerar.
 async function startServer() {
   await connectToDatabase();
 
@@ -12,6 +13,7 @@ async function startServer() {
   });
 }
 
+// Fångar fel vid uppstart, till exempel saknad MONGO_URI eller misslyckad databasanslutning.
 startServer().catch((error) => {
   console.error("Kunde inte starta servern:", error);
   process.exit(1);

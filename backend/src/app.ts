@@ -12,8 +12,9 @@ import usersRouter from "./routes/usersRouter";
 const app = express();
 
 
-// Middleware
+// Global middleware körs för alla requests innan de når routes.
 app.use(cors());
+// Gör JSON-body tillgänglig som req.body i controllers och validation middleware.
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(requestConsoleLogger);
@@ -23,7 +24,7 @@ app.get('/health', (_req: express.Request, res: express.Response) => {
   res.json({ status: 'ok' });
 });
 
-// Routes
+// Samlar API-versionering och skickar vidare till respektive router.
 app.use('/api/v1/recipes', recipesRouter);
 app.use('/api/v1/users', usersRouter);
 
@@ -37,7 +38,7 @@ app.use((_req: express.Request, res: express.Response) => {
   });
 });
 
-// 500 - central felhantering
+// Central felhantering måste ligga sist, efter routes och 404-hantering.
 app.use(errorHandler);
 
 export default app;

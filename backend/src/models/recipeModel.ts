@@ -1,6 +1,7 @@
 // src/models/Recipe.ts
 import mongoose, { Schema, Document } from 'mongoose';
 
+// TypeScript-interface för ett receptdokument som Mongoose returnerar.
 export interface IRecipe extends Document {
   title: string;
   createdBy: string;
@@ -10,6 +11,7 @@ export interface IRecipe extends Document {
   updatedAt: Date;
 }
 
+// Schemat beskriver fält, defaults och databasvalidering för recept.
 const RecipeSchema = new Schema<IRecipe>(
   {
     title: {
@@ -32,8 +34,10 @@ const RecipeSchema = new Schema<IRecipe>(
     },
   },
   {
+    // timestamps skapar och uppdaterar createdAt/updatedAt automatiskt.
     timestamps: true,
   }
 );
 
+// Modellen används i recipesController för CRUD mot MongoDB.
 export const Recipe = mongoose.model<IRecipe>('Recipe', RecipeSchema);

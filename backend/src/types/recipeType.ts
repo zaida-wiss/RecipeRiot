@@ -1,5 +1,5 @@
 
-
+// Delad TypeScript-typ för hur ett recept representeras i applikationen.
 export interface RecipeType {
   id: string;
   title: string;

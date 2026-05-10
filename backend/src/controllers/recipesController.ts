@@ -3,6 +3,8 @@ import { Request, Response, NextFunction } from "express";
 import { Recipe } from "../models/recipeModel";
 import { AppError } from "../middleware/errorHandler";
 
+// Recept-controllern ansvarar för databasarbete efter att routes och validation middleware kört.
+
 // Hämtar och returnerar alla recept.
 const getAllRecipes = async (
   _req: Request,
@@ -10,6 +12,7 @@ const getAllRecipes = async (
   next: NextFunction
 ) => {
   try {
+    // Recipe.find() hämtar alla recept från recipes-collection.
     const recipes = await Recipe.find();
     return res.json(recipes);
   } catch (error) {
@@ -26,6 +29,7 @@ const getRecipeById = async (
 ) => {
   try {
     const id = req.params.id;
+    // findById används när id:t kommer från route-parametern /:id.
     const recipe = await Recipe.findById(id);
 
     if (!recipe) {
@@ -45,6 +49,7 @@ const createRecipe = async (
   next: NextFunction
 ) => {
   try {
+    // req.body är redan validerad av validateCreateRecipe i recipesRouter.
     const { title, createdBy, ingredients, steps } = req.body;
 
     const newRecipe =  await Recipe.create({
@@ -77,6 +82,7 @@ const updateRecipeObject = async (
 
     const { title, createdBy, ingredients, steps } = req.body;
 
+    // PUT ersätter hela receptets skrivbara innehåll.
     recipe.title = title;
     recipe.createdBy = createdBy;
     recipe.ingredients = ingredients;
@@ -107,6 +113,7 @@ const updateRecipeField = async (
 
     const { title, createdBy, ingredients, steps } = req.body;
 
+    // PATCH ändrar bara de fält som klienten skickar med.
     if (title !== undefined) {
       recipe.title = title;
     }
@@ -123,6 +130,7 @@ const updateRecipeField = async (
       recipe.steps = steps;
     }
 
+    // save() sparar ändringarna och låter Mongoose uppdatera updatedAt.
     const updatedRecipe = await recipe.save();
 
     return res.json(updatedRecipe);
@@ -145,6 +153,7 @@ const deleteRecipe = async (
       return next(new AppError("Receptet hittades inte.", 404));
     }
 
+    // deleteOne tar bort dokumentet permanent från MongoDB.
     await recipe.deleteOne();
 
     return res.status(204).send();

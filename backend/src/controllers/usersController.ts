@@ -4,13 +4,17 @@ import { User } from "../models/userModel";
 import type { CreateUserBodyType, UpdateUserBodyType } from "../types/userType";
 import { AppError } from "../middleware/errorHandler";
 
-//Hämtar och returnerar alla users.
+// Controller-funktionerna körs efter routes och validation middleware.
+// Här ligger databaslogiken, medan fel skickas vidare till errorHandler med next(error).
+
+// Hämtar och returnerar alla users.
 const getAllUsers = async (
   _req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try{
+    // User.find() hämtar alla dokument från users-collection i MongoDB.
     const users = await User.find();
     return res.json(users);
   } catch (error) {
@@ -26,6 +30,7 @@ const getUserById = async (
 ) => {
   try {
     const id = req.params.id;
+    // findById returnerar antingen ett dokument eller null om id:t saknas i databasen.
     const user = await User.findById(id);
 
     if (!user) {
@@ -45,8 +50,10 @@ const createUser = async (
   next: NextFunction
 ) => {
   try{
+    // req.body är redan kontrollerad av validateCreateUser i routern.
     const { username, email, password } = req.body as CreateUserBodyType;
 
+    // Klienten skickar password, men databasen sparar passwordHash.
     const newUser = await User.create({
       username,
       email,
@@ -75,10 +82,12 @@ const updateUserObject = async (
 
     const { username, email, password } = req.body as CreateUserBodyType;
 
+    // PUT uppdaterar hela användarens skrivbara fält.
     user.username = username;
     user.email = email;
     user.passwordHash = `hashed-${password}`;
 
+    // save() sparar ändringarna och uppdaterar updatedAt via Mongoose timestamps.
     const updatedUser = await user.save();
 
     return res.json(updatedUser);
@@ -105,6 +114,7 @@ const updateUserField = async (
 
     const { username, email, isActive } = req.body as UpdateUserBodyType;
 
+    // PATCH uppdaterar bara de fält som faktiskt skickades med i request body.
     if (username !== undefined) {
       user.username = username;
     }
@@ -142,6 +152,7 @@ const deleteUser = async (
       return next(new AppError("Användaren hittades inte.", 404));
     }
 
+    // deleteOne tar bort just detta dokument från databasen.
     await user.deleteOne();
 
     return res.status(204).send();
