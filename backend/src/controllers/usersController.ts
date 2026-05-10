@@ -1,7 +1,10 @@
 // src/controllers/usersController.ts
 import { NextFunction, Request, Response } from "express";
 import { User } from "../models/userModel";
+import type { CreateUserBodyType } from "../types/userType";
 
+
+//helper
 const hasRequiredUserFields = (
   username: unknown,
   email: unknown,
@@ -55,7 +58,7 @@ const createUser = async (
   next: NextFunction
 ) => {
   try{
-    const { username, email, password } = req.body;
+    const { username, email, password } = req.body as CreateUserBodyType;
 
     if (!hasRequiredUserFields(username, email, password)) {
       return res.status(400).json({
@@ -97,7 +100,7 @@ const updateUserObject = async (
       });
     }
 
-    const { username, email, password } = req.body;
+    const { username, email, password } = req.body as CreateUserBodyType;
 
     if (!hasRequiredUserFields(username, email, password)) {
       return res.status(400).json({
@@ -121,35 +124,6 @@ const updateUserObject = async (
 };
 
 
-// const updateUserObject = (req: Request, res: Response) => {
-//   const id = Number(req.params.id);
-//   const index = users.findIndex((item) => item.id === id);
-
-//   if (index === -1) {
-//     return res.status(404).json({ message: "Användaren hittades inte" });
-//   }
-
-//   const { username, email, password }: CreateUserBodyTypes = req.body;
-
-//   if (!username || !email || !password) {
-//     return res.status(400).json({ message: "username, email och password krävs" });
-//   }
-
-//   const updatedUser: UserModelTypes = {
-//     id,
-//     username,
-//     email,
-//     role: users[index].role,
-//     passwordHash: `hashed-${password}`,
-//     createdAt: users[index].createdAt,
-//     updatedAt: new Date(),
-//     isActive: users[index].isActive,
-//   };
-
-//   users[index] = updatedUser;
-
-//   return res.json(toUserResponse(updatedUser));
-// };
 
 // //Uppdaterar en eller flera användar-fält.
 // const updateUserField = (req: Request, res: Response) => {
