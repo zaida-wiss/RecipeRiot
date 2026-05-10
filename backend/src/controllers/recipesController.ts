@@ -1,6 +1,7 @@
 // src/controllers/recipesController.ts
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 import { Recipe } from "../models/recipeModel";
+import { AppError } from "../middleware/errorHandler";
 
 // Hämtar och returnerar alla recept.
 const getAllRecipes = async (
@@ -28,17 +29,12 @@ const getRecipeById = async (
     const recipe = await Recipe.findById(id);
 
     if (!recipe) {
-      return res.status(404).json({
-        error: {
-          message: "Receptet hittades inte",
-          status: 404,
-        },
-       });
+      return next(new AppError("Receptet hittades inte.", 404));
     }
 
     return res.json(recipe);
   } catch (error) {
-   return next(error);
+    return next(error);
   }
 };
 
@@ -50,15 +46,6 @@ const createRecipe = async (
 ) => {
   try {
     const { title, createdBy, ingredients, steps } = req.body;
-
-    if (!title || !createdBy) {
-      return res.status(400).json({
-        error: {
-          message: "titel och skapare krävs",
-          status: 400,
-        },
-      });
-    }
 
     const newRecipe =  await Recipe.create({
       title,
@@ -74,113 +61,103 @@ const createRecipe = async (
 };
 
 
-// //Uppdaterar hela recept-objektet
-// const updateRecipeObject = (req: Request, res: Response) => {
-//   const id = Number(req.params.id);
-//   const index = recipes.findIndex((item) => item.id === id);
+// Uppdaterar hela recept-objektet.
+const updateRecipeObject = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = req.params.id;
+    const recipe = await Recipe.findById(id);
 
-//   if (index === -1) {
-//     return res.status(400).json({message: "receptet hittades inte"
-//     });
-//   }
+    if (!recipe) {
+      return next(new AppError("Receptet hittades inte.", 404));
+    }
 
-//   const {title, createdBy, ingredients, steps } = req.body;
+    const { title, createdBy, ingredients, steps } = req.body;
 
-//   if (!title || !createdBy || !Array.isArray(ingredients) || !Array.isArray(steps)) {
-//     return res.status(400).json({
-//       message: "title, createdBy, ingredients och steps krävs",
-//     });
-//   }
+    recipe.title = title;
+    recipe.createdBy = createdBy;
+    recipe.ingredients = ingredients;
+    recipe.steps = steps;
 
-//     const updatedRecipe: Recipe = {
-//       id,
-//       title,
-//       createdBy,
-//       ingredients,
-//       steps,
-//       createdAt: recipes[index].createdAt,
-//       updatedAt: new Date().toISOString(),
-//     };
+    const updatedRecipe = await recipe.save();
 
-//     recipes[index] = updatedRecipe;
-
-//     return res.json(updatedRecipe);
-// };
+    return res.json(updatedRecipe);
+  } catch (error) {
+    return next(error);
+  }
+};
 
 
-// //Uppdaterar recept fält
-// const updateRecipeField = (req: Request, res: Response) => {
-// const id = Number(req.params.id);
-// const recipe = recipes.find((item) => item.id === id);
+// Uppdaterar ett eller flera recept-fält.
+const updateRecipeField = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = req.params.id;
+    const recipe = await Recipe.findById(id);
 
-// if(!recipe) {
-//   return res.status(404).json({message: "Receptet hittades inte"});
-// }
+    if (!recipe) {
+      return next(new AppError("Receptet hittades inte.", 404));
+    }
 
-// const { title, createdBy, ingredients, steps } = req.body;
+    const { title, createdBy, ingredients, steps } = req.body;
 
-// if (
-//   title ===undefined &&
-//   createdBy === undefined &&
-//   ingredients === undefined &&
-//   steps === undefined
-// ) {
-//   return res.status(400).json({message: "Skicka minst ett fält att uppdatera"});
-// }
+    if (title !== undefined) {
+      recipe.title = title;
+    }
 
-// if (title !== undefined) recipe.title = title;
-// if (createdBy !== undefined) recipe.createdBy = createdBy;
-// if (ingredients !== undefined) recipe.ingredients = ingredients;
-// if (steps !== undefined) recipe.steps = steps;
+    if (createdBy !== undefined) {
+      recipe.createdBy = createdBy;
+    }
 
-// recipe.updatedAt = new Date().toISOString();
+    if (ingredients !== undefined) {
+      recipe.ingredients = ingredients;
+    }
 
-// return res.json(recipe);
-// };
+    if (steps !== undefined) {
+      recipe.steps = steps;
+    }
 
+    const updatedRecipe = await recipe.save();
 
-// // Tar bort ett recept.
-// const deleteRecipe = (req: Request, res: Response) => {
-//   const id = Number(req.params.id);
-//   const index = recipes.findIndex((item) => item.id === id);
+    return res.json(updatedRecipe);
+  } catch (error) {
+    return next(error);
+  }
+};
 
-//   if (index === -1) {
-//     return res.status(404).json({ message: 'Receptet hittades inte' });
-//   }
+// Tar bort ett recept.
+const deleteRecipe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = req.params.id;
+    const recipe = await Recipe.findById(id);
 
-//   recipes.splice(index, 1);
-//   return res.status(204).send();
-// };
+    if (!recipe) {
+      return next(new AppError("Receptet hittades inte.", 404));
+    }
 
+    await recipe.deleteOne();
+
+    return res.status(204).send();
+  } catch (error) {
+    return next(error);
+  }
+};
 
 export {
-   getAllRecipes,
-   getRecipeById,
-   createRecipe,
-//   updateRecipeObject,
-//   updateRecipeField,
-//   deleteRecipe
- };
-
-
- 
-// // // Uppdaterar delar av ett recept.
-// // exports.updateRecipe = (req: Request, res: Response) => {
-// //   const id = Number(req.params.id);
-// //   const { title, createdBy } = req.body;
-// //   const recipe = recipes.find((item) => item.id === id);
-
-// //   if (!recipe) {
-// //     return res.status(404).json({ message: 'Receptet hittades inte' });
-// //   }
-
-// //   if (title === undefined && createdBy === undefined) {
-// //     return res.status(400).json({ message: 'Skicka minst ett fält: title eller createdBy' });
-// //   }
-
-// //   if (title !== undefined) recipe.title = title;
-// //   if (createdBy !== undefined) recipe.createdBy = createdBy;
-
-// //   recipe.updatedAt = new Date().toISOString();
-// //   return res.json(recipe);
-// // };
+  getAllRecipes,
+  getRecipeById,
+  createRecipe,
+  updateRecipeObject,
+  updateRecipeField,
+  deleteRecipe,
+};
