@@ -5,7 +5,7 @@ import {
   getUserById,
   createUser,
   updateUserObject,
-  // updateUserField,
+  updateUserField,
   // deleteUser
 } from "../controllers/usersController";
 
@@ -15,7 +15,7 @@ router.get("/", getAllUsers);
 router.get("/:id", getUserById);
 router.post("/", createUser);
 router.put("/:id", updateUserObject);
-// router.patch("/:id", updateUserField);
+router.patch("/:id", updateUserField);
 // router.delete("/:id", deleteUser);
 
 export default router;

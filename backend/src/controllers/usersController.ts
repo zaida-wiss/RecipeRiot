@@ -1,15 +1,23 @@
 // src/controllers/usersController.ts
 import { NextFunction, Request, Response } from "express";
 import { User } from "../models/userModel";
-import type { CreateUserBodyType } from "../types/userType";
+import type { CreateUserBodyType, UpdateUserBodyType } from "../types/userType";
 
 
-//helper
+//helpers
 const hasRequiredUserFields = (
   username: unknown,
   email: unknown,
   password: unknown
 ) => Boolean(username && email && password);
+
+const hasUserFieldToUpdate = (
+  username: unknown,
+  email: unknown,
+  isActive: unknown
+) => {
+  return username !== undefined || email !== undefined || isActive !== undefined;
+};
 
 
 //Hämtar och returnerar alla users.
@@ -126,6 +134,56 @@ const updateUserObject = async (
 
 
 // //Uppdaterar en eller flera användar-fält.
+const updateUserField = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const id = req.params.id;
+    const user = await User.findById(id);
+
+    if (!user) {
+      return res.status(404).json({
+        error: {
+          message: "Användaren hittades inte.",
+          status: 404,
+        },
+      });
+    }
+
+    const { username, email, isActive } = req.body as UpdateUserBodyType;
+
+    if (!hasUserFieldToUpdate(username, email, isActive)) {
+      return res.status(400).json({
+        error: {
+          message: "Uppdatera användarnamn, email eller aktivitetsläge.",
+          status: 400,
+        }
+      });
+    }
+
+    if (username !== undefined) {
+      user.username = username;
+    }
+
+    if (email !== undefined) {
+      user.email = email;
+    }
+
+    if (isActive !== undefined) {
+      user.isActive = isActive;
+    }
+
+    const updatedUser = await user.save();
+
+    return res.json(updatedUser);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+
 // const updateUserField = (req: Request, res: Response) => {
 //   const id = Number(req.params.id);
 //   const user = users.find((item) => item.id === id);
@@ -169,6 +227,6 @@ export {
   getUserById,
   createUser,
   updateUserObject,
-  // updateUserField,
+  updateUserField,
   // deleteUser
 };
