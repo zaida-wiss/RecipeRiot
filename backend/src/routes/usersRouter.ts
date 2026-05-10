@@ -17,12 +17,14 @@ import { validateObjectIdParam } from "../middleware/validateParams";
 
 const router = Router();
 
-// Läs-routes behöver ingen body-validering.
+// Läs-routen för listan behöver ingen body- eller params-validering.
 router.get("/", getAllUsers);
-router.get("/:id", getUserById);
+router.get("/:id", validateObjectIdParam, getUserById);
 
-// Skriv-routes kör validation middleware innan controllern.
-router.post("/", validateObjectIdParam, validateCreateUser, createUser);
+// POST har ingen :id i URL:en, så här valideras bara request body.
+router.post("/", validateCreateUser, createUser);
+
+// PUT/PATCH/DELETE har :id och validerar därför params innan controllern.
 router.put("/:id", validateObjectIdParam, validateUpdateUserObject, updateUserObject);
 router.patch("/:id", validateObjectIdParam, validateUpdateUserField, updateUserField);
 router.delete("/:id", validateObjectIdParam, deleteUser);

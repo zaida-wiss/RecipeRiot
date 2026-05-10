@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import request from "supertest";
 import app from "../app";
 
+// Integrationstesterna går genom routes, validation middleware, controller och MongoDB-model.
 describe("Recipes API", () => {
   it("skapar ett recept", async () => {
     const response = await request(app)
@@ -49,6 +50,7 @@ describe("Recipes API", () => {
   });
 
   it("returnerar 404 när receptet inte finns", async () => {
+    // Id:t är syntaktiskt giltigt men saknas i databasen, därför förväntar vi 404.
     const missingRecipeId = new mongoose.Types.ObjectId().toString();
     const response = await request(app).get(`/api/v1/recipes/${missingRecipeId}`);
 

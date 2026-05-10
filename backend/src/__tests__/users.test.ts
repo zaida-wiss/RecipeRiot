@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import request from "supertest";
 import app from "../app";
 
+// Supertest kör requests mot Express-appen utan att vi behöver starta app.listen().
 describe("Users API", () => {
   it("skapar en användare", async () => {
     const response = await request(app)
@@ -47,6 +48,7 @@ describe("Users API", () => {
   });
 
   it("returnerar 404 när användaren inte finns", async () => {
+    // Ett giltigt ObjectId-format som inte finns i testdatabasen ska ge 404.
     const missingUserId = new mongoose.Types.ObjectId().toString();
     const response = await request(app).get(`/api/v1/users/${missingUserId}`);
 
