@@ -1,4 +1,4 @@
-// src/middleware/logger.ts
+// src/middleware/requestConsoleLogger.ts
 import { Request, Response, NextFunction } from 'express';
 
 const requestConsoleLogger = (
@@ -8,6 +8,6 @@ const requestConsoleLogger = (
 ) => {
   console.log(`${req.method} ${req.path}`);
   next();
-}
+};
 
 export default requestConsoleLogger;
