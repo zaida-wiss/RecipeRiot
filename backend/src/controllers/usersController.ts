@@ -2,6 +2,7 @@
 import { NextFunction, Request, Response } from "express";
 import { User } from "../models/userModel";
 import type { CreateUserBodyType, UpdateUserBodyType } from "../types/userType";
+import { AppError } from "../middleware/errorHandler";
 
 
 //helpers
@@ -45,13 +46,8 @@ const getUserById = async (
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({
-        error: {
-           message: "Användaren hittades inte",
-          status: 404,
-         },
-    });
-  }
+      return next(new AppError("Användaren hittades inte.", 404));
+    }
 
     return res.json(user);
   } catch (error) {
@@ -69,12 +65,7 @@ const createUser = async (
     const { username, email, password } = req.body as CreateUserBodyType;
 
     if (!hasRequiredUserFields(username, email, password)) {
-      return res.status(400).json({
-        error: {
-          message: "username, email och password krävs",
-          status: 400,
-        },
-      });
+      return next(new AppError("username, email och password krävs", 400));
     }
 
     const newUser = await User.create({
@@ -100,23 +91,13 @@ const updateUserObject = async (
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({
-        error: {
-          message: "Användaren hittades inte.",
-          status: 404,
-        },
-      });
+      return next(new AppError("Användaren hittades inte.", 404));
     }
 
     const { username, email, password } = req.body as CreateUserBodyType;
 
     if (!hasRequiredUserFields(username, email, password)) {
-      return res.status(400).json({
-        error: {
-          message: "username, email och lösenord krävs.",
-          status: 400,
-        },
-      });
+      return next(new AppError("username, email och password krävs", 400));
     }
 
     user.username = username;
@@ -144,23 +125,13 @@ const updateUserField = async (
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({
-        error: {
-          message: "Användaren hittades inte.",
-          status: 404,
-        },
-      });
+      return next(new AppError("Användaren hittades inte.", 404));
     }
 
     const { username, email, isActive } = req.body as UpdateUserBodyType;
 
     if (!hasUserFieldToUpdate(username, email, isActive)) {
-      return res.status(400).json({
-        error: {
-          message: "Uppdatera användarnamn, email eller aktivitetsläge.",
-          status: 400,
-        },
-      });
+      return next(new AppError("Uppdatera användarnamn, email eller aktivitetsläge.", 400));
     }
 
     if (username !== undefined) {
@@ -197,12 +168,7 @@ const deleteUser = async (
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({
-        error: {
-          message: "Användaren hittades inte",
-          status: 404,
-        },
-      });
+      return next(new AppError("Användaren hittades inte.", 404));
     }
 
     await user.deleteOne();
@@ -221,5 +187,5 @@ export {
   createUser,
   updateUserObject,
   updateUserField,
-  deleteUser
+  deleteUser,
 };

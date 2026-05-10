@@ -1,14 +1,25 @@
 import { ErrorRequestHandler } from "express";
 
-const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
-  console.error(error);
+export class AppError extends Error {
+  status: number;
 
-  res.status(500).json({
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
+
+const errorHandler: ErrorRequestHandler = (error, _req, res, _next) => {
+  const status = error.status || 500;
+  const message = error.message || "Något gick fel på servern";
+
+  res.status(status).json({
     error: {
-      message: "Något gick fel på servern",
-      status: 500,
+      message,
+      status,
     },
   });
 };
+
 
 export default errorHandler;
