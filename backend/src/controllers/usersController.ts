@@ -4,7 +4,7 @@ import { User } from '../models/User';
 import { NotFoundError, ConflictError } from '../errors/AppError';
 
 // GET /api/v1/users
-exports.getAllUsers = async (_req: Request, res: Response, next: NextFunction) => {
+export const getAllUsers = async (_req: Request, res: Response) => {
   try {
     const users = await User.find();
     res.json(users);
@@ -14,7 +14,7 @@ exports.getAllUsers = async (_req: Request, res: Response, next: NextFunction) =
 };
 
 // GET /api/v1/users/:id
-exports.getUserById = async (req: Request, res: Response, next: NextFunction) => {
+export const getUserById = async (req: Request, res: Response) => {
   try {
     const { id } = req.validatedParams;
     const user = await User.findById(id);
@@ -26,7 +26,7 @@ exports.getUserById = async (req: Request, res: Response, next: NextFunction) =>
 };
 
 // POST /api/v1/users
-exports.createUser = async (req: Request, res: Response, next: NextFunction) => {
+export const createUser = async (req: Request, res: Response) => {
   try {
     // Kontrollera om e-postadressen redan finns (409 Conflict)
     const existing = await User.findOne({ email: req.validatedBody.email });
@@ -40,7 +40,7 @@ exports.createUser = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 // PUT /api/v1/users/:id
-exports.updateUser = async (req: Request, res: Response, next: NextFunction) => {
+export const updateUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.validatedParams;
     const user = await User.findByIdAndUpdate(
@@ -56,7 +56,7 @@ exports.updateUser = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 // DELETE /api/v1/users/:id
-exports.deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteUser = async (req: Request, res: Response) => {
   try {
     const { id } = req.validatedParams;
     const user = await User.findByIdAndDelete(id);
