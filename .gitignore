@@ -1,5 +1,5 @@
-# Ignorera kursvecka-markdownfiler
-kursvecka*.md
+# Ignorera kurs-markdownfiler
+kurs*.md
 workshop*.md
 
 # Dependencies

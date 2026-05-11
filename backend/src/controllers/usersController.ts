@@ -63,4 +63,9 @@ exports.deleteUser = async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).json({ message: 'Något gick fel' });
   }
+
+  users.splice(index, 1);
+  return res.status(204).send();
 };
+
+module.exports = { getAllUsers, getUserById, createUser, updateUser, deleteUser };

@@ -182,3 +182,8 @@
     border-right-color: var(--border);
   }
 }
+
+.main-content {
+  min-height: calc(100vh - 80px); /* Justera 80px efter din navbars höjd */
+  padding-top: 20px; /* Ger lite andrum mellan nav och innehåll */
+}

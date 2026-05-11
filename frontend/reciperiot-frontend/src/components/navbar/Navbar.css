@@ -17,7 +17,6 @@ background: rgba(255, 255, 255, 0.85);
 
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 
-  z-index: 1000;
 }
 
 .logo {
@@ -58,4 +57,12 @@ background: rgba(255, 255, 255, 0.85);
   border: none;
   padding: 0.6rem 1.2rem;
   border-radius: 10px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: #c56a2d;
 }
