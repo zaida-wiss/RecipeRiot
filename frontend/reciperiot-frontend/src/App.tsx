@@ -4,15 +4,6 @@ import Home from "./components/pages/Home";
 import ExplorePage from "./components/explorePage/ExplorePage";
 import WeeklyPlanner from "./components/weeklyPlanner/WeeklyPlanner";
 import ShoppingList from "./components/shoppingList/ShoppingList";
-import Footer from "./components/footer/Footer";
-
-import { clearAuthData, getAuthData } from "./api/authApi";
-
-type AuthUser = {
-  id: number;
-  email: string;
-  username: string;
-};
 
 function App() {
   return (
@@ -27,8 +18,6 @@ function App() {
           </Route>
         </Routes>
       </main>
-
-      <Footer />
     </BrowserRouter>
   );
 }
