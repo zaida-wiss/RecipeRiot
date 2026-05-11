@@ -1,7 +1,6 @@
-// src/middleware/logger.ts
 import { Request, Response, NextFunction } from 'express';
 
-module.exports = (req: Request, _res: Response, next: NextFunction) => {
+export default function logger(req: Request, _res: Response, next: NextFunction) {
   console.log(`${req.method} ${req.path}`);
   next();
-};
+}

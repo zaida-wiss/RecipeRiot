@@ -1,5 +1,14 @@
 // src/types/index.ts
-// interfaces för alla datamodeller
+
+export interface Ingredient {
+  name: string;
+  quantity: string;
+}
+
+export interface Step {
+  order: number;
+  instruction: string;
+}
 
 export interface User {
   id: number;
@@ -10,9 +19,13 @@ export interface User {
 export interface Recipe {
   id: number;
   title: string;
-  ingredients?: string[];
-  steps?: string[];
+
+  ingredients: Ingredient[];
+
+  steps: Step[];
+
   createdBy: string;
+
   createdAt: string;
   updatedAt: string;
 }

@@ -1,72 +1,70 @@
-// src/controllers/usersController.ts
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import { NotFoundError } from '../errors';
 import { User } from '../types';
 
-// Enkel lista ersätter databasen tills vidare.
-const users: User[] = [
-  { id: 1, username: 'anna_kocker', email: 'anna@example.com' },
-  { id: 2, username: 'erik_mat', email: 'erik@example.com' },
-];
+const users: User[] = [];
 
-// GET /api/v1/users
-const getAllUsers = (_req: Request, res: Response) => {
+export const getAllUsers = (_req: Request, res: Response) => {
   res.json(users);
 };
 
-// GET /api/v1/users/:id
-const getUserById = (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
-  const user = users.find(u => u.id === id);
+export const getUserById = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = Number(req.params.id);
 
-  if (!user) {
-    return res.status(404).json({ message: 'Användaren hittades inte' });
+    const user = users.find(u => u.id === id);
+
+    if (!user) throw new NotFoundError('Användaren hittades inte');
+
+    res.json(user);
+  } catch (err) {
+    next(err);
   }
-
-  return res.json(user);
 };
 
-// POST /api/v1/users
-const createUser = (req: Request, res: Response) => {
-  const { username, email } = req.body;
+export const createUser = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const newUser = {
+      id: users.length + 1,
+      ...req.body,
+    };
 
-  if (!username || !email) {
-    return res.status(400).json({ message: 'username och email krävs' });
+    users.push(newUser);
+
+    res.status(201).json(newUser);
+  } catch (err) {
+    next(err);
   }
-
-  const newUser: User = {
-    id: users.length + 1,
-    username,
-    email,
-  };
-
-  users.push(newUser);
-  return res.status(201).json(newUser);
 };
 
-// PUT /api/v1/users/:id
-const updateUser = (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
-  const index = users.findIndex(u => u.id === id);
+export const updateUser = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = Number(req.params.id);
 
-  if (index === -1) {
-    return res.status(404).json({ message: 'Användaren hittades inte' });
+    const user = users.find(u => u.id === id);
+
+    if (!user) throw new NotFoundError('Användaren hittades inte');
+
+    Object.assign(user, req.body);
+
+    res.json(user);
+  } catch (err) {
+    next(err);
   }
-
-  users[index] = { id, ...req.body };
-  return res.json(users[index]);
 };
 
-// DELETE /api/v1/users/:id
-const deleteUser = (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
-  const index = users.findIndex(u => u.id === id);
+export const deleteUser = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = Number(req.params.id);
 
-  if (index === -1) {
-    return res.status(404).json({ message: 'Användaren hittades inte' });
+    const index = users.findIndex(u => u.id === id);
+
+    if (index === -1) throw new NotFoundError('Användaren hittades inte');
+
+    users.splice(index, 1);
+
+    res.status(204).send();
+  } catch (err) {
+    next(err);
   }
-
-  users.splice(index, 1);
-  return res.status(204).send();
 };
-
-module.exports = { getAllUsers, getUserById, createUser, updateUser, deleteUser };

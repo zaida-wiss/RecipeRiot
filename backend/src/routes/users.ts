@@ -1,13 +1,44 @@
-// src/routes/users.ts
 import { Router } from 'express';
-const usersController = require('../controllers/usersController');
+
+import { getAllUsers, getUserById, createUser, updateUser, deleteUser, } from '../controllers/usersController';
+
+import { validateRequest } from '../middleware/validate';
+
+import {
+  createUserSchema,
+  updateUserSchema,
+  userIdSchema,
+} from '../schemas/userSchema';
 
 const router = Router();
 
-router.get('/', usersController.getAllUsers);
-router.get('/:id', usersController.getUserById);
-router.post('/', usersController.createUser);
-router.put('/:id', usersController.updateUser);
-router.delete('/:id', usersController.deleteUser);
+router.get('/', getAllUsers);
 
-module.exports = router;
+router.get(
+  '/:id',
+  validateRequest({ params: userIdSchema }),
+  getUserById
+);
+
+router.post(
+  '/',
+  validateRequest({ body: createUserSchema }),
+  createUser
+);
+
+router.put(
+  '/:id',
+  validateRequest({
+    params: userIdSchema,
+    body: updateUserSchema,
+  }),
+  updateUser
+);
+
+router.delete(
+  '/:id',
+  validateRequest({ params: userIdSchema }),
+  deleteUser
+);
+
+export default router;
