@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { User } from '../models/User';
 
 // GET /api/v1/users
-exports.getAllUsers = async (_req: Request, res: Response) => {
+export const getAllUsers = async (_req: Request, res: Response) => {
   try {
     const users = await User.find();
     return res.json(users);
@@ -13,7 +13,7 @@ exports.getAllUsers = async (_req: Request, res: Response) => {
 };
 
 // GET /api/v1/users/:id
-exports.getUserById = async (req: Request, res: Response) => {
+export const getUserById = async (req: Request, res: Response) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) {
@@ -26,7 +26,7 @@ exports.getUserById = async (req: Request, res: Response) => {
 };
 
 // POST /api/v1/users
-exports.createUser = async (req: Request, res: Response) => {
+export const createUser = async (req: Request, res: Response) => {
   try {
     const user = await User.create(req.body);
     return res.status(201).json(user);
@@ -36,7 +36,7 @@ exports.createUser = async (req: Request, res: Response) => {
 };
 
 // PUT /api/v1/users/:id
-exports.updateUser = async (req: Request, res: Response) => {
+export const updateUser = async (req: Request, res: Response) => {
   try {
     const user = await User.findByIdAndUpdate(
       req.params.id,
@@ -53,7 +53,7 @@ exports.updateUser = async (req: Request, res: Response) => {
 };
 
 // DELETE /api/v1/users/:id
-exports.deleteUser = async (req: Request, res: Response) => {
+export const deleteUser = async (req: Request, res: Response) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) {
@@ -63,9 +63,4 @@ exports.deleteUser = async (req: Request, res: Response) => {
   } catch (error) {
     return res.status(500).json({ message: 'Något gick fel' });
   }
-
-  users.splice(index, 1);
-  return res.status(204).send();
 };
-
-module.exports = { getAllUsers, getUserById, createUser, updateUser, deleteUser };
