@@ -1,70 +1,71 @@
-import { Request, Response, NextFunction } from 'express';
-import { NotFoundError } from '../errors';
-import { User } from '../types';
+// src/controllers/usersController.ts
+import { Request, Response } from 'express';
+import { User } from '../models/User';
 
-const users: User[] = [];
-
-export const getAllUsers = (_req: Request, res: Response) => {
-  res.json(users);
-};
-
-export const getUserById = (req: Request, res: Response, next: NextFunction) => {
+// GET /api/v1/users
+exports.getAllUsers = async (_req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
-
-    const user = users.find(u => u.id === id);
-
-    if (!user) throw new NotFoundError('Användaren hittades inte');
-
-    res.json(user);
-  } catch (err) {
-    next(err);
+    const users = await User.find();
+    return res.json(users);
+  } catch (error) {
+    return res.status(500).json({ message: 'Något gick fel' });
   }
 };
 
-export const createUser = (req: Request, res: Response, next: NextFunction) => {
+// GET /api/v1/users/:id
+exports.getUserById = async (req: Request, res: Response) => {
   try {
-    const newUser = {
-      id: users.length + 1,
-      ...req.body,
-    };
-
-    users.push(newUser);
-
-    res.status(201).json(newUser);
-  } catch (err) {
-    next(err);
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Användaren hittades inte' });
+    }
+    return res.json(user);
+  } catch (error) {
+    return res.status(500).json({ message: 'Något gick fel' });
   }
 };
 
-export const updateUser = (req: Request, res: Response, next: NextFunction) => {
+// POST /api/v1/users
+exports.createUser = async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
-
-    const user = users.find(u => u.id === id);
-
-    if (!user) throw new NotFoundError('Användaren hittades inte');
-
-    Object.assign(user, req.body);
-
-    res.json(user);
-  } catch (err) {
-    next(err);
+    const user = await User.create(req.body);
+    return res.status(201).json(user);
+  } catch (error) {
+    return res.status(500).json({ message: 'Något gick fel' });
   }
 };
 
-export const deleteUser = (req: Request, res: Response, next: NextFunction) => {
+// PUT /api/v1/users/:id
+exports.updateUser = async (req: Request, res: Response) => {
   try {
-    const id = Number(req.params.id);
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!user) {
+      return res.status(404).json({ message: 'Användaren hittades inte' });
+    }
+    return res.json(user);
+  } catch (error) {
+    return res.status(500).json({ message: 'Något gick fel' });
+  }
+};
 
-    const index = users.findIndex(u => u.id === id);
+// DELETE /api/v1/users/:id
+exports.deleteUser = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Användaren hittades inte' });
+    }
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(500).json({ message: 'Något gick fel' });
+  }
 
     if (index === -1) throw new NotFoundError('Användaren hittades inte');
 
     users.splice(index, 1);
 
-    res.status(204).send();
-  } catch (err) {
-    next(err);
-  }
-};
+module.exports = { getAllUsers, getUserById, createUser, updateUser, deleteUser };

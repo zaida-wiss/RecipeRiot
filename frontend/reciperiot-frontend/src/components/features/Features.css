@@ -1,88 +1,61 @@
+/* Mobile first */
 .features-section {
   width: 100%;
-  display: block;
-  padding-bottom: 40px;
+  padding: 52px 1.25rem;
+  background: #f6f1eb;
 }
 
-.features-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  text-align: center;
+.features-header { text-align: center; margin-bottom: 36px; }
+
+.section-label {
+  display: block; font-size: 11px; font-weight: 700;
+  letter-spacing: 1.4px; text-transform: uppercase;
+  color: #c56a2d; margin-bottom: 10px;
 }
 
 .features-main-title {
   font-family: "Playfair Display", serif;
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  color: #201b16;
-  text-align: center;
+  font-size: 1.9rem; color: #1a1a1a; margin: 0 0 6px;
 }
 
-.features-subtitle {
-  font-family: "Inter", sans-serif;
-  color: #8f8880;
-  margin-bottom: 4rem;
-  font-size: 1.1rem;
-  text-align: center;
-}
+.features-subtitle { color: #999; font-size: 0.9rem; margin: 0; }
 
+/* Single column on mobile */
 .feature-grid {
   display: grid;
-  /* Tvingar 3 kolumner på desktop */
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
 
 .feature-card {
-  background: #f5f4ef;
-  /* Mindre padding uppe/nere (30px) och mer på sidorna (40px) gör det "lägre" */
-  padding: 26px 40px; 
-  border-radius: 14px;
-  text-align: left; /* Ändrat till vänsterställt som på bilden */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: #fff; border-radius: 12px;
+  padding: 22px 20px; border: 1px solid #ede8e2;
 }
 
 .feature-icon-wrapper {
-  background-color: #ede5db;
-  color: #c56a2d;
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
+  width: 40px; height: 40px; border-radius: 10px;
+  background: #fdf0e7; display: flex;
+  align-items: center; justify-content: center;
+  color: #c56a2d; margin-bottom: 14px;
 }
 
 .feature-card-title {
-  font-family: "Inter", sans-serif !important;
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin: 0 0 12px 0;
-  color: #201b16;
-}
-
-.feature-card-desc {
+  font-size: 0.95rem; font-weight: 700;
+  color: #1a1a1a; margin: 0 0 6px;
   font-family: "Inter", sans-serif;
-  font-size: 0.9rem;
-  line-height: 1.6;
-  color: #555;
-  margin: 0;
 }
 
-/* Responsivitet */
-@media (max-width: 1024px) {
-  .feature-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+.feature-card-desc { font-size: 0.85rem; color: #888; line-height: 1.65; margin: 0; }
+
+/* Two columns on tablet */
+@media (min-width: 560px) {
+  .feature-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
-@media (max-width: 768px) {
-  .feature-grid {
-    grid-template-columns: 1fr;
-  }
-  .features-section {
-    padding: 60px 20px;
-  }
+/* Three columns on desktop */
+@media (min-width: 900px) {
+  .features-section { padding: 72px 0; }
+  .features-header { margin-bottom: 48px; }
+  .features-main-title { font-size: 2.2rem; }
+  .feature-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; }
 }

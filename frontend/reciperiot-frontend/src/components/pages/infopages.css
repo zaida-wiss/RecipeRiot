@@ -1,0 +1,177 @@
+/* ── Shared page layout ── */
+.info-page {
+  min-height: 100vh;
+  background: #f6f1eb;
+}
+
+/* ── Hero ── */
+.info-hero {
+  background: #fff;
+  padding: 52px 1.25rem 48px;
+  border-bottom: 1px solid #ede8e2;
+  text-align: center;
+}
+.info-hero h1 {
+  font-family: "Playfair Display", serif;
+  font-size: 2rem; font-weight: 700;
+  color: #1a1a1a; margin: 0 0 10px;
+  line-height: 1.15;
+}
+.info-hero p {
+  font-size: 1rem; color: #888;
+  margin: 0; line-height: 1.6;
+  max-width: 480px; margin: 0 auto;
+}
+
+/* ── Section ── */
+.info-section {
+  padding: 48px 1.25rem;
+}
+.info-section--beige {
+  background: #f6f1eb;
+}
+
+/* ── Shared icon ── */
+.info-icon {
+  width: 42px; height: 42px;
+  border-radius: 10px; background: #fdf0e7;
+  display: flex; align-items: center; justify-content: center;
+  color: #c56a2d; flex-shrink: 0;
+  margin-bottom: 14px;
+}
+
+/* ── About: 3-col grid ── */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  max-width: 960px; margin: 0 auto;
+}
+.info-card {
+  background: #fff; border-radius: 12px;
+  padding: 24px 20px; border: 1px solid #ede8e2;
+}
+.info-card h3 {
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem; font-weight: 700;
+  color: #1a1a1a; margin: 0 0 6px;
+}
+.info-card p {
+  font-size: 0.875rem; color: #888; line-height: 1.65; margin: 0;
+}
+
+/* ── About: text block ── */
+.info-text-block {
+  max-width: 640px; margin: 0 auto;
+}
+.info-text-block h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.6rem; color: #1a1a1a; margin: 0 0 16px;
+}
+.info-text-block p {
+  font-size: 0.95rem; color: #666; line-height: 1.75;
+  margin: 0 0 14px;
+}
+
+/* ── Privacy: list ── */
+.privacy-list {
+  display: flex; flex-direction: column; gap: 16px;
+  max-width: 680px; margin: 0 auto;
+}
+.privacy-item {
+  display: flex; gap: 16px; align-items: flex-start;
+  background: #fff; border-radius: 12px;
+  padding: 20px; border: 1px solid #ede8e2;
+}
+.privacy-item .info-icon { margin-bottom: 0; }
+.privacy-item h3 {
+  font-family: "Inter", sans-serif;
+  font-size: 0.95rem; font-weight: 700;
+  color: #1a1a1a; margin: 0 0 5px;
+}
+.privacy-item p {
+  font-size: 0.875rem; color: #888; line-height: 1.65; margin: 0;
+}
+
+/* ── Contact layout ── */
+.contact-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  max-width: 900px; margin: 0 auto;
+}
+.contact-info {
+  display: flex; flex-direction: column; gap: 12px;
+}
+.contact-info-item {
+  display: flex; gap: 14px; align-items: flex-start;
+  background: #fff; border-radius: 12px;
+  padding: 18px; border: 1px solid #ede8e2;
+}
+.contact-info-item .info-icon { margin-bottom: 0; }
+.contact-info-item h3 {
+  font-family: "Inter", sans-serif;
+  font-size: 0.875rem; font-weight: 700;
+  color: #1a1a1a; margin: 0 0 3px;
+}
+.contact-info-item p {
+  font-size: 0.875rem; color: #888; margin: 0;
+}
+
+/* ── Contact form ── */
+.contact-form-wrap {
+  background: #fff; border-radius: 12px;
+  padding: 24px 20px; border: 1px solid #ede8e2;
+}
+.contact-form {
+  display: flex; flex-direction: column; gap: 14px;
+}
+.form-group {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.form-group label {
+  font-size: 0.85rem; font-weight: 600; color: #444;
+  font-family: "Inter", sans-serif;
+}
+.form-group input,
+.form-group textarea {
+  border: 1px solid #e0d8d2; border-radius: 9px;
+  padding: 10px 13px; font-size: 0.9rem;
+  font-family: "Inter", sans-serif; color: #1a1a1a;
+  background: #fdfbf9; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: vertical;
+}
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #c56a2d;
+  box-shadow: 0 0 0 3px rgba(197,106,45,0.1);
+}
+.contact-submit {
+  background: #c56a2d; color: #fff; border: none;
+  padding: 12px; border-radius: 9px;
+  font-size: 0.9rem; font-weight: 700;
+  font-family: "Inter", sans-serif;
+  cursor: pointer; transition: background 0.2s;
+  min-height: 44px;
+}
+.contact-submit:hover { background: #a85525; }
+.contact-submit:focus-visible { outline: 2px solid #c56a2d; outline-offset: 2px; }
+
+.contact-success {
+  text-align: center; padding: 32px 16px; color: #c56a2d;
+}
+.contact-success h3 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.2rem; color: #1a1a1a; margin: 14px 0 6px;
+}
+.contact-success p { font-size: 0.9rem; color: #888; margin: 0; }
+
+/* ── Desktop ── */
+@media (min-width: 640px) {
+  .info-hero { padding: 64px 2rem 56px; }
+  .info-hero h1 { font-size: 2.6rem; }
+  .info-section { padding: 60px 2rem; }
+  .info-grid { grid-template-columns: repeat(3, 1fr); }
+  .contact-layout { grid-template-columns: 1fr 1.6fr; }
+}
