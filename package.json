@@ -1,0 +1,36 @@
+{
+  "name": "reciperiot",
+  "version": "1.0.0",
+  "description": "RecipeRiot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev",
+    "build": "cd backend && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zaida-wiss/RecipeRiot.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/zaida-wiss/RecipeRiot/issues"
+  },
+  "homepage": "https://github.com/zaida-wiss/RecipeRiot#readme",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "morgan": "^1.10.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/morgan": "^1.9.10",
+    "@types/node": "^25.6.0",
+    "nodemon": "^3.1.14"
+  }
+}

@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: #f6f1eb;
+  color: #2d2d2d;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { font-family: "Playfair Display", serif; }
+
+/* Prevent content hiding under fixed navbar */
+#main-content { padding-top: 56px; }
+@media (min-width: 640px) { #main-content { padding-top: 60px; } }
+@media (min-width: 900px) { #main-content { padding-top: 64px; } }
+
+.container {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 1.25rem;
+}
+@media (min-width: 640px) { .container { padding: 0 2rem; } }
+
+button { cursor: pointer; transition: 0.2s; font-family: "Inter", sans-serif; }
+
+/* Improve tap targets on mobile */
+@media (max-width: 640px) {
+  button, a { min-height: 44px; }
+}

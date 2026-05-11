@@ -1,0 +1,43 @@
+/* Mobile first */
+.recipes-section {
+  width: 100%;
+  background-color: #fff;
+  padding: 52px 1.25rem;
+}
+
+.recipes-content { max-width: 1100px; margin: 0 auto; }
+
+.recipes-header { text-align: center; margin-bottom: 36px; }
+.recipes-header .section-label {
+  display: block; font-size: 11px; font-weight: 700;
+  letter-spacing: 1.4px; text-transform: uppercase;
+  color: #c56a2d; margin-bottom: 10px;
+}
+.recipes-header h2 {
+  font-family: "Playfair Display", serif;
+  font-size: 1.9rem; color: #1a1a1a; margin: 0 0 6px;
+}
+.recipes-header p { color: #999; font-size: 0.9rem; margin: 0; }
+
+/* Single column on mobile */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.recipes-status { text-align: center; color: #999; padding: 4rem 0; }
+.recipes-status--error { color: #c33; }
+
+/* Two columns on tablet */
+@media (min-width: 560px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* Three columns on desktop */
+@media (min-width: 900px) {
+  .recipes-section { padding: 72px 6%; }
+  .recipes-header { margin-bottom: 48px; }
+  .recipes-header h2 { font-size: 2.2rem; }
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 22px; }
+}

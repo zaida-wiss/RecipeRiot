@@ -1,0 +1,144 @@
+.user-login-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(21, 17, 13, 0.56);
+  backdrop-filter: blur(6px);
+}
+
+.user-login-modal {
+  position: relative;
+  width: min(460px, 100%);
+  border-radius: 18px;
+  border: 1px solid #eadfce;
+  background: linear-gradient(180deg, #fffdf9 0%, #f7efe5 100%);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.24);
+  padding: 26px;
+}
+
+.user-login-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: #f0e7db;
+  color: #4b3a2d;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.user-login-title {
+  margin: 0;
+  color: #1f150d;
+  font-size: 2rem;
+  line-height: 1.1;
+}
+
+.user-login-subtitle {
+  margin: 8px 0 20px;
+  color: #6e5a4b;
+  font-size: 0.98rem;
+}
+
+.user-login-error {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  background: #ffe0e0;
+  border: 1px solid #f5a1a1;
+  border-radius: 8px;
+  color: #c33;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.user-login-success {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  background: #e0f5e0;
+  border: 1px solid #a1f5a1;
+  border-radius: 8px;
+  color: #3a7d3a;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.user-login-form {
+  display: grid;
+  gap: 10px;
+}
+
+.user-login-label {
+  color: #3f2f22;
+  font-weight: 600;
+}
+
+.user-login-input {
+  width: 100%;
+  border: 1px solid #d7c8b5;
+  border-radius: 10px;
+  padding: 12px;
+  font-size: 0.95rem;
+  background: #fffdfb;
+}
+
+.user-login-input:focus {
+  border-color: #c56a2d;
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(197, 106, 45, 0.18);
+}
+
+.user-login-submit {
+  margin-top: 8px;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  background: #c56a2d;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.user-login-submit:hover:not(:disabled) {
+  filter: brightness(0.95);
+}
+
+.user-login-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.user-login-toggle {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 0.95rem;
+  color: #6e5a4b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.user-login-toggle-text {
+  margin: 0;
+}
+
+.user-login-toggle-btn {
+  border: none;
+  background: none;
+  color: #c56a2d;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.user-login-toggle-btn:hover {
+  color: #a85220;
+}

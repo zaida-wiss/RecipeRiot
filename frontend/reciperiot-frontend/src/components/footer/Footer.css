@@ -1,0 +1,78 @@
+/* Mobile first */
+.footer {
+  background: #fff;
+  border-top: 1px solid #ede8e2;
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 1.25rem 20px;
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  gap: 24px;
+}
+
+.footer-logo {
+  display: inline-flex; align-items: center; gap: 8px;
+  text-decoration: none; margin-bottom: 6px;
+}
+.footer-logo:focus-visible { outline: 2px solid #c56a2d; outline-offset: 2px; border-radius: 4px; }
+
+.footer-logo-icon {
+  width: 26px; height: 26px; border-radius: 6px;
+  background: #c56a2d;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; flex-shrink: 0;
+}
+
+.footer-logo-name {
+  font-family: "Playfair Display", serif;
+  font-size: 1rem; font-weight: 700; color: #1a1a1a;
+}
+
+.footer-tagline {
+  font-size: 12px; color: #bbb; margin: 0;
+}
+
+.footer-links {
+  display: flex; flex-direction: column;
+  align-items: flex-end; gap: 8px;
+}
+.footer-links a {
+  font-size: 13px; color: #888; text-decoration: none;
+  transition: color 0.15s;
+}
+.footer-links a:hover { color: #1a1a1a; }
+.footer-links a:focus-visible { outline: 2px solid #c56a2d; outline-offset: 2px; border-radius: 2px; }
+
+.footer-bottom {
+  border-top: 1px solid #f0ebe6;
+  padding-top: 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.footer-copy { font-size: 11px; color: #ccc; }
+
+.footer-social { display: flex; gap: 8px; }
+
+.social-btn {
+  width: 30px; height: 30px; border-radius: 8px;
+  border: 1px solid #ede8e2;
+  display: flex; align-items: center; justify-content: center;
+  color: #aaa; text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+}
+.social-btn:hover { color: #1a1a1a; border-color: #d0c8c0; }
+.social-btn:focus-visible { outline: 2px solid #c56a2d; outline-offset: 2px; }
+
+/* Desktop */
+@media (min-width: 900px) {
+  .footer-inner { padding: 32px 2rem 24px; }
+  .footer-links { flex-direction: row; gap: 20px; align-items: center; }
+}

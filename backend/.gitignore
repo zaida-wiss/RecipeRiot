@@ -1,16 +1,6 @@
-# Ignorera kurs-markdownfiler
-kurs*.md
-workshop*.md
-
 # Dependencies
 node_modules
-package-lock.json
 yarn.lock
-
-# Build outputs
-dist
-dist-ssr
-build
 
 # Environment variables
 .env
@@ -25,6 +15,10 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+
+# Build outputs
+dist
+build
 
 # Editor directories and files
 .vscode/*
