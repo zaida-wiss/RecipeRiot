@@ -2,6 +2,7 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import { errorHandler } from './middleware/errorHandler';
 
 const recipesRouter = require('./routes/recipes');
 const usersRouter = require('./routes/users');
@@ -29,5 +30,7 @@ app.use('/api/v1/users', usersRouter);
 app.use((_req: express.Request, res: express.Response) => {
   res.status(404).json({ message: 'Sidan finns inte' });
 });
+
+app.use(errorHandler);
 
 export default app;

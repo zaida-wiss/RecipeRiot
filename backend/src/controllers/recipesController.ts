@@ -1,78 +1,74 @@
 // src/controllers/recipesController.ts
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { Recipe } from '../models/Recipe';
+import { NotFoundError } from '../errors/AppError';
 
 // GET /api/v1/recipes
-exports.getAllRecipes = async (_req: Request, res: Response) => {
+exports.getAllRecipes = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const recipes = await Recipe.find();
-    return res.json(recipes);
+    res.json(recipes);
   } catch (error) {
-    return res.status(500).json({ message: 'Något gick fel' });
+    next(error);
   }
 };
 
 // GET /api/v1/recipes/:id
-exports.getRecipeById = async (req: Request, res: Response) => {
+exports.getRecipeById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const recipe = await Recipe.findById(req.params.id);
-    if (!recipe) {
-      return res.status(404).json({ message: 'Receptet hittades inte' });
-    }
-    return res.json(recipe);
+    const { id } = req.validatedParams;
+    const recipe = await Recipe.findById(id);
+    if (!recipe) throw new NotFoundError('Receptet hittades inte');
+    res.json(recipe);
   } catch (error) {
-    return res.status(500).json({ message: 'Något gick fel' });
+    next(error);
   }
 };
 
 // POST /api/v1/recipes
-exports.createRecipe = async (req: Request, res: Response) => {
+exports.createRecipe = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const recipe = await Recipe.create(req.body);
-    return res.status(201).json(recipe);
+    const recipe = await Recipe.create(req.validatedBody);
+    res.status(201).json(recipe);
   } catch (error) {
-    return res.status(500).json({ message: 'Något gick fel' });
+    next(error);
   }
 };
 
 // PATCH /api/v1/recipes/:id
-exports.updateRecipe = async (req: Request, res: Response) => {
+exports.updateRecipe = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { id } = req.validatedParams;
     const recipe = await Recipe.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
+      id,
+      req.validatedBody,
+      { new: true, runValidators: true }
     );
-    if (!recipe) {
-      return res.status(404).json({ message: 'Receptet hittades inte' });
-    }
-    return res.json(recipe);
+    if (!recipe) throw new NotFoundError('Receptet hittades inte');
+    res.json(recipe);
   } catch (error) {
-    return res.status(500).json({ message: 'Något gick fel' });
+    next(error);
   }
 };
 
 // DELETE /api/v1/recipes/:id
-exports.deleteRecipe = async (req: Request, res: Response) => {
+exports.deleteRecipe = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const recipe = await Recipe.findByIdAndDelete(req.params.id);
-    if (!recipe) {
-      return res.status(404).json({ message: 'Receptet hittades inte' });
-    }
-    return res.status(204).send();
+    const { id } = req.validatedParams;
+    const recipe = await Recipe.findByIdAndDelete(id);
+    if (!recipe) throw new NotFoundError('Receptet hittades inte');
+    res.status(204).send();
   } catch (error) {
-    return res.status(500).json({ message: 'Något gick fel' });
+    next(error);
   }
 };
 
 // POST /api/v1/recipes/:id/fork
-exports.forkRecipe = async (req: Request, res: Response) => {
+exports.forkRecipe = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const original = await Recipe.findById(req.params.id);
-
-    if (!original) {
-      return res.status(404).json({ message: 'Receptet hittades inte' });
-    }
+    const { id } = req.validatedParams;
+    const original = await Recipe.findById(id);
+    if (!original) throw new NotFoundError('Receptet hittades inte');
 
     const forkedRecipe = await Recipe.create({
       title: original.title,
@@ -82,9 +78,8 @@ exports.forkRecipe = async (req: Request, res: Response) => {
       originalRef: original._id,
     });
 
-    return res.status(201).json(forkedRecipe);
+    res.status(201).json(forkedRecipe);
   } catch (error) {
-    console.log('Fork fel:', error); // lägg till denna
-    return res.status(500).json({ message: 'Något gick fel' });
+    next(error);
   }
 };
