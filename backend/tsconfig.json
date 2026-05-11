@@ -18,7 +18,8 @@
     "strictFunctionTypes": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitReturns": true
+    "noImplicitReturns": true,
+    "types": ["jest", "node"]
   },
   "ts-node": {
     "esm": false

@@ -1,80 +1,90 @@
 // src/controllers/recipesController.ts
 import { Request, Response } from 'express';
-import { Recipe } from '../types';
+import { Recipe } from '../models/Recipe';
 
-// En enkel in-memory lista med recept (försvinner när servern startas om).
-const recipes: Recipe[] = [
-  { id: 1, title: 'Biff med Tomat', createdBy: 'Zaida', ingredients: [], steps: [], createdAt: '2026-04-02T10:00:00Z', updatedAt: '2026-04-02T10:00:00Z' },
-  { id: 2, title: 'Vietnamesiska vårrullar', createdBy: 'Zaida', ingredients: [], steps: [], createdAt: '2026-04-02T10:00:00Z', updatedAt: '2026-04-02T10:00:00Z' },
-];
-
-// Hämtar och returnerar alla recept.
-exports.getAllRecipes = (_req: Request, res: Response) => {
-  res.json(recipes);
+// GET /api/v1/recipes
+exports.getAllRecipes = async (_req: Request, res: Response) => {
+  try {
+    const recipes = await Recipe.find();
+    return res.json(recipes);
+  } catch (error) {
+    return res.status(500).json({ message: 'Något gick fel' });
+  }
 };
 
-// Hämtar ett recept baserat på id från URL-parametern.
-exports.getRecipeById = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const recipe = recipes.find((item) => item.id === id);
-
-  if (!recipe) {
-    return res.status(404).json({ message: 'Receptet hittades inte' });
+// GET /api/v1/recipes/:id
+exports.getRecipeById = async (req: Request, res: Response) => {
+  try {
+    const recipe = await Recipe.findById(req.params.id);
+    if (!recipe) {
+      return res.status(404).json({ message: 'Receptet hittades inte' });
+    }
+    return res.json(recipe);
+  } catch (error) {
+    return res.status(500).json({ message: 'Något gick fel' });
   }
-
-  return res.json(recipe);
 };
 
-// Skapar ett nytt recept från data i request body.
-exports.createRecipe = (req: Request, res: Response) => {
-  const { title, createdBy } = req.body;
-
-  if (!title || !createdBy) {
-    return res.status(400).json({ message: 'title och createdBy krävs' });
+// POST /api/v1/recipes
+exports.createRecipe = async (req: Request, res: Response) => {
+  try {
+    const recipe = await Recipe.create(req.body);
+    return res.status(201).json(recipe);
+  } catch (error) {
+    return res.status(500).json({ message: 'Något gick fel' });
   }
-
-  const newRecipe: Recipe = {
-    id: recipes.length + 1,
-    title,
-    createdBy,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  recipes.push(newRecipe);
-  return res.status(201).json(newRecipe);
 };
 
-// Tar bort ett recept.
-exports.deleteRecipe = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const index = recipes.findIndex((item) => item.id === id);
-
-  if (index === -1) {
-    return res.status(404).json({ message: 'Receptet hittades inte' });
+// PATCH /api/v1/recipes/:id
+exports.updateRecipe = async (req: Request, res: Response) => {
+  try {
+    const recipe = await Recipe.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!recipe) {
+      return res.status(404).json({ message: 'Receptet hittades inte' });
+    }
+    return res.json(recipe);
+  } catch (error) {
+    return res.status(500).json({ message: 'Något gick fel' });
   }
-
-  recipes.splice(index, 1);
-  return res.status(204).send();
 };
 
-// Uppdaterar delar av ett recept.
-exports.updateRecipe = (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-  const { title, createdBy } = req.body;
-  const recipe = recipes.find((item) => item.id === id);
-
-  if (!recipe) {
-    return res.status(404).json({ message: 'Receptet hittades inte' });
+// DELETE /api/v1/recipes/:id
+exports.deleteRecipe = async (req: Request, res: Response) => {
+  try {
+    const recipe = await Recipe.findByIdAndDelete(req.params.id);
+    if (!recipe) {
+      return res.status(404).json({ message: 'Receptet hittades inte' });
+    }
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(500).json({ message: 'Något gick fel' });
   }
+};
 
-  if (title === undefined && createdBy === undefined) {
-    return res.status(400).json({ message: 'Skicka minst ett fält: title eller createdBy' });
+// POST /api/v1/recipes/:id/fork
+exports.forkRecipe = async (req: Request, res: Response) => {
+  try {
+    const original = await Recipe.findById(req.params.id);
+
+    if (!original) {
+      return res.status(404).json({ message: 'Receptet hittades inte' });
+    }
+
+    const forkedRecipe = await Recipe.create({
+      title: original.title,
+      createdBy: req.body.createdBy,
+      ingredients: original.ingredients,
+      steps: original.steps,
+      originalRef: original._id,
+    });
+
+    return res.status(201).json(forkedRecipe);
+  } catch (error) {
+    console.log('Fork fel:', error); // lägg till denna
+    return res.status(500).json({ message: 'Något gick fel' });
   }
-
-  if (title !== undefined) recipe.title = title;
-  if (createdBy !== undefined) recipe.createdBy = createdBy;
-
-  recipe.updatedAt = new Date().toISOString();
-  return res.json(recipe);
 };
