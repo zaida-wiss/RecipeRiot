@@ -4,9 +4,15 @@ import Home from "./components/pages/Home";
 import ExplorePage from "./components/explorePage/ExplorePage";
 import WeeklyPlanner from "./components/weeklyPlanner/WeeklyPlanner";
 import ShoppingList from "./components/shoppingList/ShoppingList";
-import AboutPage from "./components/pages/aboutpage";
-import PrivacyPage from "./components/pages/privacypage";
-import ContactPage from "./components/pages/contactpage";
+import Footer from "./components/footer/Footer";
+
+import { clearAuthData, getAuthData } from "./api/authApi";
+
+type AuthUser = {
+  id: number;
+  email: string;
+  username: string;
+};
 
 function App() {
   return (
@@ -17,12 +23,11 @@ function App() {
           <Route path="/utforska" element={<ExplorePage />} />
           <Route path="/veckomeny" element={<WeeklyPlanner />} />
           <Route path="/inkopslista" element={<ShoppingList />} />
-          <Route path="/om" element={<AboutPage />} />
-          <Route path="/integritet" element={<PrivacyPage />} />
-          <Route path="/kontakt" element={<ContactPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+        </Routes>
+      </main>
+
+      <Footer />
+    </Router>
   );
 }
 
