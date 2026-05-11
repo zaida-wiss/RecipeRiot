@@ -17,17 +17,19 @@ type AuthUser = {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/utforska" element={<ExplorePage />} />
-          <Route path="/veckomeny" element={<WeeklyPlanner />} />
-          <Route path="/inkopslista" element={<ShoppingList />} />
+      <main>
+        <Routes>
+          <Route element={<Layout />}>
+            <Route path="/" element={<Home />} />
+            <Route path="/utforska" element={<ExplorePage />} />
+            <Route path="/veckomeny" element={<WeeklyPlanner />} />
+            <Route path="/inkopslista" element={<ShoppingList />} />
+          </Route>
         </Routes>
       </main>
 
       <Footer />
-    </Router>
+    </BrowserRouter>
   );
 }
 
