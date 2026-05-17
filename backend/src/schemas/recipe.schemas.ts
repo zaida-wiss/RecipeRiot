@@ -9,14 +9,14 @@ const ingredientSchema = z.object({
 });
 
 // ─── Hjälpschema: steg (inbäddad i receptet) ─────────────────────────────────
-const recipeStepSchema = z.object({
-  stepNumber: z.number().int().positive('Stegnummer måste vara ett positivt heltal'),
-  instruction: z
-    .string()
-    .min(1, 'Instruktion är obligatorisk')
-    .max(1000)
-    .trim(),
-});
+// const recipeStepSchema = z.object({
+//   stepNumber: z.number().int().positive('Stegnummer måste vara ett positivt heltal'),
+//   instruction: z
+//     .string()
+//     .min(1, 'Instruktion är obligatorisk')
+//     .max(1000)
+//     .trim(),
+// });
 
 // ─── POST /recipes ────────────────────────────────────────────────────────────
 export const createRecipeSchema = z.object({
@@ -30,7 +30,9 @@ export const createRecipeSchema = z.object({
     .min(1, 'createdBy är obligatoriskt')
     .trim(),
   ingredients: z.array(ingredientSchema).optional().default([]),
-  steps: z.array(recipeStepSchema).optional().default([]),
+  steps: z.array(
+    z.string().min(1, "Steg får inte vara tomt").max(1000).trim()
+  ).optional().default([]),
   // originalRef sätts av fork-logiken, inte av klienten vid vanlig skapelse
 });
 

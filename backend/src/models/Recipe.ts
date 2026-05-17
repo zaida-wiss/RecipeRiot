@@ -1,15 +1,40 @@
 // src/models/Recipe.ts
 import mongoose, { Schema, Document } from 'mongoose';
 
+interface IIngredient {
+  name: string;
+  quantity: number;
+  unit: string;
+}
+
 export interface IRecipe extends Document {
   title: string;
   createdBy: string;
-  ingredients?: string[];
-  steps?: string[];
+  ingredients: IIngredient[];
+  steps: string[];
   originalRef?: mongoose.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
 }
+
+const IngredientSchema = new Schema<IIngredient>(
+  {
+    name: {
+      type: String,
+      required: [true, "Ingrediens är obligatorisk"],
+      trim: true,
+    },
+    quantity: {
+      type: Number,
+      required: [true, "Antal är obligatoriskt"],
+    },
+    unit: {
+      type: String,
+      required: [true, "Enhet är obligatoriskt"],
+      trim: true,
+    }
+  }
+);
 
 const RecipeSchema = new Schema<IRecipe>(
   {
@@ -24,7 +49,7 @@ const RecipeSchema = new Schema<IRecipe>(
       trim: true,
     },
     ingredients: {
-      type: [String],
+      type: [IngredientSchema],
       default: [],
     },
     steps: {
