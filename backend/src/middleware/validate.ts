@@ -1,7 +1,7 @@
 // src/middleware/validate.ts
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 import { ValidationError } from "../errors/AppError";
-import { ZodTypeAny } from 'zod';
+import { ZodTypeAny } from "zod";
 
 // Utökar Express Request med validerade fält
 declare global {
