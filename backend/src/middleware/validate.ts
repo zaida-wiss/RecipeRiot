@@ -1,5 +1,6 @@
 // src/middleware/validate.ts
 import { Request, Response, NextFunction } from 'express';
+import { ValidationError } from "../errors/AppError";
 import { ZodTypeAny } from 'zod';
 
 // Utökar Express Request med validerade fält
@@ -21,7 +22,7 @@ interface Schemas {
 
 // ─── Middleware-fabrik ────────────────────────────────────────────────────────
 export function validateRequest(schemas: Schemas) {
-  return (req: Request, res: Response, next: NextFunction): void => {
+  return (req: Request, _res: Response, next: NextFunction): void => {
     const errors: { location: string; field: string; message: string }[] = [];
 
     if (schemas.body) {
@@ -58,7 +59,7 @@ export function validateRequest(schemas: Schemas) {
     }
 
     if (errors.length > 0) {
-      res.status(400).json({ message: 'Valideringsfel', errors });
+      next(new ValidationError('Valideringsfel', errors));
       return;
     }
 
