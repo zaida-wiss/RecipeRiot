@@ -12,7 +12,9 @@
     "preset": "ts-jest",
     "testEnvironment": "node",
     "testPathIgnorePatterns": [
-      "helpers"
+      "/node_modules/",
+        "<rootDir>/dist/",
+        "<rootDir>/src/__tests__/helpers/"
     ]
   },
   "dependencies": {
