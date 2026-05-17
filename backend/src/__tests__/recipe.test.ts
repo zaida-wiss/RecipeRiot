@@ -2,8 +2,10 @@ const request = require('supertest');
 const app = require('../app').default;
 const db = require('./helpers/db');
 
-beforeAll(async() => {
-    await db.connect();
+jest.setTimeout(30000);
+
+beforeAll(async () => {
+  await db.connect();
 });
 
 afterEach(async() => {
@@ -27,14 +29,43 @@ describe('POST /api/v1/recipes', () => {
     const res = await request(app)
       .post('/api/v1/recipes')
       .send({ title: 'Pannkakor', createdBy: 'Anna' });
+
     expect(res.status).toBe(201);
     expect(res.body.title).toBe('Pannkakor');
+  });
+
+  test('ska skapa ett recept med ingredienser och steg', async () => {
+    const res = await request(app)
+      .post('/api/v1/recipes')
+      .send({
+        title: 'Pannkakor',
+        createdBy: 'Anna',
+        ingredients: [
+          { name: 'Mjöl', quantity: 2, unit: 'dl' },
+          { name: 'Mjölk', quantity: 5, unit: 'dl' },
+        ],
+        steps: [
+          'Blanda ingredienserna.',
+          'Stek pannkakorna.',
+        ],
+      });
+
+    expect(res.status).toBe(201);
+    expect(res.body.ingredients).toHaveLength(2);
+    expect(res.body.ingredients[0].name).toBe('Mjöl');
+    expect(res.body.ingredients[0].quantity).toBe(2);
+    expect(res.body.ingredients[0].unit).toBe('dl');
+    expect(res.body.steps).toEqual([
+      'Blanda ingredienserna.',
+      'Stek pannkakorna.',
+    ]);
   });
 
   test('ska returnera 400 om title saknas', async () => {
     const res = await request(app)
       .post('/api/v1/recipes')
       .send({ createdBy: 'Anna' });
+
     expect(res.status).toBe(400);
   });
 });
