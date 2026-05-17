@@ -31,11 +31,11 @@ describe('POST /api/v1/recipes', () => {
     expect(res.body.title).toBe('Pannkakor');
   });
 
-  test('ska returnera 500 om title saknas', async () => {
+  test('ska returnera 400 om title saknas', async () => {
     const res = await request(app)
       .post('/api/v1/recipes')
       .send({ createdBy: 'Anna' });
-    expect(res.status).toBe(500);
+    expect(res.status).toBe(400);
   });
 });
 
