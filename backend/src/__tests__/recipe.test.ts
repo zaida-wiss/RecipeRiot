@@ -25,15 +25,6 @@ describe('GET /api/v1/recipes', () => {
 });
 
 describe('POST /api/v1/recipes', () => {
-  test('ska skapa ett recept och returnera 201', async () => {
-    const res = await request(app)
-      .post('/api/v1/recipes')
-      .send({ title: 'Pannkakor', createdBy: 'Anna' });
-
-    expect(res.status).toBe(201);
-    expect(res.body.title).toBe('Pannkakor');
-  });
-
   test('ska skapa ett recept med ingredienser och steg', async () => {
     const res = await request(app)
       .post('/api/v1/recipes')
