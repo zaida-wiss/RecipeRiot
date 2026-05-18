@@ -24,7 +24,7 @@ const UserSchema = new Schema<IUser>(
       required: [true, 'Email är obligatorisk'],
       trim: true,
       lowercase: true,
-      uniqe: true,
+      unique: true,
       index: true,
     },
     passwordHash: {
