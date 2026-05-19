@@ -15,6 +15,7 @@ import {
   deleteRecipe,
   forkRecipe,
 } from '../controllers/recipesController';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
@@ -37,6 +38,7 @@ router.get(
 // POST /api/recipes
 router.post(
   '/',
+  authenticate,
   validateRequest({ body: createRecipeSchema }),
   createRecipe
 );
