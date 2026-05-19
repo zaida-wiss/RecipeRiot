@@ -17,7 +17,6 @@ function toUserResponse(user: IUser): UserResponse {
   };
 }
 
-
 function createToken(user: IUser): string {
   const secret = process.env.JWT_SECRET;
 

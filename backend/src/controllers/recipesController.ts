@@ -4,7 +4,7 @@ import { Recipe } from '../models/Recipe';
 import { NotFoundError } from '../errors/AppError';
 
 // GET /api/v1/recipes
-exports.getAllRecipes = async (_req: Request, res: Response, next: NextFunction) => {
+export const getAllRecipes = async (_req: Request, res: Response, next: NextFunction) => {
   try {
     const recipes = await Recipe.find();
     res.json(recipes);
@@ -14,7 +14,7 @@ exports.getAllRecipes = async (_req: Request, res: Response, next: NextFunction)
 };
 
 // GET /api/v1/recipes/:id
-exports.getRecipeById = async (req: Request, res: Response, next: NextFunction) => {
+export const getRecipeById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.validatedParams;
     const recipe = await Recipe.findById(id);
@@ -26,7 +26,7 @@ exports.getRecipeById = async (req: Request, res: Response, next: NextFunction) 
 };
 
 // POST /api/v1/recipes
-exports.createRecipe = async (req: Request, res: Response, next: NextFunction) => {
+export const createRecipe = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const recipe = await Recipe.create(req.validatedBody);
     res.status(201).json(recipe);
@@ -36,7 +36,7 @@ exports.createRecipe = async (req: Request, res: Response, next: NextFunction) =
 };
 
 // PATCH /api/v1/recipes/:id
-exports.updateRecipe = async (req: Request, res: Response, next: NextFunction) => {
+export const updateRecipe = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.validatedParams;
     const recipe = await Recipe.findByIdAndUpdate(
@@ -52,7 +52,7 @@ exports.updateRecipe = async (req: Request, res: Response, next: NextFunction) =
 };
 
 // DELETE /api/v1/recipes/:id
-exports.deleteRecipe = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteRecipe = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.validatedParams;
     const recipe = await Recipe.findByIdAndDelete(id);
@@ -64,7 +64,7 @@ exports.deleteRecipe = async (req: Request, res: Response, next: NextFunction) =
 };
 
 // POST /api/v1/recipes/:id/fork
-exports.forkRecipe = async (req: Request, res: Response, next: NextFunction) => {
+export const forkRecipe = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.validatedParams;
     const original = await Recipe.findById(id);
