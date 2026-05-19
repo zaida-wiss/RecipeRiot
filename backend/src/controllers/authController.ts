@@ -123,7 +123,7 @@ export const login = async (
 // Motsvarar Joakims router.get('/profile', authMiddleware, ...)
 export const getMe = async (
   req: Request,
-  res: Response<{ user: AuthUser }>,
+  res: Response<{ message: string; user: AuthUser }>,
   next: NextFunction
 ): Promise<void> =>{
   try {
@@ -131,7 +131,9 @@ export const getMe = async (
       throw new UnauthorizedError('Autentisering krävs');
     }
 
-    res.json({ user: req.user });
+    res.json({
+      message: "Åtkomst beviljad till skyddad sida",
+      user: req.user, });
   } catch (error) {
     next(error);
   }
