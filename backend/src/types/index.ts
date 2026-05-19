@@ -52,5 +52,5 @@ export interface JwtPayload {
 export interface AuthUser {
   id: string;
   email: string;
-  username: string;
+  username?: string;
 }
