@@ -1,10 +1,14 @@
 // src/controllers/recipesController.ts
 import { Request, Response, NextFunction } from 'express';
 import { Recipe } from '../models/Recipe';
-import { NotFoundError } from '../errors/AppError';
+import { NotFoundError, UnauthorizedError, ForbiddenError } from '../errors/AppError';
 
 // GET /api/v1/recipes
-export const getAllRecipes = async (_req: Request, res: Response, next: NextFunction) => {
+export const getAllRecipes = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const recipes = await Recipe.find();
     res.json(recipes);
@@ -14,7 +18,11 @@ export const getAllRecipes = async (_req: Request, res: Response, next: NextFunc
 };
 
 // GET /api/v1/recipes/:id
-export const getRecipeById = async (req: Request, res: Response, next: NextFunction) => {
+export const getRecipeById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const { id } = req.validatedParams;
     const recipe = await Recipe.findById(id);
@@ -26,9 +34,21 @@ export const getRecipeById = async (req: Request, res: Response, next: NextFunct
 };
 
 // POST /api/v1/recipes
-export const createRecipe = async (req: Request, res: Response, next: NextFunction) => {
+export const createRecipe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    const recipe = await Recipe.create(req.validatedBody);
+    if (!req.user) {
+      throw new UnauthorizedError('Autentisering krävs');
+    }
+
+    const recipe = await Recipe.create({
+      ...req.validatedBody,
+      createdBy: req.user.id,
+    });
+
     res.status(201).json(recipe);
   } catch (error) {
     next(error);
@@ -36,15 +56,30 @@ export const createRecipe = async (req: Request, res: Response, next: NextFuncti
 };
 
 // PATCH /api/v1/recipes/:id
-export const updateRecipe = async (req: Request, res: Response, next: NextFunction) => {
+export const updateRecipe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
+    if (!req.user) {
+      throw new UnauthorizedError('Autentisering krävs');
+    }
+
     const { id } = req.validatedParams;
-    const recipe = await Recipe.findByIdAndUpdate(
-      id,
-      req.validatedBody,
-      { new: true, runValidators: true }
-    );
-    if (!recipe) throw new NotFoundError('Receptet hittades inte');
+    const recipe = await Recipe.findById(id);
+
+    if (!recipe) {
+      throw new NotFoundError('Receptet hittades inte');
+    }
+
+    if (recipe.createdBy.toString() !== req.user.id) {
+      throw new ForbiddenError('Du får bara uppdatera dina egna recept');
+    }
+
+    Object.assign(recipe, req.validatedBody);
+    await recipe.save();
+
     res.json(recipe);
   } catch (error) {
     next(error);
@@ -52,11 +87,29 @@ export const updateRecipe = async (req: Request, res: Response, next: NextFuncti
 };
 
 // DELETE /api/v1/recipes/:id
-export const deleteRecipe = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteRecipe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
+    if (!req.user) {
+      throw new UnauthorizedError('Autentisering krävs');
+    }
+
     const { id } = req.validatedParams;
-    const recipe = await Recipe.findByIdAndDelete(id);
-    if (!recipe) throw new NotFoundError('Receptet hittades inte');
+    const recipe = await Recipe.findById(id);
+
+    if (!recipe) {
+      throw new NotFoundError('Receptet hittades inte');
+    }
+
+    if (recipe.createdBy.toString() !== req.user.id) {
+      throw new ForbiddenError('Du får bara radera dina egna recept');
+    }
+
+    await recipe.deleteOne();
+
     res.status(204).send();
   } catch (error) {
     next(error);
@@ -64,15 +117,26 @@ export const deleteRecipe = async (req: Request, res: Response, next: NextFuncti
 };
 
 // POST /api/v1/recipes/:id/fork
-export const forkRecipe = async (req: Request, res: Response, next: NextFunction) => {
+export const forkRecipe = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
+    if (!req.user) {
+      throw new UnauthorizedError('Autentisering krävs');
+    }
+
     const { id } = req.validatedParams;
     const original = await Recipe.findById(id);
-    if (!original) throw new NotFoundError('Receptet hittades inte');
+
+    if (!original) {
+      throw new NotFoundError('Receptet hittades inte');
+    }
 
     const forkedRecipe = await Recipe.create({
       title: original.title,
-      createdBy: req.body.createdBy,
+      createdBy: req.user.id,
       ingredients: original.ingredients,
       steps: original.steps,
       originalRef: original._id,

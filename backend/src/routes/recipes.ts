@@ -21,21 +21,21 @@ const router = Router();
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
-// GET /api/recipes?page=&limit=&search=
+// GET /api/v1/recipes?page=&limit=&search=
 router.get(
   '/',
   validateRequest({ query: listRecipesQuerySchema }),
   getAllRecipes
 );
 
-// GET /api/recipes/:id
+// GET /api/v1/recipes/:id
 router.get(
   '/:id',
   validateRequest({ params: idParamSchema }),
   getRecipeById
 );
 
-// POST /api/recipes
+// POST /api/v1/recipes
 router.post(
   '/',
   authenticate,
@@ -43,21 +43,23 @@ router.post(
   createRecipe
 );
 
-// PATCH /api/recipes/:id
+// PATCH /api/v1/recipes/:id
 router.patch(
   '/:id',
+  authenticate,
   validateRequest({ params: idParamSchema, body: updateRecipeSchema }),
   updateRecipe
 );
 
-// DELETE /api/recipes/:id
+// DELETE /api/v1/recipes/:id
 router.delete(
   '/:id',
+  authenticate,
   validateRequest({ params: idParamSchema }),
   deleteRecipe
 );
 
-// POST /api/recipes/:id/fork
+// POST /api/v1/recipes/:id/fork
 router.post(
   '/:id/fork',
   authenticate,
