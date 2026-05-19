@@ -2,46 +2,77 @@ import request from 'supertest';
 import app from '../app';
 import { connect, clearDatabase, disconnect } from './helpers/db';
 
+process.env.JWT_SECRET = 'test-secret';
+process.env.JWT_EXPIRES_IN = '1h';
+process.env.BCRYPT_SALT_ROUNDS = '10';
+
 jest.setTimeout(30000);
 
 beforeAll(async () => {
   await connect();
 });
 
-afterEach(async() => {
-    await clearDatabase();
+afterEach(async () => {
+  await clearDatabase();
 });
 
-afterAll(async() => {
-    await disconnect();
+afterAll(async () => {
+  await disconnect();
 });
+
+async function getAuthToken(): Promise<string> {
+  const res = await request(app)
+    .post('/api/v1/auth/register')
+    .send({
+      username: 'ReceptTestare',
+      email: 'recepttestare@example.com',
+      password: 'superhemligt123',
+    });
+
+  return res.body.token;
+}
 
 describe('GET /api/v1/recipes', () => {
   test('ska returnera 200 och en array', async () => {
     const res = await request(app).get('/api/v1/recipes');
+
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
 });
 
 describe('POST /api/v1/recipes', () => {
-test('ska skapa ett recept med bara obligatoriska fält', async () => {
-  const res = await request(app)
-    .post('/api/v1/recipes')
-    .send({ title: 'Pannkakor', createdBy: 'Anna' });
-
-  expect(res.status).toBe(201);
-  expect(res.body.title).toBe('Pannkakor');
-  expect(res.body.ingredients).toEqual([]);
-  expect(res.body.steps).toEqual([]);
-});
-
-  test('ska skapa ett recept med ingredienser och steg', async () => {
+  test('ska neka receptskapande utan token', async () => {
     const res = await request(app)
       .post('/api/v1/recipes')
+      .send({ title: 'Pannkakor' });
+
+    expect(res.status).toBe(401);
+  });
+
+  test('ska skapa ett recept med bara obligatoriska fält', async () => {
+    const token = await getAuthToken();
+
+    const res = await request(app)
+      .post('/api/v1/recipes')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ title: 'Pannkakor' });
+
+    expect(res.status).toBe(201);
+    expect(res.body.title).toBe('Pannkakor');
+    expect(res.body.createdBy).toBeDefined();
+    expect(res.body.ingredients).toEqual([]);
+    expect(res.body.steps).toEqual([]);
+  });
+
+  test('ska skapa ett recept med ingredienser och steg', async () => {
+    const token = await getAuthToken();
+
+    const res = await request(app)
+      .post('/api/v1/recipes')
+      .set('Authorization', `Bearer ${token}`)
       .send({
         title: 'Pannkakor',
-        createdBy: 'Anna',
         ingredients: [
           { name: 'Mjöl', quantity: 2, unit: 'dl' },
           { name: 'Mjölk', quantity: 5, unit: 'dl' },
@@ -64,9 +95,12 @@ test('ska skapa ett recept med bara obligatoriska fält', async () => {
   });
 
   test('ska returnera 400 om title saknas', async () => {
+    const token = await getAuthToken();
+
     const res = await request(app)
       .post('/api/v1/recipes')
-      .send({ createdBy: 'Anna' });
+      .set('Authorization', `Bearer ${token}`)
+      .send({});
 
     expect(res.status).toBe(400);
   });
@@ -74,7 +108,10 @@ test('ska skapa ett recept med bara obligatoriska fält', async () => {
 
 describe('GET /api/v1/recipes/:id', () => {
   test('ska returnera 404 för ett id som inte finns', async () => {
-    const res = await request(app).get('/api/v1/recipes/000000000000000000000000');
+    const res = await request(app).get(
+      '/api/v1/recipes/000000000000000000000000'
+    );
+
     expect(res.status).toBe(404);
   });
 });
