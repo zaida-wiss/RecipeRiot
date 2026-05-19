@@ -1,70 +1,38 @@
-// src/routes/recipes.ts
+// src/routes/recipeRoutes.ts
 import { Router } from 'express';
-import { validateRequest } from '../middleware/validate.js';
-import {
-  createRecipeSchema,
-  updateRecipeSchema,
-  listRecipesQuerySchema,
-  idParamSchema,
-} from '../schemas/recipe.schemas.js';
-import {
-  getAllRecipes,
-  getRecipeById,
-  createRecipe,
-  updateRecipe,
-  deleteRecipe,
-  forkRecipe,
-} from '../controllers/recipesController.js';
-import { authenticate } from '../middleware/auth.js';
+import * as recipeController from '../controllers/recipesController'
+import { protect, authorize } from '../middleware/auth';
+import { validateRequest } from '../middleware/validate';
+import { createRecipeSchema, updateRecipeSchema } from '../schemas/recipe.schemas';
 
 const router = Router();
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+// Öppna rutter
+router.get('/', recipeController.getAllRecipes);
+router.get('/:id', recipeController.getRecipeById);
 
-// GET /api/v1/recipes?page=&limit=&search=
-router.get(
-  '/',
-  validateRequest({ query: listRecipesQuerySchema }),
-  getAllRecipes
-);
-
-// GET /api/v1/recipes/:id
-router.get(
-  '/:id',
-  validateRequest({ params: idParamSchema }),
-  getRecipeById
-);
-
-// POST /api/v1/recipes
+// Skyddade rutter
 router.post(
-  '/',
-  authenticate,
-  validateRequest({ body: createRecipeSchema }),
-  createRecipe
+  '/', 
+  protect, 
+  authorize('kock', 'admin'), 
+  validateRequest({ body: createRecipeSchema }), // 2. Använd createRecipeSchema här
+  recipeController.createRecipe
 );
 
-// PATCH /api/v1/recipes/:id
-router.patch(
-  '/:id',
-  authenticate,
-  validateRequest({ params: idParamSchema, body: updateRecipeSchema }),
-  updateRecipe
+router.put(
+  '/:id', 
+  protect, 
+  authorize('kock', 'admin'), 
+  validateRequest({ body: updateRecipeSchema }), // 3. Använd updateRecipeSchema här
+  recipeController.updateRecipe
 );
 
-// DELETE /api/v1/recipes/:id
 router.delete(
-  '/:id',
-  authenticate,
-  validateRequest({ params: idParamSchema }),
-  deleteRecipe
-);
-
-// POST /api/v1/recipes/:id/fork
-router.post(
-  '/:id/fork',
-  authenticate,
-  validateRequest({ params: idParamSchema }),
-  forkRecipe
+  '/:id', 
+  protect, 
+  authorize('kock', 'admin'), 
+  recipeController.deleteRecipe
 );
 
 export default router;

@@ -1,7 +1,8 @@
 // src/controllers/usersController.ts
-import { Request, Response, NextFunction } from 'express';
-import { User } from '../models/User.js';
-import { NotFoundError, ConflictError } from '../errors/AppError.js';
+import { Request, Response } from 'express';
+import { User } from '../models/User';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 
 // GET /api/v1/users
 export const getAllUsers = async (
@@ -33,21 +34,33 @@ export const getUserById = async (
   }
 };
 
-// POST /api/v1/users
-export const createUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
+// POST /api/v1/users (Registrering)
+export const createUser = async (req: Request, res: Response) => {
   try {
-    const existing = await User.findOne({email: req.body.email})
+    const { username, email, password, role } = req.body;
 
-    if (existing) {throw new ConflictError('Användaren finns redan');
-  }
-    const user = await User.create(req.body);
-    res.status(201).json(user);
+    // Kontrollera om e-postadressen redan är upptagen
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: 'E-postadressen är redan registrerad' });
+    }
+
+    // HÄR HASCHAS LÖSENORDET: Kryptera lösenordet innan det skickas till databasen
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+
+    // Skapa användaren med det krypterade lösenordet
+    const user = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+      role,
+    });
+
+    // Tack vare 'toJSON'-transformeringen i User.ts kommer lösenordet inte att skickas tillbaka i svaret
+    return res.status(201).json(user);
   } catch (error) {
-    next(error);
+    return res.status(500).json({ message: 'Något gick fel vid registreringen' });
   }
 };
 
@@ -58,6 +71,12 @@ export const updateUser = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    // Om användaren uppdaterar sitt lösenord via PUT, hasha det också
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      req.body.password = await bcrypt.hash(req.body.password, salt);
+    }
+
     const user = await User.findByIdAndUpdate(
       req.params.id,
       req.body,
@@ -88,5 +107,45 @@ export const deleteUser = async (
     res.status(204).send();
   } catch (error) {
     next(error);
+  }
+};
+
+// POST /api/v1/users/login
+export const loginUser = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+
+    // 1. Leta efter användaren i databasen
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: 'Felaktig e-postadress eller lösenord' });
+    }
+
+    // 2. Använd comparePassword-metoden vi skapat i User.ts för att jämföra med hashen
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Felaktig e-postadress eller lösenord' });
+    }
+
+    // 3. Om lösenordet stämmer, generera ett JWT-token
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET!,
+      { expiresIn: '1d' } // Token är giltig i 1 dag
+    );
+
+    // 4. Skicka tillbaka token och användarinfo till klienten
+    return res.json({
+      message: 'Inloggning lyckades',
+      token,
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Något gick fel vid inloggningen' });
   }
 };

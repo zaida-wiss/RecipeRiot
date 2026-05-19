@@ -10,6 +10,10 @@ declare global {
       validatedBody?: any;
       validatedParams?: any;
       validatedQuery?: any;
+      user?: {
+        id: string;
+        role: 'user' | 'kock' | 'admin';
+      };
     }
   }
 }

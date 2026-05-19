@@ -3,68 +3,13 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { Recipe, type IRecipe } from '../models/Recipe.js';
 import { NotFoundError, UnauthorizedError, ForbiddenError } from '../errors/AppError.js';
 
-// Helpers
-type AsyncController = (req: Request, res: Response) => Promise<void>;
-
-// Fångar fel i async controllers och skickar dem vidare till Express errorHandler.
-const asyncHandler = (handler: AsyncController): RequestHandler => {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    void handler(req, res).catch(next);
-  };
-};
-
-// Hjälper oss att söka på text utan att specialtecken blir regex-kod.
-const escapeRegex = (value: string): string => {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-};
-
-const buildRecipeFilter = (search?: string) => {
-  if (!search) {
-    return {};
-  }
-
-  const textMatch = { $regex: escapeRegex(search), $options: 'i' };
-
-  return {
-    $or: [
-      { title: textMatch },
-      { 'ingredients.name': textMatch },
-    ],
-  };
-};
-
-const getAuthenticatedUserId = (req: Request): string => {
-  if (!req.user) {
-    throw new UnauthorizedError('Autentisering krävs');
-  }
-
-  return req.user.id;
-};
-
-const getRecipeOrThrow = async (id: string): Promise<IRecipe> => {
-  const recipe = await Recipe.findById(id);
-
-  if (!recipe) {
-    throw new NotFoundError('Receptet hittades inte');
-  }
-
-  return recipe;
-};
-
-const assertRecioeOwnerOrAdmin = (
-  recipe: IRecipe,
-  req: Request,
-  message: string
-): void => {
-  if(!req.user) {
-    throw new UnauthorizedError("Autentiering krävs");
-  }
-
-  const isOwner = recipe.createdBy.toString() === req.user.id;
-  const isAdmin = req.user.role === "admin";
-
-  if (!isOwner && !isAdmin) {
-    throw new ForbiddenError(message);
+// GET /api/v1/recipes
+export const getAllRecipes = async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    const recipes = await Recipe.find();
+    res.json(recipes);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -118,59 +63,61 @@ export const getAllRecipes = asyncHandler(async (req, res): Promise<void> => {
 });
 
 // GET /api/v1/recipes/:id
-export const getRecipeById = asyncHandler(async (req, res): Promise<void> => {
-  const { id } = req.validatedParams;
-  const recipe = await getRecipeOrThrow(id);
-
-  res.json(recipe);
-});
+export const getRecipeById = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.validatedParams;
+    const recipe = await Recipe.findById(id);
+    if (!recipe) throw new NotFoundError('Receptet hittades inte');
+    res.json(recipe);
+  } catch (error) {
+    next(error);
+  }
+};
 
 // POST /api/v1/recipes
-export const createRecipe = asyncHandler(async (req, res): Promise<void> => {
-  const userId = getAuthenticatedUserId(req);
-
-  const recipe = await Recipe.create({
-    ...req.validatedBody,
-    createdBy: userId,
-  });
-
-  res.status(201).json(recipe);
-});
+export const createRecipe = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const recipe = await Recipe.create(req.validatedBody);
+    res.status(201).json(recipe);
+  } catch (error) {
+    next(error);
+  }
+};
 
 // PATCH /api/v1/recipes/:id
-export const updateRecipe = asyncHandler(async (req, res): Promise<void> => {
-  const recipe = await getOwnedRecipeFromRequest(
-    req,
-    'Du får bara uppdatera dina egna recept'
-  );
-
-  Object.assign(recipe, req.validatedBody);
-  await recipe.save();
-
-  res.json(recipe);
-});
+export const updateRecipe = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.validatedParams;
+    const recipe = await Recipe.findByIdAndUpdate(
+      id,
+      req.validatedBody,
+      { new: true, runValidators: true }
+    );
+    if (!recipe) throw new NotFoundError('Receptet hittades inte');
+    res.json(recipe);
+  } catch (error) {
+    next(error);
+  }
+};
 
 // DELETE /api/v1/recipes/:id
-export const deleteRecipe = asyncHandler(async (req, res): Promise<void> => {
-  const { id } = req.validatedParams;
-  const recipe = await getRecipeOrThrow(id);
-
-  assertRecioeOwnerOrAdmin(
-    recipe,
-    req,
-    'Du får bara radera dina egna recept.'
-  );
-
-  await recipe.deleteOne();
-
-  res.status(204).send();
-});
+export const deleteRecipe = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.validatedParams;
+    const recipe = await Recipe.findByIdAndDelete(id);
+    if (!recipe) throw new NotFoundError('Receptet hittades inte');
+    res.status(204).send();
+  } catch (error) {
+    next(error);
+  }
+};
 
 // POST /api/v1/recipes/:id/fork
-export const forkRecipe = asyncHandler(async (req, res): Promise<void> => {
-  const userId = getAuthenticatedUserId(req);
-  const { id } = req.validatedParams;
-  const original = await getRecipeOrThrow(id);
+export const forkRecipe = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.validatedParams;
+    const original = await Recipe.findById(id);
+    if (!original) throw new NotFoundError('Receptet hittades inte');
 
   const forkedRecipe = await Recipe.create({
     title: original.title,

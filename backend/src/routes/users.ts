@@ -1,23 +1,32 @@
 // src/routes/users.ts
 import { Router } from 'express';
-import { validateRequest } from '../middleware/validate.js';
+import { validateRequest } from '../middleware/validate';
+import { z } from 'zod'; // Importera z för att göra ett snabbt login-schema
 import {
   createUserSchema,
   updateUserSchema,
   listUsersQuerySchema,
   idParamSchema,
-} from '../schemas/user.schemas.js';
-import {
-  getAllUsers,
-  getUserById,
-  createUser,
-  updateUser,
-  deleteUser,
-} from '../controllers/usersController.js';
+} from '../schemas/user.schemas';
+
+import * as usersController from '../controllers/usersController';
 
 const router = Router();
 
+// Ett enkelt valideringsschema för login (kräver email och lösenord)
+const loginSchema = z.object({
+  email: z.string().email('Ogiltig e-postadress'),
+  password: z.string().min(1, 'Lösenord krävs'),
+});
+
 // ─── Routes ───────────────────────────────────────────────────────────────────
+
+// POST /api/users/login
+router.post(
+  '/login',
+  validateRequest({ body: loginSchema }),
+  usersController.loginUser
+);
 
 // GET /api/users?page=&limit=&search=
 router.get(
@@ -33,7 +42,7 @@ router.get(
   getUserById
 );
 
-// POST /api/users
+// POST /api/users (Registrering)
 router.post(
   '/',
   validateRequest({ body: createUserSchema }),
