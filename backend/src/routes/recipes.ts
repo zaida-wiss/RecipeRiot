@@ -7,8 +7,14 @@ import {
   listRecipesQuerySchema,
   idParamSchema,
 } from '../schemas/recipe.schemas';
-
-const recipesController = require('../controllers/recipesController');
+import {
+  getAllRecipes,
+  getRecipeById,
+  createRecipe,
+  updateRecipe,
+  deleteRecipe,
+  forkRecipe,
+} from '../controllers/recipesController';
 
 const router = Router();
 
@@ -18,42 +24,42 @@ const router = Router();
 router.get(
   '/',
   validateRequest({ query: listRecipesQuerySchema }),
-  recipesController.getAllRecipes
+  getAllRecipes
 );
 
 // GET /api/recipes/:id
 router.get(
   '/:id',
   validateRequest({ params: idParamSchema }),
-  recipesController.getRecipeById
+  getRecipeById
 );
 
 // POST /api/recipes
 router.post(
   '/',
   validateRequest({ body: createRecipeSchema }),
-  recipesController.createRecipe
+  createRecipe
 );
 
 // PATCH /api/recipes/:id
 router.patch(
   '/:id',
   validateRequest({ params: idParamSchema, body: updateRecipeSchema }),
-  recipesController.updateRecipe
+  updateRecipe
 );
 
 // DELETE /api/recipes/:id
 router.delete(
   '/:id',
   validateRequest({ params: idParamSchema }),
-  recipesController.deleteRecipe
+  deleteRecipe
 );
 
 // POST /api/recipes/:id/fork
 router.post(
   '/:id/fork',
   validateRequest({ params: idParamSchema }),
-  recipesController.forkRecipe
+  forkRecipe
 );
 
-module.exports = router;
+export default router;

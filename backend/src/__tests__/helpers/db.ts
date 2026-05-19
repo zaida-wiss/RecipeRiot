@@ -3,7 +3,7 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 
 let mongoServer: MongoMemoryServer | undefined;
 
-async function connect() {
+export async function connect() {
   mongoServer = await MongoMemoryServer.create({
     binary: {
       version: '4.4.29',
@@ -17,7 +17,7 @@ async function connect() {
   await mongoose.connect(uri);
 }
 
-async function clearDatabase() {
+export async function clearDatabase() {
   if (mongoose.connection.readyState !== 1) {
     return;
   }
@@ -29,7 +29,7 @@ async function clearDatabase() {
   }
 }
 
-async function disconnect() {
+export async function disconnect() {
   if (mongoose.connection.readyState !== 0) {
     await mongoose.connection.dropDatabase();
     await mongoose.connection.close();
@@ -39,5 +39,3 @@ async function disconnect() {
     await mongoServer.stop();
   }
 }
-
-module.exports = { connect, clearDatabase, disconnect };

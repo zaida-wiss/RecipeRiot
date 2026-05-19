@@ -27,10 +27,11 @@ import { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types';
      throw new Error('JWT_SECRET saknas i miljövariabler');
    }
      // sub betyder "subject" och används ofta som användarens id i JWT.
-   const payload: JwtPayload = {
-     sub: user._id.toString(),
-     email: user.email,
-   };
+  const payload: JwtPayload = {
+    sub: user._id.toString(),
+    email: user.email,
+    username: user.username,
+  };
 
    const options: jwt.SignOptions = {
      expiresIn: (process.env.JWT_EXPIRES_IN || '1h') as jwt.SignOptions['expiresIn'],

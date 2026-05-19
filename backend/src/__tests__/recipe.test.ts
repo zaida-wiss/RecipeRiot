@@ -1,19 +1,19 @@
-const request = require('supertest');
-const app = require('../app').default;
-const db = require('./helpers/db');
+import request from 'supertest';
+import app from '../app';
+import { connect, clearDatabase, disconnect } from './helpers/db';
 
 jest.setTimeout(30000);
 
 beforeAll(async () => {
-  await db.connect();
+  await connect();
 });
 
 afterEach(async() => {
-    await db.clearDatabase();
+    await clearDatabase();
 });
 
 afterAll(async() => {
-    await db.disconnect();
+    await disconnect();
 });
 
 describe('GET /api/v1/recipes', () => {

@@ -7,8 +7,13 @@ import {
   listUsersQuerySchema,
   idParamSchema,
 } from '../schemas/user.schemas';
-
-const usersController = require('../controllers/usersController');
+import {
+  getAllUsers,
+  getUserById,
+  createUser,
+  updateUser,
+  deleteUser,
+} from '../controllers/usersController';
 
 const router = Router();
 
@@ -18,35 +23,35 @@ const router = Router();
 router.get(
   '/',
   validateRequest({ query: listUsersQuerySchema }),
-  usersController.getAllUsers
+  getAllUsers
 );
 
 // GET /api/users/:id
 router.get(
   '/:id',
   validateRequest({ params: idParamSchema }),
-  usersController.getUserById
+  getUserById
 );
 
 // POST /api/users
 router.post(
   '/',
   validateRequest({ body: createUserSchema }),
-  usersController.createUser
+  createUser
 );
 
 // PUT /api/users/:id  (alla fält valfria tack vare updateUserSchema)
 router.put(
   '/:id',
   validateRequest({ params: idParamSchema, body: updateUserSchema }),
-  usersController.updateUser
+  updateUser
 );
 
 // DELETE /api/users/:id
 router.delete(
   '/:id',
   validateRequest({ params: idParamSchema }),
-  usersController.deleteUser
+  deleteUser
 );
 
-module.exports = router;
+export default router;
