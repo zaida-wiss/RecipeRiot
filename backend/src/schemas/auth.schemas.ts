@@ -24,5 +24,5 @@ export const loginSchema = z.object({
     .toLowerCase(),
   password: z
     .string()
-    .min(8, "Lösenordet ska innehålla minst 8 tecken"),
+    .min(1, "Lösenord är obligatoriskt"),
 });
