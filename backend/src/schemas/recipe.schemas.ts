@@ -25,10 +25,6 @@ export const createRecipeSchema = z.object({
     .min(2, 'Titel måste ha minst 2 tecken')
     .max(200, 'Titel får inte överstiga 200 tecken')
     .trim(),
-  createdBy: z
-    .string()
-    .min(1, 'createdBy är obligatoriskt')
-    .trim(),
   ingredients: z.array(ingredientSchema).optional().default([]),
   steps: z.array(
     z.string().min(1, "Steg får inte vara tomt").max(1000).trim()
