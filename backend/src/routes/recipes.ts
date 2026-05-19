@@ -60,6 +60,7 @@ router.delete(
 // POST /api/recipes/:id/fork
 router.post(
   '/:id/fork',
+  authenticate,
   validateRequest({ params: idParamSchema }),
   forkRecipe
 );
