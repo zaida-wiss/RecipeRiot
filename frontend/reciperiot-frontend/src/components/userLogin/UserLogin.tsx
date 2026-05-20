@@ -9,12 +9,19 @@ type UserLoginProps = {
 };
 
 const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
+  // isRegisterMode avgör om samma modal visar login-formulär eller registreringsformulär.
   const [isRegisterMode, setIsRegisterMode] = useState(false);
+
+  // Login använder ett gemensamt fält eftersom backend kan söka på både username och email.
   const [loginIdentifier, setLoginIdentifier] = useState("");
+
+  // Registrering behöver separata fält så backend kan skapa ett komplett användarkonto.
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [username, setUsername] = useState("");
+
+  // error och success visas i modalen för att användaren ska förstå vad som händer.
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -42,6 +49,7 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isOpen, onClose]);
 
+  // Samma reset används både när man byter läge och när formuläret behöver börja om.
   const resetForm = () => {
     setLoginIdentifier("");
     setEmail("");
@@ -52,11 +60,13 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     setSuccess("");
   };
 
+  // Växlar mellan login och registrering utan att gamla fältvärden följer med.
   const toggleMode = () => {
     resetForm();
     setIsRegisterMode(!isRegisterMode);
   };
 
+  // Frontendvalidering hjälper användaren snabbt, men backendens Zod-schema är fortfarande säkerhetsgränsen.
   const validateRegisterInput = () => {
     const validationRules: Array<[boolean, string]> = [
       [password !== passwordConfirm, "Lösenorden matchar inte"],
@@ -71,6 +81,7 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     }
   };
 
+  // Register-flödet får tillbaka en riktig JWT från backend och sparar den lokalt.
   const handleRegister = async () => {
     validateRegisterInput();
 
@@ -81,6 +92,7 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     setSuccess("Registreringen lyckades! Välkommen till RecipeRiot.");
   };
 
+  // Login skickar identifier + password till backend. Frontend kontrollerar aldrig lösenord själv.
   const handleLogin = async () => {
     const result = await loginUser(loginIdentifier, password);
 
@@ -89,6 +101,7 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     setSuccess("Inloggningen lyckades! Välkommen tillbaka.");
   };
 
+  // Riktig lösenordsåterställning kräver mail/reset-token i backend, så länken visar bara nuläget.
   const handleForgotPassword = () => {
     setError("");
     setSuccess(
@@ -96,6 +109,7 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     );
   };
 
+  // Ett gemensamt submit-flöde gör att knappen kan användas i både login- och registerläge.
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
@@ -118,6 +132,7 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     }
   };
 
+  // Hindrar klick inuti modalen från att bubbla upp till backdropen och stänga modalen.
   const stopModalClose = (event: MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
   };
