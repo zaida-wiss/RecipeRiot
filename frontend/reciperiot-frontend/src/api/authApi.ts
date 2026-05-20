@@ -123,3 +123,22 @@ export const clearAuthData = (): void => {
   localStorage.removeItem('authToken');
   localStorage.removeItem('user');
 };
+
+
+// Det här behövs när frontend ska skapa, uppdatera, radera eller forka recept.
+export const getAuthToken = (): string | null => {
+  return localStorage.getItem('authToken');
+};
+// Skapar Authorization-headern för skyddade routes.
+// Om användaren inte är inloggad skickas inga auth-headers.
+export const getAuthHeaders = (): HeadersInit => {
+  const token = getAuthToken();
+
+  if (!token) {
+    return {};
+  }
+
+  return {
+    Authorization: `Bearer ${token}`,
+  };
+};
