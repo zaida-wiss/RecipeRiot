@@ -8,16 +8,6 @@ const ingredientSchema = z.object({
   unit: z.string().min(1, 'Enhet är obligatorisk').max(50).trim(),
 });
 
-// ─── Hjälpschema: steg (inbäddad i receptet) ─────────────────────────────────
-// const recipeStepSchema = z.object({
-//   stepNumber: z.number().int().positive('Stegnummer måste vara ett positivt heltal'),
-//   instruction: z
-//     .string()
-//     .min(1, 'Instruktion är obligatorisk')
-//     .max(1000)
-//     .trim(),
-// });
-
 // ─── POST /recipes ────────────────────────────────────────────────────────────
 export const createRecipeSchema = z.object({
   title: z

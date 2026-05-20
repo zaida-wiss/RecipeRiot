@@ -33,11 +33,38 @@ async function getAuthToken(): Promise<string> {
 }
 
 describe('GET /api/v1/recipes', () => {
-  test('ska returnera 200 och en array', async () => {
+  test('ska returnera 200, data-array och pagination', async () => {
     const res = await request(app).get('/api/v1/recipes');
 
     expect(res.status).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
+    expect(Array.isArray(res.body.data)).toBe(true);
+    expect(res.body.pagination).toEqual({
+      page: 1,
+      limit: 20,
+      total: 0,
+      totalPages: 0,
+    });
+  });
+
+  test('ska filtrera recept med search-query', async () => {
+    const token = await getAuthToken();
+
+    await request(app)
+      .post('/api/v1/recipes')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ title: 'Pannkakor' });
+
+    await request(app)
+      .post('/api/v1/recipes')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ title: 'Tomatsoppa' });
+
+    const res = await request(app).get('/api/v1/recipes?search=pann&page=1&limit=10');
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).toHaveLength(1);
+    expect(res.body.data[0].title).toBe('Pannkakor');
+    expect(res.body.pagination.total).toBe(1);
   });
 });
 
