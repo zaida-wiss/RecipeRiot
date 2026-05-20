@@ -52,6 +52,19 @@ const assertRecipeOwner = (
   }
 };
 
+const getOwnedRecipeFromRequest = async (
+  req: Request,
+  forbiddenMessage: string
+): Promise<IRecipe> => {
+  const userId = getAuthenticatedUserId(req);
+  const { id } = req.validatedParams;
+  const recipe = await getRecipeOrThrow(id);
+
+  assertRecipeOwner(recipe, userId, forbiddenMessage);
+
+  return recipe;
+};
+
 // Routes
 // GET /api/v1/recipes
 export const getAllRecipes = async (
@@ -129,11 +142,11 @@ export const updateRecipe = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const userId = getAuthenticatedUserId(req);
-    const { id } = req.validatedParams;
-    const recipe = await getRecipeOrThrow(id);
+    const recipe = await getOwnedRecipeFromRequest(
+      req,
+      'Du får bara uppdatera dina egna recept'
+    );
 
-    assertRecipeOwner(recipe, userId, 'Du får bara uppdatera dina egna recept');
     Object.assign(recipe, req.validatedBody);
     await recipe.save();
 
@@ -150,11 +163,11 @@ export const deleteRecipe = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const userId = getAuthenticatedUserId(req);
-    const { id } = req.validatedParams;
-    const recipe = await getRecipeOrThrow(id);
+    const recipe = await getOwnedRecipeFromRequest(
+      req,
+      'Du får bara radera dina egna recept'
+    );
 
-    assertRecipeOwner(recipe, userId, 'Du får bara radera dina egna recept');
     await recipe.deleteOne();
 
     res.status(204).send();
