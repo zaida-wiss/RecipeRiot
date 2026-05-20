@@ -7,6 +7,7 @@ type NavbarProps = {
   onLoginClick: () => void;
   onLogoutClick: () => void;
   isLoggedIn: boolean;
+  statusMessage?: string | null;
   username?: string;
 };
 
@@ -16,7 +17,7 @@ const navLinks = [
   { to: "/inkopslista", label: "Inköpslista", icon: ShoppingCart },
 ];
 
-const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, username }: NavbarProps) => {
+const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, username }: NavbarProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -95,6 +96,11 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, username }: NavbarPro
             </>
           ) : (
             <>
+              {statusMessage && (
+                <span className="navbar-status" aria-live="polite">
+                  {statusMessage}
+                </span>
+              )}
               <button
                 className="navbar-btn navbar-btn--ghost"
                 onClick={onLoginClick}

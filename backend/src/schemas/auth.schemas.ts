@@ -18,10 +18,11 @@ password: z
 
 
 export const loginSchema = z.object({
-  email: z
-    .email("Ogiltig e-postadress")
-    .trim()
-    .toLowerCase(),
+  identifier: z
+    .string()
+    .min(1, "Användarnamn eller e-post är obligatoriskt")
+    .max(100, "Användarnamn eller e-post är för långt")
+    .trim(),
   password: z
     .string()
     .min(1, "Lösenord är obligatoriskt"),

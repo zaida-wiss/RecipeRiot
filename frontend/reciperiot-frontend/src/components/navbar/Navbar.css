@@ -62,6 +62,13 @@
   display: flex; align-items: center; gap: 8px; flex-shrink: 0;
 }
 
+.navbar-status {
+  color: #3a7d3a;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
 .navbar-btn {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 6px 12px; border-radius: 8px;

@@ -27,7 +27,7 @@ type RegisterOverrides = Partial<{
 }>;
 
 type LoginOverrides = Partial<{
-  email: string;
+  identifier: string;
   password: string;
 }>;
 
@@ -46,7 +46,7 @@ async function registerTestUser(overrides: RegisterOverrides = {}) {
 
 async function loginTestUser(overrides: LoginOverrides = {}) {
   const credentials = {
-    email: 'annapanna@example.com',
+    identifier: 'annapanna@example.com',
     password: 'superhemligt123',
     ...overrides,
   };
@@ -76,6 +76,16 @@ describe('POST /api/v1/auth/register', () => {
 
     expect(res.status).toBe(409);
   });
+
+  test('ska returnera 409 om användarnamn redan finns', async () => {
+    await registerTestUser();
+
+    const res = await registerTestUser({
+      email: 'annan@example.com',
+    });
+
+    expect(res.status).toBe(409);
+  });
 });
 
 describe('POST /api/v1/auth/login', () => {
@@ -83,6 +93,17 @@ describe('POST /api/v1/auth/login', () => {
     await registerTestUser();
 
     const res = await loginTestUser();
+
+    expect(res.status).toBe(200);
+    expect(res.body.token).toBeDefined();
+  });
+
+  test('ska logga in med användarnamn och rätt lösenord', async () => {
+    await registerTestUser();
+
+    const res = await loginTestUser({
+      identifier: 'Annapanna',
+    });
 
     expect(res.status).toBe(200);
     expect(res.body.token).toBeDefined();

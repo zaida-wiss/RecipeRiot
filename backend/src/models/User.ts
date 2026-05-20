@@ -20,6 +20,8 @@ const UserSchema = new Schema<IUser>(
       trim: true,
       minlength: [4, "Username måste ha minst 4 tecken"],
       maxlength: [50, "Username får inte överstiga 50 tecken"],
+      unique: true,
+      index: true,
     },
     email: {
       type: String,

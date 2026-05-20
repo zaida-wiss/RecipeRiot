@@ -115,6 +115,23 @@
   cursor: not-allowed;
 }
 
+.user-login-forgot {
+  display: block;
+  width: fit-content;
+  margin: 12px auto 0;
+  border: none;
+  background: none;
+  color: #6e5a4b;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.user-login-forgot:hover {
+  color: #c56a2d;
+}
+
 .user-login-toggle {
   margin-top: 16px;
   text-align: center;

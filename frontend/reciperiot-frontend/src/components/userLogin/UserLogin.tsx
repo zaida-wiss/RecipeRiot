@@ -10,6 +10,7 @@ type UserLoginProps = {
 
 const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [loginIdentifier, setLoginIdentifier] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
@@ -20,6 +21,16 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
 
   useEffect(() => {
     if (!isOpen) return;
+
+    // Varje ny öppning ska börja i login-läge, inte visa gammal success eller register-form.
+    setIsRegisterMode(false);
+    setLoginIdentifier("");
+    setEmail("");
+    setPassword("");
+    setPasswordConfirm("");
+    setUsername("");
+    setError("");
+    setSuccess("");
 
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -32,6 +43,7 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
   }, [isOpen, onClose]);
 
   const resetForm = () => {
+    setLoginIdentifier("");
     setEmail("");
     setPassword("");
     setPasswordConfirm("");
@@ -70,11 +82,18 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
   };
 
   const handleLogin = async () => {
-    const result = await loginUser(email, password);
+    const result = await loginUser(loginIdentifier, password);
 
     saveAuthData(result.token, result.user);
     onAuthSuccess(result.user);
     setSuccess("Inloggningen lyckades! Välkommen tillbaka.");
+  };
+
+  const handleForgotPassword = () => {
+    setError("");
+    setSuccess(
+      "Lösenordsåterställning är inte kopplad ännu. Be en administratör hjälpa dig tills reset-flödet finns på plats."
+    );
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -140,18 +159,38 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
             </>
           )}
 
-          <label className="user-login-label" htmlFor="user-login-email">
-            E-post
-          </label>
-          <input
-            id="user-login-email"
-            className="user-login-input"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="namn@email.com"
-            required
-          />
+          {isRegisterMode ? (
+            <>
+              <label className="user-login-label" htmlFor="user-login-email">
+                E-post
+              </label>
+              <input
+                id="user-login-email"
+                className="user-login-input"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="namn@email.com"
+                required
+              />
+            </>
+          ) : (
+            <>
+              <label className="user-login-label" htmlFor="user-login-identifier">
+                Användarnamn eller e-post
+              </label>
+              <input
+                id="user-login-identifier"
+                className="user-login-input"
+                type="text"
+                value={loginIdentifier}
+                onChange={(event) => setLoginIdentifier(event.target.value)}
+                placeholder="Användarnamn eller e-post"
+                autoComplete="username"
+                required
+              />
+            </>
+          )}
 
           <label className="user-login-label" htmlFor="user-login-password">
             Lösenord
@@ -187,6 +226,16 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
             {isLoading ? "Laddar..." : isRegisterMode ? "Registrera" : "Logga in"}
           </button>
         </form>
+
+        {!isRegisterMode && (
+          <button
+            type="button"
+            className="user-login-forgot"
+            onClick={handleForgotPassword}
+          >
+            Glömt lösenordet?
+          </button>
+        )}
 
         <div className="user-login-toggle">
           <p className="user-login-toggle-text">

@@ -52,12 +52,14 @@ export const register = async (
     // validatedBody kommer från validateRequest-middleware.
     // Vi använder validerad data, inte rå req.body.
     const { username, email, password } = req.validatedBody;
-    // Vitlista queryn: sök bara på email.
+    // Vitlista queryn: sök bara på email och username.
     // Gör inte User.findOne(req.body).
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+      $or: [{ email }, { username }],
+    });
 
     if (existingUser) {
-      throw new ConflictError('E-postadressen är redan registrerad');
+      throw new ConflictError('E-postadressen eller användarnamnet är redan registrerat');
     }
 
     const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS || 10);
@@ -91,21 +93,26 @@ export const login = async (
   next: NextFunction
 ): Promise<void> =>{
   try {
-    const { email, password } = req.validatedBody;
+    const { identifier, password } = req.validatedBody;
     // passwordHash har select: false i modellen.
     // Därför måste vi aktivt ta med det vid login.
-    const user = await User.findOne({ email }).select('+passwordHash');
+    const user = await User.findOne({
+      $or: [
+        { email: identifier.toLowerCase() },
+        { username: identifier },
+      ],
+    }).select('+passwordHash');
 
     if (!user) {
-    // Samma felmeddelande oavsett om email eller password är fel.
-    // Då hjälper vi inte en angripare att lista ut vilka emails som finns.
-      throw new UnauthorizedError('Felaktig e-post eller lösenord');
+    // Samma felmeddelande oavsett om identifier eller password är fel.
+    // Då hjälper vi inte en angripare att lista ut vilka konton som finns.
+      throw new UnauthorizedError('Felaktigt användarnamn/e-post eller lösenord');
     }
     // Jämför inkommande password med hashad version i databasen.
     const isValidPassword = await bcrypt.compare(password, user.passwordHash);
 
     if (!isValidPassword) {
-      throw new UnauthorizedError('Felaktig e-post eller lösenord');
+      throw new UnauthorizedError('Felaktigt användarnamn/e-post eller lösenord');
     }
 
     const token = createToken(user);

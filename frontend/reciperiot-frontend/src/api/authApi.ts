@@ -87,12 +87,12 @@ export const registerUser = async (
   return postAuth<AuthResponse>('register', { username, email, password });
 };
 
-// Login skickar email och lösenord till backend. Frontend ska inte själv jämföra lösenord.
+// Login skickar användarnamn/e-post och lösenord till backend. Frontend ska inte själv jämföra lösenord.
 export const loginUser = async (
-  email: string,
+  identifier: string,
   password: string
 ): Promise<AuthResponse> => {
-  return postAuth<AuthResponse>('login', { email, password });
+  return postAuth<AuthResponse>('login', { identifier, password });
 };
 
 // Token och publik user-info sparas så appen kan komma ihåg inloggningen efter sidladdning.

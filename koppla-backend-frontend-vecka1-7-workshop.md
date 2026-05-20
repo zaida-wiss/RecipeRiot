@@ -208,13 +208,13 @@ export const registerUser = async (
 };
 
 export const loginUser = async (
-  email: string,
+  identifier: string,
   password: string
 ): Promise<AuthResponse> => {
   return requestJson(`${BASE_URL}/api/v1/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ identifier, password }),
   });
 };
 
@@ -387,6 +387,30 @@ Backendens register-route skapar användaren, hashar lösenordet och returnerar 
 
 ### 5.5 Ändra handleLogin runt rad 73-79
 
+För att kunna logga in med antingen användarnamn eller e-post behöver login-formuläret ha ett eget state:
+
+```ts
+const [loginIdentifier, setLoginIdentifier] = useState("");
+```
+
+I login-läget ska fältet se ut ungefär så här:
+
+```tsx
+<label className="user-login-label" htmlFor="user-login-identifier">
+  Användarnamn eller e-post
+</label>
+<input
+  id="user-login-identifier"
+  className="user-login-input"
+  type="text"
+  value={loginIdentifier}
+  onChange={(event) => setLoginIdentifier(event.target.value)}
+  placeholder="Användarnamn eller e-post"
+  autoComplete="username"
+  required
+/>
+```
+
 Nu:
 
 ```ts
@@ -403,11 +427,36 @@ Kodförslag:
 
 ```ts
 const handleLogin = async () => {
-  const result = await loginUser(email, password);
+  const result = await loginUser(loginIdentifier, password);
 
   saveAuthData(result.token, result.user);
   onAuthSuccess(result.user);
   setSuccess("Inloggningen lyckades! Välkommen tillbaka.");
+};
+```
+
+Om du vill ha en klickbar länk för glömt lösenord innan backend har ett reset-flöde, lägg den bara i login-läget:
+
+```tsx
+{!isRegisterMode && (
+  <button
+    type="button"
+    className="user-login-forgot"
+    onClick={handleForgotPassword}
+  >
+    Glömt lösenordet?
+  </button>
+)}
+```
+
+Och låt den visa ett ärligt meddelande:
+
+```ts
+const handleForgotPassword = () => {
+  setError("");
+  setSuccess(
+    "Lösenordsåterställning är inte kopplad ännu. Be en administratör hjälpa dig tills reset-flödet finns på plats."
+  );
 };
 ```
 
@@ -487,7 +536,7 @@ Login:
 ```bash
 curl -X POST http://127.0.0.1:3000/api/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"superhemligt"}'
+  -d '{"identifier":"test@example.com","password":"superhemligt"}'
 ```
 
 Skyddad route:
