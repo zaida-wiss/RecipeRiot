@@ -1,6 +1,6 @@
 # Ignorera kurs-markdownfiler
 kurs*.md
-workshop*.md
+*workshop*.md
 
 # Dependencies
 node_modules
