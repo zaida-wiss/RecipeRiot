@@ -1,8 +1,13 @@
-// Vi använder fetch här i stället för axios eftersom den här wrappern redan hanterar timeout och fel. Byt till axios först om vi behöver interceptors, retries eller gemensam auth-hantering för många requests.
+// API-basens adress kommer från Vite-miljön, så frontend inte behöver hårdkoda backend-url överallt.
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:3000';
 const API_TIMEOUT = 10000;
 
-async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
+// Helpers
+// AbortController gör att ett anrop inte kan hänga hur länge som helst.
+const fetchWithTimeout = async (
+  url: string,
+  init?: RequestInit
+): Promise<Response> => {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), API_TIMEOUT);
 
@@ -11,18 +16,20 @@ async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Respon
   } finally {
     clearTimeout(id);
   }
-}
+};
 
-async function getResponseErrorMessage(response: Response): Promise<string> {
+// Backend skickar ofta { message: "..." }. Den här helpern gör om det till ett tydligt frontend-fel.
+const getResponseErrorMessage = async (response: Response): Promise<string> => {
   try {
     const data = await response.json();
     return data.message || `Fel (${response.status})`;
   } catch {
     return `Fel (${response.status})`;
   }
-}
+};
 
-async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
+// Gemensam JSON-wrapper: alla API-anrop får timeout, felhantering och typat svar på samma sätt.
+const requestJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
   try {
     const response = await fetchWithTimeout(url, init);
 
@@ -39,36 +46,63 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
 
     throw error;
   }
-}
+};
 
-export async function registerUser(username: string, email: string): Promise<{ id: number; username: string; email: string }> {
-  return requestJson(`${BASE_URL}/api/v1/users`, {
+// Auth-routes använder samma POST-mönster. Bara endpoint och body skiljer register från login.
+const postAuth = async <T>(
+  endpoint: string,
+  body: unknown
+): Promise<T> => {
+  return requestJson(`${BASE_URL}/api/v1/auth/${endpoint}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ username, email }),
+    body: JSON.stringify(body),
   });
-}
+};
 
-export async function loginUser(email: string): Promise<{ token: string; user: { id: number; email: string; username: string } }> {
-  const users = await requestJson<Array<{ id: number; email: string; username: string }>>(`${BASE_URL}/api/v1/users`);
 
-  const user = users.find((u) => u.email.toLowerCase() === email.toLowerCase());
-  if (!user) {
-    throw new Error('E-postadressen hittades inte');
-  }
+// Typer
+// AuthUser matchar det säkra användarobjektet backend returnerar. passwordHash ska aldrig finnas här.
+export type AuthUser = {
+  id: string;
+  username: string;
+  email: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
 
-  return {
-    token: 'demo-token',
-    user,
-  };
-}
+export type AuthResponse = {
+  token: string;
+  user: AuthUser;
+};
 
-export function saveAuthData(token: string, user: { id: number; email: string; username: string }): void {
+
+// Export-funktioner
+// Registrering skickar lösenordet till backend, där det hashats med bcrypt innan användaren sparas.
+export const registerUser = async (
+  username: string,
+  email: string,
+  password: string
+): Promise<AuthResponse> => {
+  return postAuth<AuthResponse>('register', { username, email, password });
+};
+
+// Login skickar email och lösenord till backend. Frontend ska inte själv jämföra lösenord.
+export const loginUser = async (
+  email: string,
+  password: string
+): Promise<AuthResponse> => {
+  return postAuth<AuthResponse>('login', { email, password });
+};
+
+// Token och publik user-info sparas så appen kan komma ihåg inloggningen efter sidladdning.
+export const saveAuthData = (token: string, user: AuthUser): void => {
   localStorage.setItem('authToken', token);
   localStorage.setItem('user', JSON.stringify(user));
-}
+};
 
-export function getAuthData(): { token: string; user: { id: number; email: string; username: string } } | null {
+// Hämtar sparad auth-data. Om JSON är trasig rensas datan så appen inte hamnar i ett konstigt läge.
+export const getAuthData = (): { token: string; user: AuthUser } | null => {
   const token = localStorage.getItem('authToken');
   const userStr = localStorage.getItem('user');
 
@@ -79,11 +113,13 @@ export function getAuthData(): { token: string; user: { id: number; email: strin
   try {
     return { token, user: JSON.parse(userStr) };
   } catch {
+    clearAuthData();
     return null;
   }
-}
+};
 
-export function clearAuthData(): void {
+// Logout i frontend betyder att vi glömmer token lokalt.
+export const clearAuthData = (): void => {
   localStorage.removeItem('authToken');
   localStorage.removeItem('user');
-}
+};

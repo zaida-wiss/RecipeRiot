@@ -3,9 +3,7 @@ import { Outlet } from "react-router-dom";
 import Navbar from "../navbar/Navbar";
 import Footer from "../footer/Footer";
 import UserLogin from "../userLogin/UserLogin";
-import { clearAuthData, getAuthData } from "../../api/authApi";
-
-type AuthUser = { id: number; email: string; username: string };
+import { clearAuthData, getAuthData, type AuthUser } from "../../api/authApi";
 
 const Layout = () => {
   const initialAuth = getAuthData();

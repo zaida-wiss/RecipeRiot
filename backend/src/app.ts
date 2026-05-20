@@ -10,9 +10,14 @@ import logger from './middleware/logger';
 
 
 const app = express();
+const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: allowedOrigin,
+  })
+);
 app.use(express.json());
 app.use(morgan('dev'));
 app.use(logger);

@@ -1,11 +1,11 @@
 import { useEffect, useState, type FormEvent, type MouseEvent } from "react";
-import { loginUser, registerUser, saveAuthData } from "../../api/authApi";
+import { loginUser, registerUser, saveAuthData, type AuthUser } from "../../api/authApi";
 import "./UserLogin.css";
 
 type UserLoginProps = {
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly onAuthSuccess: (user: { id: number; email: string; username: string }) => void;
+  readonly onAuthSuccess: (user: AuthUser) => void;
 };
 
 const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
@@ -48,7 +48,7 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
   const validateRegisterInput = () => {
     const validationRules: Array<[boolean, string]> = [
       [password !== passwordConfirm, "Lösenorden matchar inte"],
-      [password.length < 6, "Lösenordet måste vara minst 6 tecken"],
+      [password.length < 8, "Lösenordet måste vara minst 8 tecken"],
       [!username.trim(), "Användarnamn krävs"],
     ];
 
@@ -62,16 +62,15 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
   const handleRegister = async () => {
     validateRegisterInput();
 
-    const user = await registerUser(username, email);
-    const authUser = { id: user.id, email: user.email, username: user.username };
+    const result = await registerUser(username, email, password);
 
-    saveAuthData("demo-token", authUser);
-    onAuthSuccess(authUser);
+    saveAuthData(result.token, result.user);
+    onAuthSuccess(result.user);
     setSuccess("Registreringen lyckades! Välkommen till RecipeRiot.");
   };
 
   const handleLogin = async () => {
-    const result = await loginUser(email);
+    const result = await loginUser(email, password);
 
     saveAuthData(result.token, result.user);
     onAuthSuccess(result.user);
