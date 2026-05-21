@@ -7,15 +7,16 @@ import authRouter from './routes/auth';
 import recipesRouter from './routes/recipes';
 import usersRouter from './routes/users';
 import logger from './middleware/logger';
+import { env } from './config/env';
+import healthRouter from './routes/health';
 
 
 const app = express();
-const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
 
 // Middleware
 app.use(
   cors({
-    origin: allowedOrigin,
+    origin: env.CORS_ORIGIN,
   })
 );
 app.use(express.json());
@@ -23,9 +24,7 @@ app.use(morgan('dev'));
 app.use(logger);
 
 // Health-kontroll
-app.get('/health', (_req: express.Request, res: express.Response) => {
-  res.json({ status: 'ok' });
-});
+app.use('/health', healthRouter);
 
 // Routes
 app.use('/api/v1/recipes', recipesRouter);
