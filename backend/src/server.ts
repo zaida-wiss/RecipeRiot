@@ -1,13 +1,12 @@
 // src/server.ts
 import 'dotenv/config';
 import app from './app';
+import { env } from "./config/env";
 import { connectToDatabase } from './config/database';
 
-const PORT = process.env.PORT || 3000;
-
-async function startServer() {
+export const startServer() = async(): Promise<void> => {
   await connectToDatabase();
-  app.listen(PORT, () => {
+  app.listen(env.PORT, () => {
     console.log(`Servern lyssnar på http://localhost:${PORT}`);
   });
 }
