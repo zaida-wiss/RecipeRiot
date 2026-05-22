@@ -4,7 +4,11 @@ import { User } from '../models/User';
 import { NotFoundError, ConflictError } from '../errors/AppError';
 
 // GET /api/v1/users
-exports.getAllUsers = async (_req: Request, res: Response, next: NextFunction) => {
+export const getAllUsers = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const users = await User.find();
     res.json(users);
@@ -14,7 +18,11 @@ exports.getAllUsers = async (_req: Request, res: Response, next: NextFunction) =
 };
 
 // GET /api/v1/users/:id
-exports.getUserById = async (req: Request, res: Response, next: NextFunction) => {
+export const getUserById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) throw new NotFoundError('Användaren hittades inte');
@@ -26,7 +34,11 @@ exports.getUserById = async (req: Request, res: Response, next: NextFunction) =>
 };
 
 // POST /api/v1/users
-exports.createUser = async (req: Request, res: Response, next: NextFunction) => {
+export const createUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const existing = await User.findOne({email: req.body.email})
 
@@ -40,7 +52,11 @@ exports.createUser = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 // PUT /api/v1/users/:id
-exports.updateUser = async (req: Request, res: Response, next: NextFunction) => {
+export const updateUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const user = await User.findByIdAndUpdate(
       req.params.id,
@@ -58,7 +74,11 @@ exports.updateUser = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 // DELETE /api/v1/users/:id
-exports.deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
     if (!user) {
