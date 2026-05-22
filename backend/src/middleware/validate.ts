@@ -1,6 +1,7 @@
 // src/middleware/validate.ts
-import { Request, Response, NextFunction } from 'express';
-import { ZodTypeAny } from 'zod';
+import { Request, Response, NextFunction } from "express";
+import { ValidationError } from "../errors/AppError";
+import { ZodTypeAny } from "zod";
 
 // Utökar Express Request med validerade fält
 declare global {
@@ -19,46 +20,84 @@ interface Schemas {
   query?: ZodTypeAny;
 }
 
+// Hjälpfunktion
+type ValidationLocation = 'body' | 'params' | 'query';
+
+type ValidationIssue = {
+  location: ValidationLocation;
+  field: string;
+  message: string;
+};
+
+type ValidateSchemaOptions = {
+  schema: ZodTypeAny | undefined;
+  value: unknown;
+  location: ValidationLocation;
+  saveValidatedData: (data: unknown) => void;
+  errors: ValidationIssue[];
+};
+
+function validateSchema({
+  schema,
+  value,
+  location,
+  saveValidatedData,
+  errors,
+}: ValidateSchemaOptions): void {
+  if (!schema) {
+    return;
+  }
+
+  const result = schema.safeParse(value);
+
+  if (!result.success) {
+    result.error.issues.forEach((i) =>
+      errors.push({ location, field: i.path.join('.'), message: i.message })
+    );
+    return;
+  }
+
+  saveValidatedData(result.data);
+}
+
+
 // ─── Middleware-fabrik ────────────────────────────────────────────────────────
 export function validateRequest(schemas: Schemas) {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const errors: { location: string; field: string; message: string }[] = [];
+  return (req: Request, _res: Response, next: NextFunction): void => {
+    const errors: ValidationIssue[] = [];
 
-    if (schemas.body) {
-      const result = schemas.body.safeParse(req.body);
-      if (!result.success) {
-        result.error.issues.forEach((i) =>
-          errors.push({ location: 'body', field: i.path.join('.'), message: i.message })
-        );
-      } else {
-        req.validatedBody = result.data;
-      }
-    }
+    validateSchema({
+      schema: schemas.body,
+      value: req.body,
+      location: 'body',
+      saveValidatedData: (data) => {
+        req.validatedBody = data;
+      },
+      errors,
+    });
 
-    if (schemas.params) {
-      const result = schemas.params.safeParse(req.params);
-      if (!result.success) {
-        result.error.issues.forEach((i) =>
-          errors.push({ location: 'params', field: i.path.join('.'), message: i.message })
-        );
-      } else {
-        req.validatedParams = result.data;
-      }
-    }
+    validateSchema({
+      schema: schemas.params,
+      value: req.params,
+      location: 'params',
+      saveValidatedData: (data) => {
+        req.validatedParams = data;
+      },
+      errors,
+    });
 
-    if (schemas.query) {
-      const result = schemas.query.safeParse(req.query);
-      if (!result.success) {
-        result.error.issues.forEach((i) =>
-          errors.push({ location: 'query', field: i.path.join('.'), message: i.message })
-        );
-      } else {
-        req.validatedQuery = result.data;
-      }
-    }
+    validateSchema({
+      schema: schemas.query,
+      value: req.query,
+      location: 'query',
+      saveValidatedData: (data) => {
+        req.validatedQuery = data;
+      },
+      errors,
+    });
 
     if (errors.length > 0) {
-      res.status(400).json({ message: 'Valideringsfel', errors });
+      next(new ValidationError('Valideringsfel', errors));
       return;
     }
 

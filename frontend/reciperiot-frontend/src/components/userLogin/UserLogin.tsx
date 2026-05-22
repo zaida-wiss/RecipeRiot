@@ -1,25 +1,43 @@
 import { useEffect, useState, type FormEvent, type MouseEvent } from "react";
-import { loginUser, registerUser, saveAuthData } from "../../api/authApi";
+import { loginUser, registerUser, saveAuthData, type AuthUser } from "../../api/authApi";
 import "./UserLogin.css";
 
 type UserLoginProps = {
   readonly isOpen: boolean;
   readonly onClose: () => void;
-  readonly onAuthSuccess: (user: { id: number; email: string; username: string }) => void;
+  readonly onAuthSuccess: (user: AuthUser) => void;
 };
 
 const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
+  // isRegisterMode avgör om samma modal visar login-formulär eller registreringsformulär.
   const [isRegisterMode, setIsRegisterMode] = useState(false);
+
+  // Login använder ett gemensamt fält eftersom backend kan söka på både username och email.
+  const [loginIdentifier, setLoginIdentifier] = useState("");
+
+  // Registrering behöver separata fält så backend kan skapa ett komplett användarkonto.
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [username, setUsername] = useState("");
+
+  // error och success visas i modalen för att användaren ska förstå vad som händer.
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
+
+    // Varje ny öppning ska börja i login-läge, inte visa gammal success eller register-form.
+    setIsRegisterMode(false);
+    setLoginIdentifier("");
+    setEmail("");
+    setPassword("");
+    setPasswordConfirm("");
+    setUsername("");
+    setError("");
+    setSuccess("");
 
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -31,7 +49,9 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     return () => window.removeEventListener("keydown", handleEsc);
   }, [isOpen, onClose]);
 
+  // Samma reset används både när man byter läge och när formuläret behöver börja om.
   const resetForm = () => {
+    setLoginIdentifier("");
     setEmail("");
     setPassword("");
     setPasswordConfirm("");
@@ -40,15 +60,17 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     setSuccess("");
   };
 
+  // Växlar mellan login och registrering utan att gamla fältvärden följer med.
   const toggleMode = () => {
     resetForm();
     setIsRegisterMode(!isRegisterMode);
   };
 
+  // Frontendvalidering hjälper användaren snabbt, men backendens Zod-schema är fortfarande säkerhetsgränsen.
   const validateRegisterInput = () => {
     const validationRules: Array<[boolean, string]> = [
       [password !== passwordConfirm, "Lösenorden matchar inte"],
-      [password.length < 6, "Lösenordet måste vara minst 6 tecken"],
+      [password.length < 8, "Lösenordet måste vara minst 8 tecken"],
       [!username.trim(), "Användarnamn krävs"],
     ];
 
@@ -59,25 +81,35 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     }
   };
 
+  // Register-flödet får tillbaka en riktig JWT från backend och sparar den lokalt.
   const handleRegister = async () => {
     validateRegisterInput();
 
-    const user = await registerUser(username, email);
-    const authUser = { id: user.id, email: user.email, username: user.username };
+    const result = await registerUser(username, email, password);
 
-    saveAuthData("demo-token", authUser);
-    onAuthSuccess(authUser);
+    saveAuthData(result.token, result.user);
+    onAuthSuccess(result.user);
     setSuccess("Registreringen lyckades! Välkommen till RecipeRiot.");
   };
 
+  // Login skickar identifier + password till backend. Frontend kontrollerar aldrig lösenord själv.
   const handleLogin = async () => {
-    const result = await loginUser(email);
+    const result = await loginUser(loginIdentifier, password);
 
     saveAuthData(result.token, result.user);
     onAuthSuccess(result.user);
     setSuccess("Inloggningen lyckades! Välkommen tillbaka.");
   };
 
+  // Riktig lösenordsåterställning kräver mail/reset-token i backend, så länken visar bara nuläget.
+  const handleForgotPassword = () => {
+    setError("");
+    setSuccess(
+      "Lösenordsåterställning är inte kopplad ännu. Be en administratör hjälpa dig tills reset-flödet finns på plats."
+    );
+  };
+
+  // Ett gemensamt submit-flöde gör att knappen kan användas i både login- och registerläge.
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
@@ -100,6 +132,7 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     }
   };
 
+  // Hindrar klick inuti modalen från att bubbla upp till backdropen och stänga modalen.
   const stopModalClose = (event: MouseEvent<HTMLDivElement>) => {
     event.stopPropagation();
   };
@@ -141,18 +174,38 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
             </>
           )}
 
-          <label className="user-login-label" htmlFor="user-login-email">
-            E-post
-          </label>
-          <input
-            id="user-login-email"
-            className="user-login-input"
-            type="email"
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
-            placeholder="namn@email.com"
-            required
-          />
+          {isRegisterMode ? (
+            <>
+              <label className="user-login-label" htmlFor="user-login-email">
+                E-post
+              </label>
+              <input
+                id="user-login-email"
+                className="user-login-input"
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="namn@email.com"
+                required
+              />
+            </>
+          ) : (
+            <>
+              <label className="user-login-label" htmlFor="user-login-identifier">
+                Användarnamn eller e-post
+              </label>
+              <input
+                id="user-login-identifier"
+                className="user-login-input"
+                type="text"
+                value={loginIdentifier}
+                onChange={(event) => setLoginIdentifier(event.target.value)}
+                placeholder="Användarnamn eller e-post"
+                autoComplete="username"
+                required
+              />
+            </>
+          )}
 
           <label className="user-login-label" htmlFor="user-login-password">
             Lösenord
@@ -188,6 +241,16 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
             {isLoading ? "Laddar..." : isRegisterMode ? "Registrera" : "Logga in"}
           </button>
         </form>
+
+        {!isRegisterMode && (
+          <button
+            type="button"
+            className="user-login-forgot"
+            onClick={handleForgotPassword}
+          >
+            Glömt lösenordet?
+          </button>
+        )}
 
         <div className="user-login-toggle">
           <p className="user-login-toggle-text">

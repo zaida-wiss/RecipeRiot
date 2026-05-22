@@ -16,10 +16,10 @@ exports.getAllUsers = async (_req: Request, res: Response, next: NextFunction) =
 // GET /api/v1/users/:id
 exports.getUserById = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.validatedParams;
-    const user = await User.findById(id);
+    const user = await User.findById(req.params.id);
     if (!user) throw new NotFoundError('Användaren hittades inte');
-    res.json(user);
+      res.json(user);
+
   } catch (error) {
     next(error);
   }
@@ -28,11 +28,11 @@ exports.getUserById = async (req: Request, res: Response, next: NextFunction) =>
 // POST /api/v1/users
 exports.createUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    // Kontrollera om e-postadressen redan finns (409 Conflict)
-    const existing = await User.findOne({ email: req.validatedBody.email });
-    if (existing) throw new ConflictError('E-postadressen är redan registrerad');
+    const existing = await User.findOne({email: req.body.email})
 
-    const user = await User.create(req.validatedBody);
+    if (existing) {throw new ConflictError('Användaren finns redan');
+  }
+    const user = await User.create(req.body);
     res.status(201).json(user);
   } catch (error) {
     next(error);
@@ -42,14 +42,16 @@ exports.createUser = async (req: Request, res: Response, next: NextFunction) => 
 // PUT /api/v1/users/:id
 exports.updateUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.validatedParams;
     const user = await User.findByIdAndUpdate(
-      id,
-      req.validatedBody,
-      { new: true, runValidators: true }
+      req.params.id,
+      req.body,
+      { new: true }
     );
-    if (!user) throw new NotFoundError('Användaren hittades inte');
-    res.json(user);
+    if (!user) {
+  res.status(404).json({ message: 'Användaren hittades inte' });
+  return;
+    }
+  res.json(user);
   } catch (error) {
     next(error);
   }
@@ -58,9 +60,11 @@ exports.updateUser = async (req: Request, res: Response, next: NextFunction) => 
 // DELETE /api/v1/users/:id
 exports.deleteUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { id } = req.validatedParams;
-    const user = await User.findByIdAndDelete(id);
-    if (!user) throw new NotFoundError('Användaren hittades inte');
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) {
+    res.status(404).json({ message: 'Användaren hittades inte' });
+    return;
+    }
     res.status(204).send();
   } catch (error) {
     next(error);

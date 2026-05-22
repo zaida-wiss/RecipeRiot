@@ -7,53 +7,64 @@ import {
   listRecipesQuerySchema,
   idParamSchema,
 } from '../schemas/recipe.schemas';
-
-const recipesController = require('../controllers/recipesController');
+import {
+  getAllRecipes,
+  getRecipeById,
+  createRecipe,
+  updateRecipe,
+  deleteRecipe,
+  forkRecipe,
+} from '../controllers/recipesController';
+import { authenticate } from '../middleware/auth';
 
 const router = Router();
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
-// GET /api/recipes?page=&limit=&search=
+// GET /api/v1/recipes?page=&limit=&search=
 router.get(
   '/',
   validateRequest({ query: listRecipesQuerySchema }),
-  recipesController.getAllRecipes
+  getAllRecipes
 );
 
-// GET /api/recipes/:id
+// GET /api/v1/recipes/:id
 router.get(
   '/:id',
   validateRequest({ params: idParamSchema }),
-  recipesController.getRecipeById
+  getRecipeById
 );
 
-// POST /api/recipes
+// POST /api/v1/recipes
 router.post(
   '/',
+  authenticate,
   validateRequest({ body: createRecipeSchema }),
-  recipesController.createRecipe
+  createRecipe
 );
 
-// PATCH /api/recipes/:id
+// PATCH /api/v1/recipes/:id
 router.patch(
   '/:id',
+  authenticate,
   validateRequest({ params: idParamSchema, body: updateRecipeSchema }),
-  recipesController.updateRecipe
+  updateRecipe
 );
 
-// DELETE /api/recipes/:id
+// DELETE /api/v1/recipes/:id
 router.delete(
   '/:id',
+  authenticate,
   validateRequest({ params: idParamSchema }),
-  recipesController.deleteRecipe
+  deleteRecipe
 );
 
-// POST /api/recipes/:id/fork
+// POST /api/v1/recipes/:id/fork
 router.post(
   '/:id/fork',
+  authenticate,
   validateRequest({ params: idParamSchema }),
-  recipesController.forkRecipe
+  forkRecipe
 );
 
-module.exports = router;
+export default router;
