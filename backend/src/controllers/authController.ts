@@ -147,3 +147,23 @@ export const getMe = async (
     next(error);
   }
 };
+
+
+export const getAdminStatus = async (
+  req: Request,
+  res: Response<{ message: string; user: AuthUser }>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if(!req.user) {
+      throw new UnauthorizedError("Autentiering krävs");
+    }
+
+    res.json({
+      message: "Åtkomst beviljad till admin-sida",
+      user: req.user,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
