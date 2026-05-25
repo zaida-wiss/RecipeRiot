@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { UnauthorizedError } from '../errors/AppError.js';
+import { env } from "../config/env.js";
 import type { JwtPayload } from '../types/index.js';
 
 export const authenticate = (
@@ -19,7 +20,7 @@ export const authenticate = (
 
     // Plocka ut själva token-delen efter "Bearer ".
     const token = authHeader.split(' ')[1];
-    const secret = process.env.JWT_SECRET;
+    const secret = env.JWT_SECRET;
 
     if (!secret) {
       throw new Error('JWT_SECRET saknas i miljövariabler');
