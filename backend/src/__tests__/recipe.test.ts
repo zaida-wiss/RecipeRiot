@@ -2,10 +2,7 @@ import { jest } from '@jest/globals';
 import request from 'supertest';
 import app from '../app.js';
 import { connect, clearDatabase, disconnect } from './helpers/db.js';
-
-process.env.JWT_SECRET = 'test-secret';
-process.env.JWT_EXPIRES_IN = '1h';
-process.env.BCRYPT_SALT_ROUNDS = '10';
+import { User } from "../models/User.js";
 
 jest.setTimeout(30000);
 
@@ -142,4 +139,90 @@ describe('GET /api/v1/recipes/:id', () => {
 
     expect(res.status).toBe(404);
   });
+});
+
+
+async function registerAndLoginUser(
+  username: string,
+  email: string
+): Promise<string> {
+  await request(app)
+    .post('/api/v1/auth/register')
+    .send({
+      username,
+      email,
+      password: 'superhemligt123',
+    });
+
+  const loginRes = await request(app)
+    .post('/api/v1/auth/login')
+    .send({
+      identifier: email,
+      password: 'superhemligt123',
+    });
+
+  return loginRes.body.token;
+}
+
+
+test('ska neka vanlig user att radera någon annans recept', async () => {
+  const ownerToken = await registerAndLoginUser(
+    'OwnerUser',
+    'owner@example.com'
+  );
+
+  const otherToken = await registerAndLoginUser(
+    'OtherUser',
+    'other@example.com'
+  );
+
+  const createRes = await request(app)
+    .post('/api/v1/recipes')
+    .set('Authorization', `Bearer ${ownerToken}`)
+    .send({ title: 'Privat recept' });
+
+  const deleteRes = await request(app)
+    .delete(`/api/v1/recipes/${createRes.body._id}`)
+    .set('Authorization', `Bearer ${otherToken}`);
+
+  expect(deleteRes.status).toBe(403);
+});
+
+
+test('ska låta admin radera någon annans recept', async () => {
+  const ownerToken = await registerAndLoginUser(
+    'RecipeOwner',
+    'owner2@example.com'
+  );
+
+  await request(app)
+    .post('/api/v1/auth/register')
+    .send({
+      username: 'AdminUser',
+      email: 'admin@example.com',
+      password: 'superhemligt123',
+    });
+
+  await User.findOneAndUpdate(
+    { email: 'admin@example.com' },
+    { role: 'admin' }
+  );
+
+  const adminLoginRes = await request(app)
+    .post('/api/v1/auth/login')
+    .send({
+      identifier: 'admin@example.com',
+      password: 'superhemligt123',
+    });
+
+  const createRes = await request(app)
+    .post('/api/v1/recipes')
+    .set('Authorization', `Bearer ${ownerToken}`)
+    .send({ title: 'Recept som admin får radera' });
+
+  const deleteRes = await request(app)
+    .delete(`/api/v1/recipes/${createRes.body._id}`)
+    .set('Authorization', `Bearer ${adminLoginRes.body.token}`);
+
+  expect(deleteRes.status).toBe(204);
 });

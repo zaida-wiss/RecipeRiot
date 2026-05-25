@@ -51,6 +51,23 @@ const getRecipeOrThrow = async (id: string): Promise<IRecipe> => {
   return recipe;
 };
 
+const assertRecioeOwnerOrAdmin = (
+  recipe: IRecipe,
+  req: Request,
+  message: string
+): void => {
+  if(!req.user) {
+    throw new UnauthorizedError("Autentiering krävs");
+  }
+
+  const isOwner = recipe.createdBy.toString() === req.user.id;
+  const isAdmin = req.user.role === "admin";
+
+  if (!isOwner && !isAdmin) {
+    throw new ForbiddenError(message);
+  }
+};
+
 const assertRecipeOwner = (
   recipe: IRecipe,
   userId: string,
@@ -135,9 +152,13 @@ export const updateRecipe = asyncHandler(async (req, res): Promise<void> => {
 
 // DELETE /api/v1/recipes/:id
 export const deleteRecipe = asyncHandler(async (req, res): Promise<void> => {
-  const recipe = await getOwnedRecipeFromRequest(
+  const { id } = req.validatedParams;
+  const recipe = await getRecipeOrThrow(id);
+
+  assertRecioeOwnerOrAdmin(
+    recipe,
     req,
-    'Du får bara radera dina egna recept'
+    'Du får bara radera dina egna recept.'
   );
 
   await recipe.deleteOne();

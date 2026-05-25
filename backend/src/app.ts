@@ -7,6 +7,7 @@ import authRouter from './routes/auth.js';
 import recipesRouter from './routes/recipes.js';
 import usersRouter from './routes/users.js';
 import logger from './middleware/logger.js';
+import healthRouter from "./routes/health.js";
 
 
 const app = express();
@@ -23,9 +24,7 @@ app.use(morgan('dev'));
 app.use(logger);
 
 // Health-kontroll
-app.get('/health', (_req: express.Request, res: express.Response) => {
-  res.json({ status: 'ok' });
-});
+app.use("/health", healthRouter);
 
 // Routes
 app.use('/api/v1/recipes', recipesRouter);

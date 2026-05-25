@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { User, type IUser } from '../models/User.js';
 import { ConflictError, UnauthorizedError } from '../errors/AppError.js';
+import { env } from "../config/env.js";
 import type { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types/index.js';
 
 
@@ -13,6 +14,7 @@ import type { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types/
      id: user._id.toString(),
      username: user.username,
      email: user.email,
+     role: user.role,
      createdAt: user.createdAt,
      updatedAt: user.updatedAt,
    };
@@ -21,7 +23,7 @@ import type { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types/
  // Helper: skapar JWT-token.
 // Den motsvarar lärarens jwt.sign(...), men med TypeScript-typer.
  function createToken(user: IUser): string {
-   const secret = process.env.JWT_SECRET;
+   const secret = env.JWT_SECRET;
 
    if (!secret) {
      throw new Error('JWT_SECRET saknas i miljövariabler');
@@ -31,10 +33,11 @@ import type { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types/
     sub: user._id.toString(),
     email: user.email,
     username: user.username,
+    role: user.role,
   };
 
    const options: jwt.SignOptions = {
-     expiresIn: (process.env.JWT_EXPIRES_IN || '1h') as jwt.SignOptions['expiresIn'],
+     expiresIn: (env.JWT_EXPIRES_IN || '1h') as jwt.SignOptions['expiresIn'],
    };
 
    return jwt.sign(payload, secret, options);
@@ -62,7 +65,7 @@ export const register = async (
       throw new ConflictError('E-postadressen eller användarnamnet är redan registrerat');
     }
 
-    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS || 10);
+    const saltRounds = Number(env.BCRYPT_SALT_ROUNDS || 10);
 
         // Här gör vi Joakims bcrypt.hash(password, 10),
     // men saltRounds kommer från .env.
@@ -141,6 +144,26 @@ export const getMe = async (
     res.json({
       message: "Åtkomst beviljad till skyddad sida",
       user: req.user, });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
+export const getAdminStatus = async (
+  req: Request,
+  res: Response<{ message: string; user: AuthUser }>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if(!req.user) {
+      throw new UnauthorizedError("Autentiering krävs");
+    }
+
+    res.json({
+      message: "Åtkomst beviljad till admin-sida",
+      user: req.user,
+    });
   } catch (error) {
     next(error);
   }

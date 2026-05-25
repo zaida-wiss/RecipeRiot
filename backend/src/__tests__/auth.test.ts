@@ -1,11 +1,8 @@
-process.env.JWT_SECRET = 'test-secret';
-process.env.JWT_EXPIRES_IN = '1h';
-process.env.BCRYPT_SALT_ROUNDS = '10';
-
 import { jest } from '@jest/globals';
 import request from 'supertest';
 import app from '../app.js';
 import { connect, clearDatabase, disconnect } from './helpers/db.js';
+import { User } from "../models/User.js";
 
 jest.setTimeout(30000);
 
@@ -138,4 +135,32 @@ describe('GET /api/v1/auth/me', () => {
     expect(res.status).toBe(200);
     expect(res.body.user.email).toBe('annapanna@example.com');
   });
+});
+
+test('ska neka vanlig user från admin-route', async () => {
+  const registerRes = await registerTestUser();
+
+  const res = await request(app)
+    .get('/api/v1/auth/admin')
+    .set('Authorization', `Bearer ${registerRes.body.token}`);
+
+  expect(res.status).toBe(403);
+});
+
+test('ska tillåta admin på admin-route', async () => {
+  await registerTestUser();
+
+  await User.findOneAndUpdate(
+    { email: 'annapanna@example.com' },
+    { role: 'admin' }
+  );
+
+  const loginRes = await loginTestUser();
+
+  const res = await request(app)
+    .get('/api/v1/auth/admin')
+    .set('Authorization', `Bearer ${loginRes.body.token}`);
+
+  expect(res.status).toBe(200);
+  expect(res.body.user.role).toBe('admin');
 });
