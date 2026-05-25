@@ -1,6 +1,6 @@
 // src/middleware/validate.ts
 import { Request, Response, NextFunction } from "express";
-import { ValidationError } from "../errors/AppError";
+import { ValidationError } from "../errors/AppError.js";
 import { ZodTypeAny } from "zod";
 
 // Utökar Express Request med validerade fält

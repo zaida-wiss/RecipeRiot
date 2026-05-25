@@ -3,8 +3,8 @@ process.env.JWT_EXPIRES_IN = '1h';
 process.env.BCRYPT_SALT_ROUNDS = '10';
 
 import request from 'supertest';
-import app from '../app';
-import { connect, clearDatabase, disconnect } from './helpers/db';
+import app from '../app.js';
+import { connect, clearDatabase, disconnect } from './helpers/db.js';
 
 jest.setTimeout(30000);
 

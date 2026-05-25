@@ -1,7 +1,7 @@
 // src/controllers/usersController.ts
 import { Request, Response, NextFunction } from 'express';
-import { User } from '../models/User';
-import { NotFoundError, ConflictError } from '../errors/AppError';
+import { User } from '../models/User.js';
+import { NotFoundError, ConflictError } from '../errors/AppError.js';
 
 // GET /api/v1/users
 export const getAllUsers = async (

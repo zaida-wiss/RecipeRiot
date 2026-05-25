@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import { UnauthorizedError } from '../errors/AppError';
-import { JwtPayload } from '../types';
+import { UnauthorizedError } from '../errors/AppError.js';
+import type { JwtPayload } from '../types/index.js';
 
 export const authenticate = (
   req: Request,

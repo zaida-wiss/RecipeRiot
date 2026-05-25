@@ -2,11 +2,11 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import { errorHandler } from './middleware/errorHandler';
-import authRouter from './routes/auth';
-import recipesRouter from './routes/recipes';
-import usersRouter from './routes/users';
-import logger from './middleware/logger';
+import { errorHandler } from './middleware/errorHandler.js';
+import authRouter from './routes/auth.js';
+import recipesRouter from './routes/recipes.js';
+import usersRouter from './routes/users.js';
+import logger from './middleware/logger.js';
 
 
 const app = express();

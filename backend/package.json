@@ -5,7 +5,7 @@
   "description": "RecipeRiot – social receptdelning",
   "scripts": {
     "start": "node dist/server.js",
-    "dev": "ts-node --files src/server.ts",
+    "dev": "nodemon --watch src --ext ts --exec \"npm run build && node dist/server.js\"",
     "build": "tsc",
     "test": "jest"
   },

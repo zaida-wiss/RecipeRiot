@@ -1,9 +1,9 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
-import { User, IUser } from '../models/User';
-import { ConflictError, UnauthorizedError } from '../errors/AppError';
-import { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types';
+import { User, type IUser } from '../models/User.js';
+import { ConflictError, UnauthorizedError } from '../errors/AppError.js';
+import type { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types/index.js';
 
 
 // Helper: gör om ett Mongoose User-dokument till ett säkert API-svar.

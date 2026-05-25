@@ -1,12 +1,12 @@
 // src/routes/recipes.ts
 import { Router } from 'express';
-import { validateRequest } from '../middleware/validate';
+import { validateRequest } from '../middleware/validate.js';
 import {
   createRecipeSchema,
   updateRecipeSchema,
   listRecipesQuerySchema,
   idParamSchema,
-} from '../schemas/recipe.schemas';
+} from '../schemas/recipe.schemas.js';
 import {
   getAllRecipes,
   getRecipeById,
@@ -14,8 +14,8 @@ import {
   updateRecipe,
   deleteRecipe,
   forkRecipe,
-} from '../controllers/recipesController';
-import { authenticate } from '../middleware/auth';
+} from '../controllers/recipesController.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = Router();
 

@@ -1,7 +1,7 @@
 // src/controllers/recipesController.ts
 import { Request, Response, NextFunction, RequestHandler } from 'express';
-import { Recipe, IRecipe } from '../models/Recipe';
-import { NotFoundError, UnauthorizedError, ForbiddenError } from '../errors/AppError';
+import { Recipe, type IRecipe } from '../models/Recipe.js';
+import { NotFoundError, UnauthorizedError, ForbiddenError } from '../errors/AppError.js';
 
 // Helpers
 type AsyncController = (req: Request, res: Response) => Promise<void>;

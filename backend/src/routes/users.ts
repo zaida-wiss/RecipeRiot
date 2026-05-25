@@ -1,19 +1,19 @@
 // src/routes/users.ts
 import { Router } from 'express';
-import { validateRequest } from '../middleware/validate';
+import { validateRequest } from '../middleware/validate.js';
 import {
   createUserSchema,
   updateUserSchema,
   listUsersQuerySchema,
   idParamSchema,
-} from '../schemas/user.schemas';
+} from '../schemas/user.schemas.js';
 import {
   getAllUsers,
   getUserById,
   createUser,
   updateUser,
   deleteUser,
-} from '../controllers/usersController';
+} from '../controllers/usersController.js';
 
 const router = Router();
 

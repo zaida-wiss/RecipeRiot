@@ -1,6 +1,6 @@
 // src/middleware/errorHandler.ts
 import { Request, Response, NextFunction } from 'express';
-import { AppError } from '../errors/AppError';
+import { AppError } from '../errors/AppError.js';
 
 // Hjälpfunktioner
 function logError(err: Error, req: Request): void {
