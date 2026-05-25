@@ -23,7 +23,7 @@
     "types": ["jest", "node"]
   },
   "ts-node": {
-    "esm": false
+    "esm": true,
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]

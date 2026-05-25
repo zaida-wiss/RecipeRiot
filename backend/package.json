@@ -1,6 +1,7 @@
 {
   "name": "reciperiot",
   "version": "1.0.0",
+  "type" : "module",
   "description": "RecipeRiot – social receptdelning",
   "scripts": {
     "start": "node dist/server.js",
