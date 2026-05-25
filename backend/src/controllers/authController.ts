@@ -13,6 +13,7 @@ import type { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types/
      id: user._id.toString(),
      username: user.username,
      email: user.email,
+     role: user.role,
      createdAt: user.createdAt,
      updatedAt: user.updatedAt,
    };
@@ -31,6 +32,7 @@ import type { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types/
     sub: user._id.toString(),
     email: user.email,
     username: user.username,
+    role: user.role,
   };
 
    const options: jwt.SignOptions = {
