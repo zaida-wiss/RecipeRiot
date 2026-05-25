@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
 import { User, type IUser } from '../models/User.js';
 import { ConflictError, UnauthorizedError } from '../errors/AppError.js';
+import { env } from "../config/env.js";
 import type { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types/index.js';
 
 
@@ -22,7 +23,7 @@ import type { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types/
  // Helper: skapar JWT-token.
 // Den motsvarar lärarens jwt.sign(...), men med TypeScript-typer.
  function createToken(user: IUser): string {
-   const secret = process.env.JWT_SECRET;
+   const secret = env.JWT_SECRET;
 
    if (!secret) {
      throw new Error('JWT_SECRET saknas i miljövariabler');
@@ -36,7 +37,7 @@ import type { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types/
   };
 
    const options: jwt.SignOptions = {
-     expiresIn: (process.env.JWT_EXPIRES_IN || '1h') as jwt.SignOptions['expiresIn'],
+     expiresIn: (env.JWT_EXPIRES_IN || '1h') as jwt.SignOptions['expiresIn'],
    };
 
    return jwt.sign(payload, secret, options);
@@ -64,7 +65,7 @@ export const register = async (
       throw new ConflictError('E-postadressen eller användarnamnet är redan registrerat');
     }
 
-    const saltRounds = Number(process.env.BCRYPT_SALT_ROUNDS || 10);
+    const saltRounds = Number(env.BCRYPT_SALT_ROUNDS || 10);
 
         // Här gör vi Joakims bcrypt.hash(password, 10),
     // men saltRounds kommer från .env.
