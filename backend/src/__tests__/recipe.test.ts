@@ -3,10 +3,6 @@ import request from 'supertest';
 import app from '../app.js';
 import { connect, clearDatabase, disconnect } from './helpers/db.js';
 
-process.env.JWT_SECRET = 'test-secret';
-process.env.JWT_EXPIRES_IN = '1h';
-process.env.BCRYPT_SALT_ROUNDS = '10';
-
 jest.setTimeout(30000);
 
 beforeAll(async () => {
