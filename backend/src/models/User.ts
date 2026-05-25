@@ -1,5 +1,6 @@
 // src/models/User.ts
 import mongoose, { Schema, Document } from 'mongoose';
+import type { UserRole } from "../types/index.js";
 
 export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
@@ -8,6 +9,7 @@ export interface IUser extends Document {
     // Vi lagrar aldrig password i klartext.
   // Därför heter fältet passwordHash.
   passwordHash: string;
+  role: UserRole;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -40,6 +42,12 @@ const UserSchema = new Schema<IUser>(
       // när vi hämtar en User. Vid login måste vi aktivt välja det med:
       // .select('+passwordHash')
       select: false,
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+      required: true,
     },
   },
   {

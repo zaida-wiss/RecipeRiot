@@ -17,10 +17,13 @@ export interface Recipe {
   updatedAt: string;
 }
 
+export type UserRole = "user" | "admin";
+
 export interface UserResponse {
   id: string;
   username: string;
   email: string;
+  role: UserRole;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,10 +50,13 @@ export interface JwtPayload {
   sub: string;
   email: string;
   username: string;
+  role: UserRole;
 }
 
 export interface AuthUser {
   id: string;
   email: string;
   username?: string;
+  role: UserRole;
 }
+
