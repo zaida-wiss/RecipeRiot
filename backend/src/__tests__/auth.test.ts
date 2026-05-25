@@ -2,6 +2,7 @@ process.env.JWT_SECRET = 'test-secret';
 process.env.JWT_EXPIRES_IN = '1h';
 process.env.BCRYPT_SALT_ROUNDS = '10';
 
+import { jest } from '@jest/globals';
 import request from 'supertest';
 import app from '../app.js';
 import { connect, clearDatabase, disconnect } from './helpers/db.js';
