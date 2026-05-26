@@ -1,3 +1,5 @@
+import type { Recipe } from '../types';
+
 export type ApiIngredient = {
   name: string;
   quantity: number;
@@ -54,4 +56,37 @@ export const getAllRecipes = async (): Promise<ApiRecipe[]> => {
   }
 
   return allRecipes;
+};
+
+
+
+const fallbackImages = [
+  'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80',
+  'https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1200&q=80',
+];
+
+const getFallbackImage = (index: number): string => {
+  return fallbackImages[index % fallbackImages.length];
+};
+
+export const toUiRecipe = (recipe: ApiRecipe, index: number): Recipe => {
+  return {
+    id: recipe._id,
+    title: recipe.title,
+    time: '30 min',
+    difficulty: 'Lätt',
+    image: getFallbackImage(index),
+    tags: ['Community'],
+    servings: 4,
+    rating: 0,
+    reviews: 0,
+    description:
+      recipe.steps[0] ?? 'Ett recept från RecipeRiot-communityt.',
+    ingredients: recipe.ingredients.map((ingredient) => ({
+      name: ingredient.name,
+      amount: `${ingredient.quantity} ${ingredient.unit}`,
+    })),
+    steps: recipe.steps,
+  };
 };
