@@ -17,7 +17,7 @@ const [recipes, setRecipes] = useState<Recipe[]>([]);
 
 
   const allTags = useMemo(() => {
-    const tags = recipes.flatMap((r) => r.tags);
+    const tags = recipes.flatMap((recipe) => recipe.tags);
     return ['Alla', ...Array.from(new Set(tags))];
   }, [recipes]);
 
@@ -26,8 +26,8 @@ const [recipes, setRecipes] = useState<Recipe[]>([]);
   const filteredRecipes = recipes.filter((recipe) => {
     const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTag = activeTag === 'Alla' || recipe.tags.includes(activeTag);
-    const matchesDiff = activeDifficulty === 'Alla' || recipe.difficulty === activeDifficulty;
-    return matchesSearch && matchesTag && matchesDiff;
+    const matchesDifficulty = activeDifficulty === 'Alla' || recipe.difficulty === activeDifficulty;
+    return matchesSearch && matchesTag && matchesDifficulty;
   });
 
   useEffect(() => {
