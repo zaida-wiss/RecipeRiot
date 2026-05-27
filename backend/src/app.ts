@@ -8,10 +8,11 @@ import recipesRouter from './routes/recipes.js';
 import usersRouter from './routes/users.js';
 import logger from './middleware/logger.js';
 import healthRouter from "./routes/health.js";
+import { env } from './config/env.js';
 
 
 const app = express();
-const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
+const allowedOrigin = env.CORS_ORIGIN;
 
 // Middleware
 app.use(

@@ -1,6 +1,7 @@
 // src/middleware/errorHandler.ts
 import { Request, Response, NextFunction } from 'express';
 import { AppError } from '../errors/AppError.js';
+import { env } from '../config/env.js';
 
 // Hjälpfunktioner
 function logError(err: Error, req: Request): void {
@@ -57,7 +58,7 @@ export function errorHandler(
   res: Response,
   _next: NextFunction // eslint-disable-line @typescript-eslint/no-unused-vars
 ): void {
-  const isDevelopment = process.env.NODE_ENV === 'development';
+  const isDevelopment = env.NODE_ENV === 'development';
 
   // ─── Intern loggning — alltid fullständig ─────────────────────────────────
   logError(err, req);
