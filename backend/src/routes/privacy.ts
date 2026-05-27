@@ -9,6 +9,6 @@ const router = Router();
 
 router.get("/export", authenticate, exportMyData);
 
-router.delete("me", authenticate, deleteMyAccount);
+router.delete("/me", authenticate, deleteMyAccount);
 
 export default router;
