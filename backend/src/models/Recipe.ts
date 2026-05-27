@@ -10,6 +10,7 @@ interface IIngredient {
 export interface IRecipe extends Document {
   title: string;
   createdBy: string;
+  imageUrl?: string;        // ← tillagd
   ingredients: IIngredient[];
   steps: string[];
   originalRef?: mongoose.Types.ObjectId;
@@ -48,6 +49,10 @@ const RecipeSchema = new Schema<IRecipe>(
       required: [true, 'createdBy är obligatorisk'],
       trim: true,
     },
+    imageUrl: {                // ← tillagd
+      type: String,
+      default: '',
+    },
     ingredients: {
       type: [IngredientSchema],
       default: [],
@@ -58,7 +63,7 @@ const RecipeSchema = new Schema<IRecipe>(
     },
     originalRef: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Recipe', // referens till ett annat recept
+      ref: 'Recipe',
     },
   },
   {

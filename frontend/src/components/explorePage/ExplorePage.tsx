@@ -1,31 +1,47 @@
-import React, { useState, useMemo } from 'react';
-import { recipes } from '../data/mockRecipes';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Clock, Tag } from 'lucide-react';
 import RecipeModal from '../recipeModal/RecipeModal';
-import type { Recipe } from '../../types'; // Se till att typen finns tillgänglig
+import type { Recipe } from '../../types';
+import { getAllRecipes } from '../../api/recipesApi';
 import './ExplorePage.css';
 
 const ExplorePage: React.FC = () => {
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTag, setActiveTag] = useState('Alla');
   const [activeDifficulty, setActiveDifficulty] = useState('Alla');
-  
-  // State för att hantera modalen
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
-  const allTags = useMemo(() => {
-    const tags = recipes.flatMap((r) => r.tags);
-    return ['Alla', ...Array.from(new Set(tags))];
+  useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const data = await getAllRecipes();
+        setRecipes(data);
+      } catch (err) {
+        console.error('Kunde inte hämta recept', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRecipes();
   }, []);
+
+  const allTags = useMemo(() => {
+    const tags = recipes.flatMap((r) => r.tags ?? []);
+    return ['Alla', ...Array.from(new Set(tags))];
+  }, [recipes]);
 
   const difficulties = ['Alla', 'Lätt', 'Medel', 'Svår'];
 
   const filteredRecipes = recipes.filter((recipe) => {
     const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTag = activeTag === 'Alla' || recipe.tags.includes(activeTag);
+    const matchesTag = activeTag === 'Alla' || (recipe.tags ?? []).includes(activeTag);
     const matchesDiff = activeDifficulty === 'Alla' || recipe.difficulty === activeDifficulty;
     return matchesSearch && matchesTag && matchesDiff;
   });
+
+  if (loading) return <p>Laddar recept...</p>;
 
   return (
     <div className="explore-page-wrapper">
@@ -75,15 +91,15 @@ const ExplorePage: React.FC = () => {
         <div className="recipe-grid">
           {filteredRecipes.length > 0 ? (
             filteredRecipes.map((recipe) => (
-              <article 
-                key={recipe.id} 
+              <article
+                key={recipe._id}
                 className="recipe-card"
-                onClick={() => setSelectedRecipe(recipe)} // <-- Öppna modal vid klick
+                onClick={() => setSelectedRecipe(recipe)}
               >
                 <div className="image-container">
-                  <img src={recipe.image} alt={recipe.title} className="recipe-image" />
+                  <img src={recipe.imageUrl} alt={recipe.title} className="recipe-image" />
                 </div>
-                
+
                 <div className="recipe-content">
                   <div className="recipe-meta">
                     <span className="difficulty-badge">{recipe.difficulty}</span>
@@ -91,11 +107,11 @@ const ExplorePage: React.FC = () => {
                       <Clock size={14} /> {recipe.time}
                     </span>
                   </div>
-                  
+
                   <h2 className="recipe-title">{recipe.title}</h2>
-                  
+
                   <div className="recipe-tags">
-                    {recipe.tags.map((tag) => (
+                    {(recipe.tags ?? []).map((tag) => (
                       <span key={tag} className="tag">
                         <Tag size={10} style={{ marginRight: '4px' }} />
                         {tag}
@@ -113,11 +129,10 @@ const ExplorePage: React.FC = () => {
         </div>
       </div>
 
-      {/* Renderar modalen endast om ett recept är valt */}
       {selectedRecipe && (
-        <RecipeModal 
-          recipe={selectedRecipe} 
-          onClose={() => setSelectedRecipe(null)} 
+        <RecipeModal
+          recipe={selectedRecipe}
+          onClose={() => setSelectedRecipe(null)}
         />
       )}
     </div>

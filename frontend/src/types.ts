@@ -1,19 +1,21 @@
 export interface Ingredient {
+  _id?: string;
   name: string;
-  amount: string;
+  quantity: number;
+  unit: string;
 }
 
 export interface Recipe {
-  id: string;
+  _id: string;
   title: string;
-  time: string;
-  difficulty: "Lätt" | "Medel" | "Svår";
-  image: string;
-  tags: string[];
-  servings: number;
-  rating: number;
-  reviews: number;
-  description: string;
-  ingredients: Ingredient[];
-  steps: string[];
+  createdBy: string;
+  imageUrl?: string;
+  time?: string;
+  difficulty?: string;
+  tags?: string[];
+  ingredients?: Ingredient[];
+  steps?: string[];
+  originalRef?: string;
+  createdAt: string;
+  updatedAt: string;
 }

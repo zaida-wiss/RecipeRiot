@@ -15,11 +15,11 @@ export const createRecipeSchema = z.object({
     .min(2, 'Titel måste ha minst 2 tecken')
     .max(200, 'Titel får inte överstiga 200 tecken')
     .trim(),
+  imageUrl: z.string().url().optional(),
   ingredients: z.array(ingredientSchema).optional().default([]),
   steps: z.array(
     z.string().min(1, "Steg får inte vara tomt").max(1000).trim()
   ).optional().default([]),
-  // originalRef sätts av fork-logiken, inte av klienten vid vanlig skapelse
 });
 
 // ─── PATCH /recipes/:id ───────────────────────────────────────────────────────
