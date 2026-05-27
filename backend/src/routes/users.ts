@@ -14,6 +14,7 @@ import {
   updateUser,
   deleteUser,
 } from '../controllers/usersController.js';
+import { authenticate } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -21,7 +22,7 @@ const router = Router();
 
 // GET /api/users?page=&limit=&search=
 router.get(
-  '/',
+  '/', authenticate,
   validateRequest({ query: listUsersQuerySchema }),
   getAllUsers
 );

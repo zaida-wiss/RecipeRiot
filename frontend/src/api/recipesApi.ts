@@ -29,11 +29,11 @@ type RecipesResponse = {
   pagination: Pagination;
 };
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api/v1';
+const API_URL =
+  import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1';
 
 const fetchRecipesPage = async (page: number): Promise<RecipesResponse> => {
-  const response = await fetch(`${API_BASE_URL}/recipes?page=${page}&limit=100`);
+  const response = await fetch(`${API_URL}/recipes?page=${page}&limit=100`);
 
   if (!response.ok) {
     throw new Error('Kunde inte hämta recept från servern');
