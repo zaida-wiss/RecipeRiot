@@ -9,6 +9,7 @@ import usersRouter from './routes/users.js';
 import logger from './middleware/logger.js';
 import healthRouter from "./routes/health.js";
 import { env } from './config/env.js';
+import privacyRouter from "./routes/privacy.js";
 
 
 const app = express();
@@ -31,6 +32,7 @@ app.use("/health", healthRouter);
 app.use('/api/v1/recipes', recipesRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/privacy', privacyRouter)
 
 // 404 - om ingen route matchar
 app.use((_req: express.Request, res: express.Response) => {
