@@ -1,30 +1,40 @@
 // src/middleware/logger.ts
-import { Request, Response, NextFunction } from 'express';
+import pinoHttpModule from 'pino-http';
+import { env } from '../config/env.js';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 
-const logger = (req: Request, res: Response, next: NextFunction): void => {
-  // Vi sparar starttiden så vi kan räkna ut hur lång tid requesten tog.
-  const startedAt = Date.now();
+const pinoHttp =
+  typeof pinoHttpModule === 'function'
+    ? pinoHttpModule
+    : pinoHttpModule.default;
 
-  // "finish" körs när svaret redan har skickats.
-  // Då vet vi statusCode och kan logga ett komplett request-resultat.
-  res.on("finish", () => {
-    const duration = Date.now() - startedAt;
+const logger = pinoHttp({
+  level: env.NODE_ENV === 'production' ? 'info' : 'debug',
 
-    // Logga bara teknisk metadata.
-    // Logga inte req.body eller Authorization-headern, eftersom de kan innehålla
-    // lösenord, tokens eller andra personuppgifter.
-    console.log(
-      JSON.stringify({
+  // Redaction betyder att Pino maskerar känsliga fält innan de hamnar i loggen.
+  redact: {
+    paths: [
+      'req.headers.authorization',
+      'req.headers.cookie',
+    ],
+    censor: '[REDACTED]',
+  },
+
+  // Vi väljer aktivt vilka delar av requesten som får loggas.
+  // Lägg inte till req.body här, eftersom body kan innehålla lösenord eller personuppgifter.
+  serializers: {
+    req(req: IncomingMessage) {
+      return {
         method: req.method,
-        path: req.path,
+        url: req.url,
+      };
+    },
+    res(res: ServerResponse) {
+      return {
         statusCode: res.statusCode,
-        durationMs: duration,
-      })
-    );
-  });
-
-  // Skicka requesten vidare till nästa middleware eller route.
-  next();
-};
+      };
+    },
+  },
+});
 
 export default logger;
