@@ -60,7 +60,7 @@ const RecipeCard = ({ recipe, onClick, isFavorite: initialFavorite = false }: Re
             <span key={tag}>{tag}</span>
           ))}
         </div>
-        <p className="card-author">Av {recipe.createdBy}</p>
+        <p className="card-author">Av {recipe.createdByUsername ?? recipe.createdBy}</p>
       </div>
     </div>
   );

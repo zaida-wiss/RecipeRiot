@@ -9,6 +9,7 @@ export interface Recipe {
   _id: string;
   title: string;
   createdBy: string;
+  createdByUsername?: string;
   imageUrl?: string;
   time?: string;
   difficulty?: string;

@@ -10,6 +10,7 @@ interface IIngredient {
 export interface IRecipe extends Document {
   title: string;
   createdBy: string;
+  createdByUsername: string;
   imageUrl?: string;
   ingredients: IIngredient[];
   steps: string[];
@@ -29,6 +30,7 @@ const RecipeSchema = new Schema<IRecipe>(
   {
     title: { type: String, required: [true, 'Titel är obligatorisk'], trim: true },
     createdBy: { type: String, required: [true, 'createdBy är obligatorisk'], trim: true },
+    createdByUsername: { type: String, default: 'Okänd' },
     imageUrl: { type: String, default: '' },
     ingredients: { type: [IngredientSchema], default: [] },
     steps: { type: [String], default: [] },

@@ -51,7 +51,7 @@ const RecipeModal = ({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
             )}
             <span className="modal__meta-item">
               <Users size={13} strokeWidth={2} aria-hidden="true" />
-              Av {recipe.createdBy}
+              Av {recipe.createdByUsername ?? recipe.createdBy}
             </span>
           </div>
 

@@ -75,7 +75,11 @@ export const getRecipeById = asyncHandler(async (req, res): Promise<void> => {
 
 export const createRecipe = asyncHandler(async (req, res): Promise<void> => {
   const userId = getAuthenticatedUserId(req);
-  const recipe = await Recipe.create({ ...req.validatedBody, createdBy: userId });
+  const recipe = await Recipe.create({
+    ...req.validatedBody,
+    createdBy: userId,
+    createdByUsername: req.user?.username ?? 'Okänd',
+  });
   res.status(201).json(recipe);
 });
 
