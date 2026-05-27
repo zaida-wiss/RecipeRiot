@@ -84,16 +84,19 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, userna
         <div className="navbar-actions">
           {isLoggedIn ? (
             <>
-              <span className="navbar-welcome" aria-live="polite">Hej, {username}</span>
-              <button
-                className="navbar-btn navbar-btn--ghost"
-                onClick={onLogoutClick}
-                aria-label="Logga ut"
-              >
-                <LogOut size={14} aria-hidden="true" />
-                Logga ut
-              </button>
-            </>
+          <span className="navbar-welcome" aria-live="polite">Hej, {username}</span>
+         <NavLink to="/profil" className="navbar-btn navbar-btn--ghost">
+           Min profil
+          </NavLink>
+        <button
+           className="navbar-btn navbar-btn--ghost"
+           onClick={onLogoutClick}
+           aria-label="Logga ut"
+    >
+      <LogOut size={14} aria-hidden="true" />
+      Logga ut
+    </button>
+  </>
           ) : (
             <>
               {statusMessage && (

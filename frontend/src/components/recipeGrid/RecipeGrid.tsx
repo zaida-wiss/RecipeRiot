@@ -2,27 +2,35 @@ import { useState, useEffect } from "react";
 import "./RecipeGrid.css";
 import RecipeCard from "../recipeCard/RecipeCard";
 import RecipeModal from "../recipeModal/RecipeModal";
+import AddRecipeForm from "../addRecipe/AddRecipeForm";
 import type { Recipe } from "../../types";
 import { getAllRecipes } from "../../api/recipesApi";
+import { getAuthData } from "../../api/authApi";
+import { Plus } from "lucide-react";
 
 const RecipeGrid = () => {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selected, setSelected] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  const authData = getAuthData();
+  const isLoggedIn = authData !== null;
+
+  const fetchRecipes = async () => {
+    try {
+      const data = await getAllRecipes();
+      setRecipes(data);
+    } catch (err) {
+      setError("Något gick fel när recepten hämtades.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchRecipes = async () => {
-      try {
-        const data = await getAllRecipes();
-        setRecipes(data);
-      } catch (err) {
-        setError("Något gick fel när recepten hämtades.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchRecipes();
   }, []);
 
@@ -53,6 +61,16 @@ const RecipeGrid = () => {
           <span className="section-label">Trendande nu</span>
           <h2>Veckans mest älskade recept</h2>
           <p>De mest forkade recepten från vår community</p>
+
+          {isLoggedIn && (
+            <button
+              className="add-recipe-btn"
+              onClick={() => setShowAddForm(true)}
+            >
+              <Plus size={16} />
+              Lägg till recept
+            </button>
+          )}
         </div>
 
         <div className="grid">
@@ -68,6 +86,16 @@ const RecipeGrid = () => {
 
       {selected && (
         <RecipeModal recipe={selected} onClose={() => setSelected(null)} />
+      )}
+
+      {showAddForm && (
+        <AddRecipeForm
+          onClose={() => setShowAddForm(false)}
+          onSuccess={() => {
+            setLoading(true);
+            fetchRecipes();
+          }}
+        />
       )}
     </section>
   );

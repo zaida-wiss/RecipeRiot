@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Search, Clock, Tag } from 'lucide-react';
+import { Search } from 'lucide-react';
 import RecipeModal from '../recipeModal/RecipeModal';
+import RecipeCard from '../recipeCard/RecipeCard';
 import type { Recipe } from '../../types';
 import { getAllRecipes } from '../../api/recipesApi';
 import './ExplorePage.css';
@@ -91,35 +92,11 @@ const ExplorePage: React.FC = () => {
         <div className="recipe-grid">
           {filteredRecipes.length > 0 ? (
             filteredRecipes.map((recipe) => (
-              <article
+              <RecipeCard
                 key={recipe._id}
-                className="recipe-card"
+                recipe={recipe}
                 onClick={() => setSelectedRecipe(recipe)}
-              >
-                <div className="image-container">
-                  <img src={recipe.imageUrl} alt={recipe.title} className="recipe-image" />
-                </div>
-
-                <div className="recipe-content">
-                  <div className="recipe-meta">
-                    <span className="difficulty-badge">{recipe.difficulty}</span>
-                    <span className="time-info">
-                      <Clock size={14} /> {recipe.time}
-                    </span>
-                  </div>
-
-                  <h2 className="recipe-title">{recipe.title}</h2>
-
-                  <div className="recipe-tags">
-                    {(recipe.tags ?? []).map((tag) => (
-                      <span key={tag} className="tag">
-                        <Tag size={10} style={{ marginRight: '4px' }} />
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </article>
+              />
             ))
           ) : (
             <div className="no-results">
