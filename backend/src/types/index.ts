@@ -60,3 +60,7 @@ export interface AuthUser {
   role: UserRole;
 }
 
+export interface PrivacyExportResponse {
+  user: UserResponse;
+  recipes: Recipe[];
+}
