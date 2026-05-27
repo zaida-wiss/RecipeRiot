@@ -1,4 +1,6 @@
 import type { Recipe } from '../types';
+import { getAuthHeaders } from './authApi';
+
 
 export type ApiIngredient = {
   name: string;
@@ -29,6 +31,13 @@ type RecipesResponse = {
   pagination: Pagination;
 };
 
+export type CreateRecipeInput = {
+  title: string;
+  ingredients?: ApiIngredient[];
+  steps?: string[];
+};
+
+
 const API_URL =
   import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1';
 
@@ -58,6 +67,24 @@ export const getAllRecipes = async (): Promise<ApiRecipe[]> => {
   return allRecipes;
 };
 
+export const createRecipe = async (
+  recipe: CreateRecipeInput
+): Promise<ApiRecipe> => {
+  const response = await fetch(`${API_URL}/recipes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(recipe),
+  });
+
+  if (!response.ok) {
+    throw new Error('Kunde inte skapa recept');
+  }
+
+  return response.json() as Promise<ApiRecipe>;
+};
 
 
 const fallbackImages = [

@@ -78,6 +78,7 @@ export type AuthResponse = {
 };
 
 
+
 // Export-funktioner
 // Registrering skickar lösenordet till backend, där det hashats med bcrypt innan användaren sparas.
 export const registerUser = async (
