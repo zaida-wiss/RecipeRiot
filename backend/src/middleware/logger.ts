@@ -1,6 +1,56 @@
-import pino from 'pino';
-import { env } from '../config/env.js';
+import crypto from 'node:crypto';
+import pinoHttpModule from 'pino-http';
+import type { IncomingMessage, ServerResponse } from 'node:http';
+import { baseLogger } from '../config/logger.js';
 
-export const baseLogger = pino({
-  level: env.NODE_ENV === 'production' ? 'info' : 'debug',
+const pinoHttp =
+  typeof pinoHttpModule === 'function'
+    ? pinoHttpModule
+    : pinoHttpModule.default;
+
+const logger = pinoHttp({
+  logger: baseLogger,
+
+  genReqId: (req) => {
+    const requestId = req.headers['x-request-id'];
+
+    if (typeof requestId === 'string') {
+      return requestId;
+    }
+
+    return crypto.randomUUID();
+  },
+
+  customSuccessMessage: (req, res) => {
+    return `${req.method} ${req.url} ${res.statusCode}`;
+  },
+
+  customErrorMessage: (req, _res, error) => {
+    return `${req.method} ${req.url} failed: ${error.message}`;
+  },
+
+  redact: {
+    paths: [
+      'req.headers.authorization',
+      'req.headers.cookie',
+    ],
+    censor: '[REDACTED]',
+  },
+
+  serializers: {
+    req(req: IncomingMessage & { id?: string | number }) {
+      return {
+        id: req.id,
+        method: req.method,
+        url: req.url,
+      };
+    },
+    res(res: ServerResponse) {
+      return {
+        statusCode: res.statusCode,
+      };
+    },
+  },
 });
+
+export default logger;
