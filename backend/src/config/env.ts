@@ -10,6 +10,9 @@ const envSchema = z.object({
   JWT_SECRET: z.string().min(20, "JWT_SECRET måste vara minst 20 tecken."),
   JWT_EXPIRES_IN: z.string().default("1h"),
   BCRYPT_SALT_ROUNDS: z.coerce.number().int().min(8).max(14).default(10),
+  LOG_LEVEL: z
+  .enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal'])
+  .optional(),
 });
 
 export const env = envSchema.parse(process.env);
