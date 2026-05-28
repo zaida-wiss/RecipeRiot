@@ -21,27 +21,24 @@ const logger = pinoHttp({
     return crypto.randomUUID();
   },
 
+  customLogLevel: (_req, res, error) => {
+    if (error || res.statusCode >= 500) {
+      return 'error';
+    }
+
+    if (res.statusCode >= 400) {
+      return 'warn';
+    }
+
+    return 'info';
+  },
+
   customSuccessMessage: (req, res) => {
     return `${req.method} ${req.url} ${res.statusCode}`;
   },
 
   customErrorMessage: (req, _res, error) => {
     return `${req.method} ${req.url} failed: ${error.message}`;
-  },
-
-  redact: {
-    paths: [
-      'req.headers.authorization',
-      'req.headers.cookie',
-      'req.body.password',
-      'req.body.passwordConfirm',
-      'req.body.token',
-      'res.headers["set-cookie"]',
-      '*.password',
-      '*.passwordHash',
-      '*.token'
-    ],
-    censor: '[REDACTED]',
   },
 
   serializers: {
