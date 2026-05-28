@@ -13,10 +13,13 @@ export const exportMyData = async (
       throw new UnauthorizedError("Autentisering krävs");
     }
 
-      req.log.info(
-    { userId: req.user.id },
-    'Exporting user data'
-  );
+    req.log.info(
+      {
+        event: 'privacy.export',
+        userId: req.user.id,
+      },
+      'User exported privacy data'
+    );
 
     const user = await User.findById(req.user.id);
 
@@ -52,9 +55,12 @@ export const exportMyData = async (
         throw new UnauthorizedError("Autentisering krävs");
       }
 
-          req.log.info(
-      { userId: req.user.id },
-      'Deleting user account'
+    req.log.info(
+      {
+        event: 'privacy.delete_account',
+        userId: req.user.id,
+      },
+      'User requested account deletion'
     );
 
       await Recipe.updateMany(

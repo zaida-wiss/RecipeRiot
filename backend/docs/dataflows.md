@@ -2,13 +2,16 @@
 
 ## Personuppgifter
 
-| Data | Var finns den? | Varför behövs den? | Vem kan se den? |
-| --- | --- | --- | --- |
-| username | User | Visa användarnamn och login | användaren, admin |
-| email | User | login och kontoidentifiering | användaren, admin |
-| passwordHash | User | verifiera lösenord | endast backend |
-| role | User/JWT | behörighet | backend, frontend |
-| createdBy | Recipe | koppla recept till användare | backend, frontend vid recept |
+RecipeRiot sparar bara de användaruppgifter som behövs för konton och behörighet.
+
+| Fält | Varför behövs det? |
+| --- | --- |
+| username | Visa användarnamn och identifiera användare i appen |
+| email | Login och kontoidentifiering |
+| passwordHash | Verifiera lösenord utan att lagra lösenord i klartext |
+| role | Styra behörighet med RBAC |
+
+Vi sparar inte personnummer, adress, telefonnummer, födelsedatum eller IP-adress eftersom appen inte behöver det.
 
 ## Dataflöde: registrering
 
@@ -34,4 +37,4 @@ Vi loggar request-metod, path, status och tid. Vi loggar inte body, password, pa
 
 ## Radering
 
-När en användare raderar sitt konto tar backend bort användaren och anonymiserar användarens recept genom att sätta createdBy till deleted-user.
+När en användare raderar sitt konto tar backend bort användaren och anonymiserar användarens recept genom att sätta createdBy till "Raderad användare".
