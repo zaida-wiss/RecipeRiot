@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import pinoHttpModule from 'pino-http';
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { baseLogger } from '../config/logger.js';
+import { baseLogger } from '../config/baseLogger.js';
 
 const pinoHttp =
   typeof pinoHttpModule === 'function'
@@ -33,6 +33,13 @@ const logger = pinoHttp({
     paths: [
       'req.headers.authorization',
       'req.headers.cookie',
+      'req.body.password',
+      'req.body.passwordConfirm',
+      'req.body.token',
+      'res.headers["set-cookie"]',
+      '*.password',
+      '*.passwordHash',
+      '*.token'
     ],
     censor: '[REDACTED]',
   },
