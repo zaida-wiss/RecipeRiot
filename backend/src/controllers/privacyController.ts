@@ -13,6 +13,11 @@ export const exportMyData = async (
       throw new UnauthorizedError("Autentisering krävs");
     }
 
+      req.log.info(
+    { userId: req.user.id },
+    'Exporting user data'
+  );
+
     const user = await User.findById(req.user.id);
 
     if (!user) {
@@ -46,6 +51,11 @@ export const exportMyData = async (
       if (!req.user) {
         throw new UnauthorizedError("Autentisering krävs");
       }
+
+          req.log.info(
+      { userId: req.user.id },
+      'Deleting user account'
+    );
 
       await Recipe.updateMany(
         { createdBy: req.user.id },
