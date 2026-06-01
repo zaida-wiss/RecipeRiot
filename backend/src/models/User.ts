@@ -10,6 +10,8 @@ export interface IUser extends Document {
   // Därför heter fältet passwordHash.
   passwordHash: string;
   role: UserRole;
+  isDeleted: boolean;
+  deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -48,6 +50,14 @@ const UserSchema = new Schema<IUser>(
       enum: ["user", "admin"],
       default: "user",
       required: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: {
+      type: Date,
+      default: null,
     },
   },
   {
