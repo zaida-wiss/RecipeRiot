@@ -1,10 +1,10 @@
 // src/config/baseLogger.ts
 import pino from 'pino';
 
-// baseLogger är appens grundlogger.
+// logger är appens grundlogger.
 // Den kan användas utanför HTTP-flödet, t.ex. vid serverstart,
 // databasanslutning eller schemalagda jobb.
-const baseLogger = pino({
+const logger = pino({
   // LOG_LEVEL gör det möjligt att styra hur mycket som loggas via .env.
   // Om inget anges loggar vi från info och uppåt.
   level: process.env.LOG_LEVEL || 'info',
@@ -44,4 +44,4 @@ const baseLogger = pino({
   },
 });
 
-export default baseLogger;
+export default logger;

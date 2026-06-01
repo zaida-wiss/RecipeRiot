@@ -1,12 +1,22 @@
 // src/middleware/logger.ts
 import crypto from 'node:crypto';
 import { pinoHttp } from 'pino-http';
-import baseLogger from '../config/baseLogger.js';
+import logger from '../config/baseLogger.js';
 
-// logger är Express-middleware.
-// Den loggar inkommande HTTP-requests och kopplar dem till baseLogger.
-const logger = pinoHttp({
-  logger: baseLogger,
+// httpLogger är Express-middleware.
+// Den loggar inkommande HTTP-requests och kopplar dem till vår vanliga logger.
+const httpLogger = pinoHttp({
+  logger,
+
+  // Anpassat loggmeddelande för requests som inte kastar serverfel.
+  customSuccessMessage: (req, res) => {
+    return `${req.method} ${req.url} ${res.statusCode}`;
+  },
+
+  // Anpassat loggmeddelande när pino-http får ett error-objekt.
+  customErrorMessage: (req, res, err) => {
+    return `${req.method} ${req.url} ${res.statusCode} failed: ${err.message}`;
+  },
 
   // Varje request får ett id så att flera loggrader från samma request
   // kan kopplas ihop vid felsökning.
@@ -37,4 +47,4 @@ const logger = pinoHttp({
   },
 });
 
-export default logger;
+export default httpLogger;

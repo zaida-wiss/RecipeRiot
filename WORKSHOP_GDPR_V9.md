@@ -17,7 +17,7 @@ Det här är redan gjort:
 
 - `backend/src/config/baseLogger.ts` finns och använder `pino`.
 - `backend/src/middleware/logger.ts` finns och använder `pino-http`.
-- `logger.ts` importerar `baseLogger` med ESM-importen `../config/baseLogger.js`.
+- `logger.ts` importerar grundloggern från `../config/baseLogger.js`.
 - `pino-http` importeras med namngiven import: `import { pinoHttp } from 'pino-http';`.
 - `npm run build` har fungerat efter uppdelningen.
 
@@ -94,7 +94,7 @@ Ledande fråga:
 Den används när du själv vill logga en händelse i koden:
 
 ```ts
-baseLogger.info(
+logger.info(
   { event: 'server.started', port: 3000 },
   'Server started'
 );
@@ -151,7 +151,7 @@ Exempel:
 import pino from 'pino';
 import { pinoHttp } from 'pino-http';
 import crypto from 'node:crypto';
-import baseLogger from '../config/baseLogger.js';
+import logger from '../config/baseLogger.js';
 ```
 
 Varför `.js` på lokala imports?
@@ -165,7 +165,7 @@ Det här är ungefär vad ni har just nu i `backend/src/config/baseLogger.ts`:
 ```ts
 import pino from 'pino';
 
-const baseLogger = pino({
+const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
   transport: process.env.NODE_ENV !== 'production'
     ? { target: 'pino-pretty' }
@@ -185,7 +185,7 @@ const baseLogger = pino({
   },
 });
 
-export default baseLogger;
+export default logger;
 ```
 
 Detta ligger nära studiematerialets CommonJS-exempel, men med ESM/TypeScript:
@@ -193,7 +193,7 @@ Detta ligger nära studiematerialets CommonJS-exempel, men med ESM/TypeScript:
 - materialet använder `const pino = require('pino')`
 - vi använder `import pino from 'pino'`
 - materialet använder `module.exports = logger`
-- vi använder `export default baseLogger`
+- vi använder `export default logger`
 
 Varför ska `redact` vara så bred?
 
@@ -229,10 +229,16 @@ Det här är vad ni har just nu i `backend/src/middleware/logger.ts`:
 ```ts
 import crypto from 'node:crypto';
 import { pinoHttp } from 'pino-http';
-import baseLogger from '../config/baseLogger.js';
+import logger from '../config/baseLogger.js';
 
-const logger = pinoHttp({
-  logger: baseLogger,
+const httpLogger = pinoHttp({
+  logger,
+  customSuccessMessage: (req, res) => {
+    return `${req.method} ${req.url} ${res.statusCode}`;
+  },
+  customErrorMessage: (req, res, err) => {
+    return `${req.method} ${req.url} ${res.statusCode} failed: ${err.message}`;
+  },
   genReqId: (req) => {
     const requestId = req.headers['x-request-id'];
 
@@ -255,7 +261,7 @@ const logger = pinoHttp({
   },
 });
 
-export default logger;
+export default httpLogger;
 ```
 
 Varför `genReqId`?
@@ -274,15 +280,15 @@ Vad skulle hända annars?
 
 Om allt loggas som `info` blir det svårare att hitta riktiga fel. Om allt loggas som `error` blir loggarna för brusiga och larm kan börja gå i onödan.
 
-Hur skiljer detta sig från studiematerialet?
+Hur stämmer detta med studiematerialet?
 
-Studiematerialet visar `customSuccessMessage` och `customErrorMessage`. Ni använder i stället `customLogLevel`. Det är också en bra lösning, för den styr vilken nivå loggen får:
+Studiematerialet visar `customSuccessMessage` och `customErrorMessage`, och de finns nu med i er `logger.ts`. Ni har dessutom `customLogLevel`, som styr vilken nivå loggen får:
 
 - lyckade requests blir `info`
 - klientfel blir `warn`
 - serverfel blir `error`
 
-Vill ni ligga ännu närmare materialet senare kan ni lägga till meddelandena också, men det behövs inte för att få en fungerande och strukturerad HTTP-logger.
+Det betyder att ni ligger nära materialet, men har en extra förbättring: loggarna får olika nivå beroende på statuskod.
 
 ## Steg 7: Behövs fallback för ESM/CommonJS?
 
