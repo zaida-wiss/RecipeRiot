@@ -1,7 +1,7 @@
 // src/middleware/logger.ts
 import crypto from 'node:crypto';
 import { pinoHttp } from 'pino-http';
-import logger from '../config/baseLogger.js';
+import logger from '../config/logger.js';
 
 // httpLogger är Express-middleware.
 // Den loggar inkommande HTTP-requests och kopplar dem till vår vanliga logger.

@@ -1,7 +1,6 @@
 // src/app.ts
 import express from 'express';
 import cors from 'cors';
-import morgan from 'morgan';
 import { errorHandler } from './middleware/errorHandler.js';
 import authRouter from './routes/auth.js';
 import recipesRouter from './routes/recipes.js';
@@ -20,7 +19,6 @@ app.use(
   })
 );
 app.use(express.json());
-app.use(morgan('dev'));
 app.use(logger);
 
 // Health-kontroll
