@@ -83,3 +83,23 @@ export const softDeleteMe = async (
 
   res.status(204).send();
 };
+
+// DELETE /api/v1/gdpr/me/hard
+export const hardDeleteMe = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  if (!req.user) {
+    throw new UnauthorizedError("Autentisering krävs");
+  }
+
+  await Recipe.deleteMany({ createdBy: req.user.id });
+  await User.findByIdAndDelete(req.user.id);
+
+  req.log.info(
+    { event: 'gdpr.user.hard_delete', userId: req.user.id },
+    'User hard deleted account'
+  );
+
+  res.status(204).send();
+};
