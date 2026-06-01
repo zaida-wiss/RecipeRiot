@@ -8,7 +8,7 @@ const logger = pino({
     ? { target: 'pino-pretty', options: { colorize: true } }
     : undefined,
 
-  // Skyddar känsliga fält — ersätts med [REDACTED] i loggarna
+  // Skyddar känsliga fält ersätts med [REDACTED] i loggarna
   redact: {
     paths: [
       'req.headers.authorization',
