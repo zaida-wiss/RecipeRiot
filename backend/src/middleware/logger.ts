@@ -1,9 +1,15 @@
 // src/middleware/logger.ts
-import { Request, Response, NextFunction } from 'express';
+import pinoHttp from 'pino-http';
 
-const logger = (req: Request, _res: Response, next: NextFunction): void => {
-  console.log(`${req.method} ${req.path}`);
-  next();
-};
+const logger = pinoHttp({
+  redact: {
+    paths: [
+      'req.headers.authorization',
+      'req.body.password',
+      'req.body.passwordHash',
+    ],
+    censor: '[REDACTED]',
+  },
+});
 
 export default logger;
