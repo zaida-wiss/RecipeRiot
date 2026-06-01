@@ -27,12 +27,18 @@ const baseLogger = pino({
       'req.body.password',
       'req.body.passwordHash',
       'req.body.token',
+      'req.body.email',
+      'req.body.identifier',
+      'req.body.username',
 
       // Wildcards skyddar även om vi loggar ett eget objekt,
       // t.ex. logger.info({ user }, '...').
       '*.password',
       '*.passwordHash',
       '*.token',
+      '*.email',
+      '*.identifier',
+      '*.username',
     ],
     censor: '[REDACTED]',
   },
