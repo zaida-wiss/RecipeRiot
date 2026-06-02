@@ -100,6 +100,7 @@ export const login = async (
     // passwordHash har select: false i modellen.
     // Därför måste vi aktivt ta med det vid login.
     const user = await User.findOne({
+      isDeleted: false,
       $or: [
         { email: identifier.toLowerCase() },
         { username: identifier },
