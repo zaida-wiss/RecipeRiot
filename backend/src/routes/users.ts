@@ -14,6 +14,8 @@ import {
   updateUser,
   deleteUser,
 } from '../controllers/usersController.js';
+import { authenticate } from '../middleware/auth.js';
+import { authorizeRoles } from '../middleware/authorize.js';
 
 const router = Router();
 
@@ -21,35 +23,35 @@ const router = Router();
 
 // GET /api/users?page=&limit=&search=
 router.get(
-  '/',
+  '/', authenticate, authorizeRoles("admin"),
   validateRequest({ query: listUsersQuerySchema }),
   getAllUsers
 );
 
 // GET /api/users/:id
 router.get(
-  '/:id',
+  '/:id', authenticate, authorizeRoles("admin"),
   validateRequest({ params: idParamSchema }),
   getUserById
 );
 
 // POST /api/users
 router.post(
-  '/',
+  '/',  authenticate, authorizeRoles("admin"),
   validateRequest({ body: createUserSchema }),
   createUser
 );
 
 // PUT /api/users/:id  (alla fält valfria tack vare updateUserSchema)
 router.put(
-  '/:id',
+  '/:id', authenticate, authorizeRoles("admin"),
   validateRequest({ params: idParamSchema, body: updateUserSchema }),
   updateUser
 );
 
 // DELETE /api/users/:id
 router.delete(
-  '/:id',
+  '/:id', authenticate, authorizeRoles("admin"),
   validateRequest({ params: idParamSchema }),
   deleteUser
 );
