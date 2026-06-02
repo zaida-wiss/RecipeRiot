@@ -67,6 +67,7 @@ export type AuthUser = {
   id: string;
   username: string;
   email: string;
+  role: "user" | "admin";
   createdAt?: string;
   updatedAt?: string;
 };
@@ -75,6 +76,7 @@ export type AuthResponse = {
   token: string;
   user: AuthUser;
 };
+
 
 
 // Export-funktioner
