@@ -15,7 +15,6 @@ const Layout = () => {
     initialAuth?.user ?? null
   );
 
-  // När inloggning lyckas — stäng modalen och gå till profilsidan direkt
   const handleAuthSuccess = (user: AuthUser) => {
     setCurrentUser(user);
     setAuthStatusMessage(null);
@@ -23,7 +22,6 @@ const Layout = () => {
     navigate('/profil');
   };
 
-  // Logout rensar localStorage och skickar till startsidan
   const handleLogout = () => {
     clearAuthData();
     setCurrentUser(null);
@@ -43,6 +41,7 @@ const Layout = () => {
         onLogoutClick={handleLogout}
         isLoggedIn={currentUser !== null}
         username={currentUser?.username}
+        role={currentUser?.role}
         statusMessage={authStatusMessage}
       />
 

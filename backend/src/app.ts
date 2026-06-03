@@ -3,7 +3,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { pinoHttp } from 'pino-http';
 import { errorHandler } from './middleware/errorHandler.js';
 import authRouter from './routes/auth.js';
 import recipesRouter from './routes/recipes.js';
@@ -41,7 +40,7 @@ app.use('/api/v1/auth/login', loginLimiter);
 
 // JSON och loggning
 app.use(express.json());
-app.use(pinoHttp({ logger }));
+app.use(logger);
 
 // Routes
 app.use("/health", healthRouter);
