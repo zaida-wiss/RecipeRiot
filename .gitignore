@@ -1,6 +1,7 @@
 # Ignorera kurs-markdownfiler
 kurs*.md
 *workshop.md
+AGENTS.md
 
 # Dependencies
 node_modules
