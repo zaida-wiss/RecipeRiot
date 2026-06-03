@@ -9,13 +9,13 @@ import authRouter from './routes/auth.js';
 import recipesRouter from './routes/recipes.js';
 import usersRouter from './routes/users.js';
 import healthRouter from "./routes/health.js";
-import logger from './middleware/logger.js';
+import gdprRouter from "./routes/gdpr.js";
 import favoritesRouter from './routes/favorites.js';
-
+import logger from './middleware/logger.js';
+import { env } from './config/env.js';
 
 const app = express();
-
-const allowedOrigin = process.env.CORS_ORIGIN || 'http://localhost:5173';
+const allowedOrigin = env.CORS_ORIGIN;
 
 // Säkerhetsheaders
 app.use(helmet());
@@ -23,14 +23,13 @@ app.use(helmet());
 // CORS
 app.use(cors({ origin: allowedOrigin }));
 
-// Rate limiting — max 100 anrop per 15 min
+// Rate limiting
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 500,
   message: { message: 'För många anrop, försök igen senare' },
 });
 
-// Striktare för login — max 5 försök per 15 min
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 5,
@@ -50,6 +49,7 @@ app.use('/api/v1/recipes', recipesRouter);
 app.use('/api/v1/favorites', favoritesRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/gdpr', gdprRouter);
 
 // 404
 app.use((_req: express.Request, res: express.Response) => {

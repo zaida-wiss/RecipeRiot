@@ -1,4 +1,5 @@
 import type { Recipe } from '../types';
+import { getAuthHeaders } from './authApi';
 
 export type ApiIngredient = {
   name: string;
@@ -31,11 +32,17 @@ type RecipesResponse = {
   pagination: Pagination;
 };
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:3000/api/v1';
+export type CreateRecipeInput = {
+  title: string;
+  ingredients?: ApiIngredient[];
+  steps?: string[];
+};
+
+const API_URL =
+  import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1';
 
 const fetchRecipesPage = async (page: number): Promise<RecipesResponse> => {
-  const response = await fetch(`${API_BASE_URL}/recipes?page=${page}&limit=100`);
+  const response = await fetch(`${API_URL}/recipes?page=${page}&limit=100`);
   if (!response.ok) {
     throw new Error('Kunde inte hämta recept från servern');
   }
@@ -58,6 +65,23 @@ export const getAllRecipes = async (): Promise<Recipe[]> => {
 };
 
 export async function getRecipeById(id: string): Promise<Recipe> {
-  const res = await fetch(`${API_BASE_URL}/recipes/${id}`);
+  const res = await fetch(`${API_URL}/recipes/${id}`);
   return res.json();
 }
+
+export const createRecipe = async (
+  recipe: CreateRecipeInput
+): Promise<ApiRecipe> => {
+  const response = await fetch(`${API_URL}/recipes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(recipe),
+  });
+  if (!response.ok) {
+    throw new Error('Kunde inte skapa recept');
+  }
+  return response.json() as Promise<ApiRecipe>;
+};

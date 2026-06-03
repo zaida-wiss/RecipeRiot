@@ -9,6 +9,8 @@ export interface IUser extends Document {
   passwordHash: string;
   role: UserRole;
   favorites: mongoose.Types.ObjectId[];
+  isDeleted: boolean;
+  deletedAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,6 +49,14 @@ const UserSchema = new Schema<IUser>(
       type: [mongoose.Schema.Types.ObjectId],
       ref: 'Recipe',
       default: [],
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: {
+      type: Date,
+      default: null,
     },
   },
   {
