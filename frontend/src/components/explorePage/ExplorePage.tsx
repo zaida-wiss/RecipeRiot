@@ -110,6 +110,22 @@ const ExplorePage: React.FC = () => {
         <RecipeModal
           recipe={selectedRecipe}
           onClose={() => setSelectedRecipe(null)}
+          onFork={(forkedData) => {
+            setSelectedRecipe(null);
+            alert(`Forka: Kopian "${forkedData.title}" skapas och förbereds för ingrediensändringar!`);
+            // TODO: Här skickar du 'forkedData' vidare till ert receptformulär
+          }}
+          onEdit={(recipeToEdit) => {
+            setSelectedRecipe(null);
+            alert(`Redigera: Öppnar formulär för att ändra originalet "${recipeToEdit.title}"`);
+            // TODO: Här sätter du igång er redigeringsvy
+          }}
+          onDelete={async () => {
+            if (!window.confirm(`Är du säker på att du vill radera "${selectedRecipe.title}"?`)) return;
+            alert("Receptet raderat!");
+            setSelectedRecipe(null);
+            // TODO: API-anrop för att radera i databasen: await deleteRecipe(selectedRecipe._id)
+          }}
         />
       )}
     </div>

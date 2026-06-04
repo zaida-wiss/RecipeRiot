@@ -14,25 +14,25 @@ const RecipeGrid = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  // Denna state hjälper oss att ladda om listan utan regelbrott
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const authData = getAuthData();
-  const isLoggedIn = authData !== null;
-
-  const fetchRecipes = async () => {
-    try {
-      const data = await getAllRecipes();
-      setRecipes(data);
-    } catch (err) {
-      setError("Något gick fel när recepten hämtades.");
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const isLoggedIn = getAuthData() !== null;
 
   useEffect(() => {
+    const fetchRecipes = async () => {
+      try {
+        const data = await getAllRecipes();
+        setRecipes(data);
+      } catch (err) {
+        setError("Något gick fel när recepten hämtades.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchRecipes();
-  }, []);
+  }, [refreshTrigger]); // Laddar om varje gång trigger-numret ändras
 
   if (loading) {
     return (
@@ -85,7 +85,23 @@ const RecipeGrid = () => {
       </div>
 
       {selected && (
-        <RecipeModal recipe={selected} onClose={() => setSelected(null)} />
+        <RecipeModal 
+          recipe={selected} 
+          onClose={() => setSelected(null)} 
+          onFork={(forkedData) => {
+            setSelected(null);
+            alert(`Grid: Kopian "${forkedData.title}" förbereds för dina ändringar!`);
+          }}
+          onEdit={(recipeToEdit) => {
+            setSelected(null);
+            alert(`Grid: Öppnar ändrings-vy för "${recipeToEdit.title}"`);
+          }}
+          onDelete={async () => {
+            if (!window.confirm(`Är du säker på att du vill radera "${selected.title}"?`)) return;
+            alert("Receptet raderat!");
+            setSelected(null);
+          }}
+        />
       )}
 
       {showAddForm && (
@@ -93,7 +109,9 @@ const RecipeGrid = () => {
           onClose={() => setShowAddForm(false)}
           onSuccess={() => {
             setLoading(true);
-            fetchRecipes();
+            // Ökar numret med 1, vilket får useEffect att köra hämta-logiken på nytt!
+            setRefreshTrigger(prev => prev + 1);
+            setShowAddForm(false);
           }}
         />
       )}

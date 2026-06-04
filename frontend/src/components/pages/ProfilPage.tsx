@@ -159,8 +159,28 @@ const ProfilePage = () => {
         )}
       </div>
 
+      {/* MODALEN UPPDATERAD MED PROPS HÄR */}
       {selected && (
-        <RecipeModal recipe={selected} onClose={() => setSelected(null)} />
+        <RecipeModal
+          recipe={selected}
+          onClose={() => setSelected(null)}
+          onFork={(forkedData) => {
+            setSelected(null);
+            alert(`Profil: Kopian "${forkedData.title}" förbereds för dina ändringar!`);
+            // TODO: Skicka forkedData vidare till AddRecipeForm
+          }}
+          onEdit={(recipeToEdit) => {
+            setSelected(null);
+            alert(`Profil: Öppnar ändrings-vy för ditt recept "${recipeToEdit.title}"`);
+            // TODO: Skicka vidare till redigering
+          }}
+          onDelete={async () => {
+            if (!window.confirm(`Är du säker på att du vill radera "${selected.title}"?`)) return;
+            alert("Receptet raderat!");
+            setSelected(null);
+            // TODO: Lägg till api-anropet här och kör fetchMyRecipes() efteråt
+          }}
+        />
       )}
 
       {showAddForm && (

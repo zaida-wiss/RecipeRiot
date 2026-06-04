@@ -145,3 +145,66 @@
   .modal { width: 100%; max-height: 95vh; border-radius: 16px 16px 0 0; top: auto; bottom: 0; left: 0; transform: none; animation: none; }
   .modal-backdrop { align-items: flex-end; }
 }
+
+/* ── Actions (Edit, Delete, Fork) ── */
+.modal__actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.modal__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 9px;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.modal__btn:active {
+  transform: scale(0.98);
+}
+
+/* Redigera-knapp (Matchar modalens dämpade, eleganta stil) */
+.modal__btn--edit {
+  background: #f5f2ef;
+  color: #666;
+  border: 1px solid #ede8e2;
+}
+
+.modal__btn--edit:hover {
+  background: #ede8e2;
+  color: #2a1e16;
+}
+
+/* Radera-knapp (Mjuk varningsröd, passar den varma paletten) */
+.modal__btn--delete {
+  background: #fff0f0;
+  color: #dc3545;
+  border: 1px solid #ffe0e0;
+}
+
+.modal__btn--delete:hover {
+  background: #ffe0e0;
+  color: #bd2130;
+}
+
+/* Forka-knapp (Matchar din terracotta primärfärg, precis som flikarna) */
+.modal__btn--fork {
+  background: #fff5ef;
+  color: #c56a2d;
+  border: 1px solid #ffdcd0;
+}
+
+.modal__btn--fork:hover {
+  background: #c56a2d;
+  color: #fff;
+}

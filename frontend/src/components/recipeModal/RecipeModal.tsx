@@ -1,10 +1,44 @@
 import { useState, useEffect } from "react";
-import { Clock, Users, ShoppingCart, ChefHat } from "lucide-react";
+import { Clock, Users, ShoppingCart, ChefHat, Trash2, Edit3, GitFork } from "lucide-react";
 import "./recipes.css";
 import type { Recipe } from "../../types";
+import { getAuthData } from "../../api/authApi";
 
-const RecipeModal = ({ recipe, onClose }: { recipe: Recipe; onClose: () => void }) => {
+interface RecipeModalProps {
+  recipe: Recipe;
+  onClose: () => void;
+  onFork: (forkedRecipe: Partial<Recipe>) => void;
+  onDelete?: (recipeId: string) => void;
+  onEdit?: (recipe: Recipe) => void;
+}
+
+const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalProps) => {
   const [activeTab, setActiveTab] = useState<"ingredients" | "steps">("ingredients");
+
+  // 1. Hämta inloggad användardata (kollar både id och _id för säkerhets skull)
+  const auth = getAuthData();
+  const isLoggedIn = !!auth;
+  const currentUserId = auth?.user?.id;
+
+  // 2. Extrahera skaparens ID (stödjer både sträng, objekt med id, eller objekt med _id)
+ let recipeCreatorId = "";
+  if (recipe.createdBy) {
+    if (typeof recipe.createdBy === "object" && recipe.createdBy !== null) {
+      const creatorObj = recipe.createdBy as { _id?: string; id?: string };
+      recipeCreatorId = creatorObj._id || creatorObj.id || "";
+    } else {
+      recipeCreatorId = String(recipe.createdBy);
+    }
+  }
+
+// 3. Kontrollera ägarskap (Super-strikt kontroll för att förhindra falska matchningar)
+  const isOwner = 
+    isLoggedIn && 
+    !!currentUserId && 
+    !!recipeCreatorId && 
+    String(currentUserId).trim().length > 5 && // Säkerställ att det är ett riktigt ID
+    String(recipeCreatorId).trim().length > 5 && 
+    String(currentUserId).trim() === String(recipeCreatorId).trim();
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -15,6 +49,20 @@ const RecipeModal = ({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
       document.body.style.overflow = "";
     };
   }, [onClose]);
+
+  const handleForkClick = () => {
+    const username = auth?.user?.username || "min";
+    
+    const forkedData: Partial<Recipe> = {
+      ...recipe,
+      _id: undefined, 
+      title: `${recipe.title} (${username} kopia)`,
+      createdBy: currentUserId,
+      createdByUsername: auth?.user?.username
+    };
+
+    onFork(forkedData);
+  };
 
   return (
     <>
@@ -39,6 +87,27 @@ const RecipeModal = ({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
 
         {/* Body */}
         <div className="modal__body">
+          
+          {/* Action-knappar */}
+          {isLoggedIn && (
+            <div className="modal__actions">
+              {isOwner ? (
+                <>
+                  <button onClick={() => onEdit?.(recipe)} className="modal__btn modal__btn--edit">
+                    <Edit3 size={16} /> Redigera recept
+                  </button>
+                  <button onClick={() => onDelete?.(recipe._id)} className="modal__btn modal__btn--delete">
+                    <Trash2 size={16} /> Radera recept
+                  </button>
+                </>
+              ) : (
+                <button onClick={handleForkClick} className="modal__btn modal__btn--fork">
+                  <GitFork size={16} /> Forka recept (Skapa kopia)
+                </button>
+              )}
+            </div>
+          )}
+
           <div className="modal__meta-row">
             {recipe.difficulty && (
               <span className="badge">{recipe.difficulty}</span>
@@ -51,7 +120,7 @@ const RecipeModal = ({ recipe, onClose }: { recipe: Recipe; onClose: () => void 
             )}
             <span className="modal__meta-item">
               <Users size={13} strokeWidth={2} aria-hidden="true" />
-              Av {recipe.createdByUsername ?? recipe.createdBy}
+              Av {recipe.createdByUsername ?? (typeof recipe.createdBy === 'object' && recipe.createdBy !== null ? (recipe.createdBy as { username?: string }).username : recipe.createdBy)}
             </span>
           </div>
 
