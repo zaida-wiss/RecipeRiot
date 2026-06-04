@@ -3,14 +3,17 @@ import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { Recipe, type IRecipe } from '../models/Recipe.js';
 import { NotFoundError, UnauthorizedError, ForbiddenError } from '../errors/AppError.js';
 
+// helpers
 type AsyncController = (req: Request, res: Response) => Promise<void>;
 
+//Fångar fel i async controllers och skickar dem vidare till Express errorHandler.
 const asyncHandler = (handler: AsyncController): RequestHandler => {
   return (req: Request, res: Response, next: NextFunction): void => {
     void handler(req, res).catch(next);
   };
 };
 
+// Hjälper oss att söka på text utan att specialtecken blir regex-kod.
 const escapeRegex = (value: string): string => {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 };
@@ -51,6 +54,8 @@ const getOwnedRecipeFromRequest = async (req: Request, forbiddenMessage: string)
   return recipe;
 };
 
+//Routes
+// GET /api/v1/recipes
 export const getAllRecipes = asyncHandler(async (req, res): Promise<void> => {
   const { page, limit, search } = req.validatedQuery;
   const filter = { ...buildRecipeFilter(search), deletedAt: null };
@@ -67,12 +72,14 @@ export const getAllRecipes = asyncHandler(async (req, res): Promise<void> => {
   });
 });
 
+// GET /api/v1/recipes/:id
 export const getRecipeById = asyncHandler(async (req, res): Promise<void> => {
   const { id } = req.validatedParams;
   const recipe = await getRecipeOrThrow(id);
   res.json(recipe);
 });
 
+// POST /api/v1/recipes
 export const createRecipe = asyncHandler(async (req, res): Promise<void> => {
   const userId = getAuthenticatedUserId(req);
   const recipe = await Recipe.create({
@@ -83,6 +90,7 @@ export const createRecipe = asyncHandler(async (req, res): Promise<void> => {
   res.status(201).json(recipe);
 });
 
+// PUT /api/v1/recipes/:id
 export const updateRecipe = asyncHandler(async (req, res): Promise<void> => {
   const recipe = await getOwnedRecipeFromRequest(req, 'Du får bara uppdatera dina egna recept');
   Object.assign(recipe, req.validatedBody);
@@ -90,6 +98,7 @@ export const updateRecipe = asyncHandler(async (req, res): Promise<void> => {
   res.json(recipe);
 });
 
+// DELETE /api/v1/recipes/:id
 export const deleteRecipe = asyncHandler(async (req, res): Promise<void> => {
   const { id } = req.validatedParams;
   const recipe = await getRecipeOrThrow(id);
@@ -99,6 +108,7 @@ export const deleteRecipe = asyncHandler(async (req, res): Promise<void> => {
   res.status(204).send();
 });
 
+// POST /api/v1/recipes/:id/fork
 export const forkRecipe = asyncHandler(async (req, res): Promise<void> => {
   const userId = getAuthenticatedUserId(req);
   const { id } = req.validatedParams;
