@@ -20,9 +20,11 @@ export const createRecipeSchema = z.object({
   steps: z.array(
     z.string().min(1, "Steg får inte vara tomt").max(1000).trim()
   ).optional().default([]),
+  /// originalRef sätts av fork-logiken, inte av klienten vid vanlig skapelse
 });
 
 // ─── PATCH /recipes/:id ───────────────────────────────────────────────────────
+// .partial() gör alla fält valfria
 export const updateRecipeSchema = createRecipeSchema.partial();
 
 // ─── GET /recipes?search=&page=&limit= ───────────────────────────────────────
@@ -42,7 +44,7 @@ export const listRecipesQuerySchema = z.object({
   search: z.string().optional(),
 });
 
-// ─── :id param ───────────────────────────────────────────────────────────────
+// ─── :id param (GET/:id, PATCH/:id, DELETE/:id, POST/:id/fork)  ───────────────────────────────────────────────────────────────
 export const idParamSchema = z.object({
   id: z
     .string()
