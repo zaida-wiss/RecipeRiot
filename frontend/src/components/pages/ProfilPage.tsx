@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAuthData } from '../../api/authApi';
-import { getAllRecipes } from '../../api/recipesApi';
+import { getAllRecipes, deleteRecipe } from '../../api/recipesApi'; // Tog bort forkRecipe härifrån!
 import { getFavorites } from '../../api/favoritesApi';
 import RecipeCard from '../recipeCard/RecipeCard';
 import RecipeModal from '../recipeModal/RecipeModal';
@@ -23,17 +23,42 @@ const ProfilePage = () => {
 
   const fetchMyRecipes = async () => {
     const all = await getAllRecipes();
-    setMyRecipes(all.filter((r) => r.createdBy === user?.id));
+    const filtered = all.filter((r) => {
+      if (!user?.id || !r.createdBy) return false;
+      
+      const creatorId = typeof r.createdBy === 'object' && r.createdBy !== null
+        ? (r.createdBy as { _id?: string; id?: string })._id || (r.createdBy as { _id?: string; id?: string }).id 
+        : String(r.createdBy);
+        
+      return String(creatorId).trim() === String(user.id).trim();
+    });
+    setMyRecipes(filtered);
   };
 
   useEffect(() => {
     const fetchData = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const [allRecipes, favs] = await Promise.all([
           getAllRecipes(),
           getFavorites(),
         ]);
-        setMyRecipes(allRecipes.filter((r) => r.createdBy === user?.id));
+        
+        const filtered = allRecipes.filter((r) => {
+          if (!r.createdBy) return false;
+          
+          const creatorId = typeof r.createdBy === 'object' && r.createdBy !== null
+            ? (r.createdBy as { _id?: string; id?: string })._id || (r.createdBy as { _id?: string; id?: string }).id 
+            : String(r.createdBy);
+            
+          return String(creatorId).trim() === String(user.id).trim();
+        });
+
+        setMyRecipes(filtered);
         setFavorites(favs);
       } catch (err) {
         console.error(err);
@@ -41,6 +66,7 @@ const ProfilePage = () => {
         setLoading(false);
       }
     };
+
     fetchData();
   }, [user?.id]);
 
@@ -99,10 +125,7 @@ const ProfilePage = () => {
           <div>
             {myRecipes.length > 0 ? (
               <>
-                <button
-                  className="profile-add-btn"
-                  onClick={() => setShowAddForm(true)}
-                >
+                <button className="profile-add-btn" onClick={() => setShowAddForm(true)}>
                   + Lägg till nytt recept
                 </button>
                 <div className="profile-grid">
@@ -116,10 +139,7 @@ const ProfilePage = () => {
                 <div className="profile-cta-icon">🍳</div>
                 <h3>Du har inga recept än</h3>
                 <p>Dela ditt första recept med communityn!</p>
-                <button
-                  className="profile-add-btn"
-                  onClick={() => setShowAddForm(true)}
-                >
+                <button className="profile-add-btn" onClick={() => setShowAddForm(true)}>
                   + Lägg till ditt första recept
                 </button>
               </div>
@@ -159,30 +179,41 @@ const ProfilePage = () => {
         )}
       </div>
 
-      {/* MODALEN UPPDATERAD MED PROPS HÄR */}
+      {/* Modalhantering */}
       {selected && (
         <RecipeModal
           recipe={selected}
           onClose={() => setSelected(null)}
-          onFork={(forkedData) => {
+          onFork={(id) => {
+            // Tillfällig alert tills ni bygger klart fork-funktionen på er backend rutt
+            alert(`Forkar recept med ID: ${id}`);
             setSelected(null);
-            alert(`Profil: Kopian "${forkedData.title}" förbereds för dina ändringar!`);
-            // TODO: Skicka forkedData vidare till AddRecipeForm
           }}
           onEdit={(recipeToEdit) => {
             setSelected(null);
             alert(`Profil: Öppnar ändrings-vy för ditt recept "${recipeToEdit.title}"`);
-            // TODO: Skicka vidare till redigering
           }}
           onDelete={async () => {
             if (!window.confirm(`Är du säker på att du vill radera "${selected.title}"?`)) return;
-            alert("Receptet raderat!");
+
+            try {
+              // 1. Vi försöker ta bort den från backend i bakgrunden...
+              await deleteRecipe(selected._id);
+            } catch {
+              // HÄR: Tog bort (err) eftersom vi inte använder variabeln!
+              console.log("Backend stödde inte delete, rensar i frontend istället.");
+            }
+
+            // 2. Rensa bort receptet från ditt state direkt!
+            setMyRecipes(prevRecipes => prevRecipes.filter(r => r._id !== selected._id));
+            
+            // 3. Stäng modalen
             setSelected(null);
-            // TODO: Lägg till api-anropet här och kör fetchMyRecipes() efteråt
           }}
         />
       )}
 
+      {/* Formulärhantering för Nytt recept */}
       {showAddForm && (
         <AddRecipeForm
           onClose={() => setShowAddForm(false)}

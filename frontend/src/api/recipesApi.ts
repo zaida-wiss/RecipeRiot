@@ -84,3 +84,17 @@ export const createRecipe = async (
   }
   return response.json() as Promise<ApiRecipe>;
 };
+
+// --- HÄR ÄR DEN NYA RADERINGSFUNKTIONEN ---
+export const deleteRecipe = async (id: string): Promise<void> => {
+  const response = await fetch(`${API_URL}/recipes/${id}`, {
+    method: 'DELETE',
+    headers: {
+      ...getAuthHeaders(),
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Kunde inte radera receptet');
+  }
+};
