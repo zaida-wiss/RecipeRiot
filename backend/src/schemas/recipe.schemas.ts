@@ -1,7 +1,7 @@
 // src/schemas/recipe.schemas.ts
 import { z } from 'zod';
 
-// ─── Hjälpschema: ingrediens (inbäddad i receptet) ───────────────────────────
+// ─── Hjälpschema: ingrediens ──────────────────────────────────────────────────
 const ingredientSchema = z.object({
   name: z.string().min(1, 'Ingrediensnamn är obligatoriskt').max(100).trim(),
   quantity: z.number().positive('Mängd måste vara ett positivt tal'),
@@ -15,7 +15,7 @@ export const createRecipeSchema = z.object({
     .min(2, 'Titel måste ha minst 2 tecken')
     .max(200, 'Titel får inte överstiga 200 tecken')
     .trim(),
-  imageUrl: z.string().url().optional(),
+  imageUrl: z.url().optional(),
   ingredients: z.array(ingredientSchema).optional().default([]),
   steps: z.array(
     z.string().min(1, "Steg får inte vara tomt").max(1000).trim()
@@ -23,7 +23,6 @@ export const createRecipeSchema = z.object({
 });
 
 // ─── PATCH /recipes/:id ───────────────────────────────────────────────────────
-// .partial() gör alla fält valfria
 export const updateRecipeSchema = createRecipeSchema.partial();
 
 // ─── GET /recipes?search=&page=&limit= ───────────────────────────────────────
@@ -43,7 +42,7 @@ export const listRecipesQuerySchema = z.object({
   search: z.string().optional(),
 });
 
-// ─── :id param (GET/:id, PATCH/:id, DELETE/:id, POST/:id/fork) ───────────────
+// ─── :id param ───────────────────────────────────────────────────────────────
 export const idParamSchema = z.object({
   id: z
     .string()
