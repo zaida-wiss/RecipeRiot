@@ -75,9 +75,24 @@ const ProfilePage = () => {
       </div>
 
       <div className="profile-tabs">
-        <button className={`profile-tab ${activeTab === 'mina-recept' ? 'active' : ''}`} onClick={() => setActiveTab('mina-recept')}>Mina recept</button>
-        <button className={`profile-tab ${activeTab === 'favoriter' ? 'active' : ''}`} onClick={() => setActiveTab('favoriter')}>Favoriter</button>
-        <button className={`profile-tab ${activeTab === 'installningar' ? 'active' : ''}`} onClick={() => setActiveTab('installningar')}>Inställningar</button>
+        <button
+          className={`profile-tab ${activeTab === 'mina-recept' ? 'active' : ''}`}
+          onClick={() => setActiveTab('mina-recept')}
+        >
+          Mina recept
+        </button>
+        <button
+          className={`profile-tab ${activeTab === 'favoriter' ? 'active' : ''}`}
+          onClick={() => setActiveTab('favoriter')}
+        >
+          Favoriter
+        </button>
+        <button
+          className={`profile-tab ${activeTab === 'installningar' ? 'active' : ''}`}
+          onClick={() => setActiveTab('installningar')}
+        >
+          Inställningar
+        </button>
       </div>
 
       <div className="profile-content">
@@ -85,30 +100,34 @@ const ProfilePage = () => {
           <p className="profile-loading">Laddar...</p>
         ) : activeTab === 'mina-recept' ? (
           <div>
+            <button className="profile-add-btn" onClick={() => setShowAddForm(true)}>
+              + Lägg till nytt recept
+            </button>
+
             {myRecipes.length > 0 ? (
-              <>
-                <button className="profile-add-btn" onClick={() => setShowAddForm(true)}>+ Lägg till nytt recept</button>
-                <div className="profile-grid">
-                  {myRecipes.map((r) => (
-                    <RecipeCard key={r._id} recipe={r} onClick={() => setSelected(r)} />
-                  ))}
-                </div>
-              </>
+              <div className="profile-grid">
+                {myRecipes.map((r) => (
+                  <RecipeCard key={r._id} recipe={r} onClick={() => setSelected(r)} />
+                ))}
+              </div>
             ) : (
               <div className="profile-cta">
                 <div className="profile-cta-icon">🍳</div>
                 <h3>Du har inga recept än</h3>
                 <p>Dela ditt första recept med communityn!</p>
-                <button className="profile-add-btn" onClick={() => setShowAddForm(true)}>+ Lägg till ditt första recept</button>
               </div>
             )}
           </div>
         ) : activeTab === 'favoriter' ? (
           <div className="profile-grid">
             {favorites.length > 0 ? (
-              favorites.map((r) => <RecipeCard key={r._id} recipe={r} onClick={() => setSelected(r)} />)
+              favorites.map((r) => (
+                <RecipeCard key={r._id} recipe={r} onClick={() => setSelected(r)} />
+              ))
             ) : (
-              <div className="profile-empty"><p>Du har inga favoriter än.</p></div>
+              <div className="profile-empty">
+                <p>Du har inga favoriter än.</p>
+              </div>
             )}
           </div>
         ) : (
@@ -116,9 +135,12 @@ const ProfilePage = () => {
             <div className="settings-card">
               <h3>Byt lösenord</h3>
               <form className="settings-form">
-                <label>Nuvarande lösenord</label><input type="password" placeholder="••••••••" />
-                <label>Nytt lösenord</label><input type="password" placeholder="••••••••" />
-                <label>Bekräfta nytt lösenord</label><input type="password" placeholder="••••••••" />
+                <label>Nuvarande lösenord</label>
+                <input type="password" placeholder="••••••••" />
+                <label>Nytt lösenord</label>
+                <input type="password" placeholder="••••••••" />
+                <label>Bekräfta nytt lösenord</label>
+                <input type="password" placeholder="••••••••" />
                 <button type="submit" className="settings-btn">Spara lösenord</button>
               </form>
             </div>
@@ -126,48 +148,51 @@ const ProfilePage = () => {
         )}
       </div>
 
-{selected && (
-        <RecipeModal 
-          recipe={selected} 
-          onClose={() => setSelected(null)} 
+      {selected && (
+        <RecipeModal
+          recipe={selected}
+          onClose={() => setSelected(null)}
           onFork={async (forkedRecipe: Partial<Recipe>) => {
             try {
               const ingredients = forkedRecipe.ingredients || [];
-              
-              // Städa upp ingredienserna
               const cleanedIngredients = ingredients.map((ing) => ({
                 ...ing,
-                quantity: typeof ing.quantity === 'string' ? Number(ing.quantity) : (ing.quantity as number)
+                quantity: typeof ing.quantity === 'string' ? Number(ing.quantity) : (ing.quantity as number),
               }));
 
-              // Skapa objektet direkt - vi inkluderar inte _id här
               const recipeToSave = {
-                title: forkedRecipe.title || "Nytt recept",
+                title: forkedRecipe.title || 'Nytt recept',
                 ingredients: cleanedIngredients,
                 steps: forkedRecipe.steps || [],
-                imageUrl: forkedRecipe.imageUrl || "",
-                createdBy: forkedRecipe.createdBy // Behåll användar-ID om det finns
+                imageUrl: forkedRecipe.imageUrl || '',
+                createdBy: forkedRecipe.createdBy,
               };
 
               await createRecipe(recipeToSave);
               await fetchMyRecipes();
               setSelected(null);
-              alert("Receptet har kopierats till dina recept!");
+              alert('Receptet har kopierats till dina recept!');
             } catch (err) {
-              console.error("Det gick inte att forka receptet:", err);
-              alert("Kunde inte skapa receptet. Kontrollera konsolen för detaljer.");
+              console.error('Det gick inte att forka receptet:', err);
+              alert('Kunde inte skapa receptet. Kontrollera konsolen för detaljer.');
             }
           }}
           onDelete={async (id) => {
             await deleteRecipe(id);
-            setMyRecipes(prev => prev.filter(r => r._id !== id));
+            setMyRecipes((prev) => prev.filter((r) => r._id !== id));
             setSelected(null);
           }}
         />
       )}
 
       {showAddForm && (
-        <AddRecipeForm onClose={() => setShowAddForm(false)} onSuccess={() => { setShowAddForm(false); fetchMyRecipes(); }} />
+        <AddRecipeForm
+          onClose={() => setShowAddForm(false)}
+          onSuccess={() => {
+            setShowAddForm(false);
+            fetchMyRecipes();
+          }}
+        />
       )}
     </div>
   );
