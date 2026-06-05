@@ -2,8 +2,10 @@
 import { getAuthHeaders } from './authApi';
 import type { Recipe } from '../types';
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 export const getFavorites = async (): Promise<Recipe[]> => {
-  const res = await fetch('/api/v1/favorites', {
+  const res = await fetch(`${BASE_URL}/api/v1/favorites`, {
     headers: getAuthHeaders(),
   });
   const json = await res.json();
@@ -11,14 +13,14 @@ export const getFavorites = async (): Promise<Recipe[]> => {
 };
 
 export const addFavorite = async (recipeId: string): Promise<void> => {
-  await fetch(`/api/v1/favorites/${recipeId}`, {
+  await fetch(`${BASE_URL}/api/v1/favorites/${recipeId}`, {
     method: 'POST',
     headers: getAuthHeaders(),
   });
 };
 
 export const removeFavorite = async (recipeId: string): Promise<void> => {
-  await fetch(`/api/v1/favorites/${recipeId}`, {
+  await fetch(`${BASE_URL}/api/v1/favorites/${recipeId}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });

@@ -41,7 +41,7 @@ export type CreateRecipeInput = {
   tags?: string[];
 };
 
-const API_URL = '/api/v1';
+const API_URL = import.meta.env.VITE_API_URL + '/api/v1';
 
 const fetchRecipesPage = async (page: number): Promise<RecipesResponse> => {
   const response = await fetch(`${API_URL}/recipes?page=${page}&limit=100`);
