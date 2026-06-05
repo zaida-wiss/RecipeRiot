@@ -56,10 +56,9 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
     if (!editedRecipe) return;
     const newIngredients = [...(editedRecipe.ingredients || [])];
     
-    // Konvertera quantity till nummer om det behövs för din typ-definition
-    const finalValue = field === 'quantity' ? (value === "" ? 0 : Number(value)) : value;
+    // Tillåt användaren att skriva vad de vill (även tomma strängar)
+    newIngredients[index] = { ...newIngredients[index], [field]: value };
     
-    newIngredients[index] = { ...newIngredients[index], [field]: finalValue };
     setEditedRecipe({ ...editedRecipe, ingredients: newIngredients });
   };
 
