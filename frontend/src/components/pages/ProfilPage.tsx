@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { getAuthData } from '../../api/authApi';
-import { getAllRecipes, deleteRecipe } from '../../api/recipesApi'; // Tog bort forkRecipe härifrån!
+import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi'; 
 import { getFavorites } from '../../api/favoritesApi';
 import RecipeCard from '../recipeCard/RecipeCard';
 import RecipeModal from '../recipeModal/RecipeModal';
@@ -21,8 +21,12 @@ const ProfilePage = () => {
   const authData = getAuthData();
   const user = authData?.user;
 
-  const fetchMyRecipes = async () => {
+const fetchMyRecipes = async () => {
+  try {
+    // Vi hämtar all data igen
     const all = await getAllRecipes();
+    
+    // Filtrera ut de som hör till användaren
     const filtered = all.filter((r) => {
       if (!user?.id || !r.createdBy) return false;
       
@@ -32,8 +36,15 @@ const ProfilePage = () => {
         
       return String(creatorId).trim() === String(user.id).trim();
     });
+
+    // Logga för att se vad vi faktiskt får tillbaka
+    console.log("Hämtade recept:", filtered); 
+    
     setMyRecipes(filtered);
-  };
+  } catch (err) {
+    console.error("Kunde inte hämta recept:", err);
+  }
+};
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,11 +91,8 @@ const ProfilePage = () => {
 
   return (
     <div className="profile-page">
-      {/* Header */}
       <div className="profile-header">
-        <div className="profile-avatar">
-          {user.username.charAt(0).toUpperCase()}
-        </div>
+        <div className="profile-avatar">{user.username.charAt(0).toUpperCase()}</div>
         <div className="profile-info">
           <h1>{user.username}</h1>
           <p>{user.email}</p>
@@ -95,29 +103,12 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="profile-tabs">
-        <button
-          className={`profile-tab ${activeTab === 'mina-recept' ? 'active' : ''}`}
-          onClick={() => setActiveTab('mina-recept')}
-        >
-          Mina recept
-        </button>
-        <button
-          className={`profile-tab ${activeTab === 'favoriter' ? 'active' : ''}`}
-          onClick={() => setActiveTab('favoriter')}
-        >
-          Favoriter
-        </button>
-        <button
-          className={`profile-tab ${activeTab === 'installningar' ? 'active' : ''}`}
-          onClick={() => setActiveTab('installningar')}
-        >
-          Inställningar
-        </button>
+        <button className={`profile-tab ${activeTab === 'mina-recept' ? 'active' : ''}`} onClick={() => setActiveTab('mina-recept')}>Mina recept</button>
+        <button className={`profile-tab ${activeTab === 'favoriter' ? 'active' : ''}`} onClick={() => setActiveTab('favoriter')}>Favoriter</button>
+        <button className={`profile-tab ${activeTab === 'installningar' ? 'active' : ''}`} onClick={() => setActiveTab('installningar')}>Inställningar</button>
       </div>
 
-      {/* Innehåll */}
       <div className="profile-content">
         {loading ? (
           <p className="profile-loading">Laddar...</p>
@@ -125,9 +116,7 @@ const ProfilePage = () => {
           <div>
             {myRecipes.length > 0 ? (
               <>
-                <button className="profile-add-btn" onClick={() => setShowAddForm(true)}>
-                  + Lägg till nytt recept
-                </button>
+                <button className="profile-add-btn" onClick={() => setShowAddForm(true)}>+ Lägg till nytt recept</button>
                 <div className="profile-grid">
                   {myRecipes.map((r) => (
                     <RecipeCard key={r._id} recipe={r} onClick={() => setSelected(r)} />
@@ -136,92 +125,62 @@ const ProfilePage = () => {
               </>
             ) : (
               <div className="profile-cta">
-                <div className="profile-cta-icon">🍳</div>
                 <h3>Du har inga recept än</h3>
-                <p>Dela ditt första recept med communityn!</p>
-                <button className="profile-add-btn" onClick={() => setShowAddForm(true)}>
-                  + Lägg till ditt första recept
-                </button>
+                <button className="profile-add-btn" onClick={() => setShowAddForm(true)}>+ Lägg till ditt första recept</button>
               </div>
             )}
           </div>
         ) : activeTab === 'favoriter' ? (
           <div className="profile-grid">
-            {favorites.length > 0 ? (
-              favorites.map((r) => (
-                <RecipeCard key={r._id} recipe={r} onClick={() => setSelected(r)} />
-              ))
-            ) : (
-              <div className="profile-empty">
-                <p>Du har inga favoriter än. Klicka på hjärtat på ett recept!</p>
-              </div>
-            )}
+            {favorites.map((r) => <RecipeCard key={r._id} recipe={r} onClick={() => setSelected(r)} />)}
           </div>
         ) : (
-          <div className="profile-settings">
-            <div className="settings-card">
-              <h3>Byt lösenord</h3>
-              <form className="settings-form">
-                <label>Nuvarande lösenord</label>
-                <input type="password" placeholder="••••••••" />
-                <label>Nytt lösenord</label>
-                <input type="password" placeholder="••••••••" />
-                <label>Bekräfta nytt lösenord</label>
-                <input type="password" placeholder="••••••••" />
-                <button type="submit" className="settings-btn">Spara lösenord</button>
-              </form>
-            </div>
-            <div className="settings-card">
-              <h3>Profilbild</h3>
-              <p className="settings-desc">Profilbild via URL kommer snart!</p>
-            </div>
-          </div>
+          <div className="profile-settings"><h3>Inställningar...</h3></div>
         )}
       </div>
 
-      {/* Modalhantering */}
       {selected && (
         <RecipeModal
           recipe={selected}
           onClose={() => setSelected(null)}
-          onFork={(id) => {
-            // Tillfällig alert tills ni bygger klart fork-funktionen på er backend rutt
-            alert(`Forkar recept med ID: ${id}`);
-            setSelected(null);
+          onFork={async (forkedRecipe) => {
+            try {
+              // Vi skapar ett objekt som garanterat uppfyller CreateRecipeInput
+              const recipeToSave = {
+                ...forkedRecipe,
+                title: forkedRecipe.title || "Nytt recept",
+                ingredients: forkedRecipe.ingredients || [], // Om ingredients krävs
+              };
+
+              await createRecipe(recipeToSave);
+              await fetchMyRecipes();
+              
+              setSelected(null);
+              alert("Receptet har kopierats till dina recept!");
+            } catch (err) {
+              console.error("Det gick inte att forka receptet:", err);
+              alert("Något gick fel, försök igen.");
+            }
           }}
           onEdit={(recipeToEdit) => {
             setSelected(null);
-            alert(`Profil: Öppnar ändrings-vy för ditt recept "${recipeToEdit.title}"`);
+            alert(`Öppnar ändrings-vy för: ${recipeToEdit.title}`);
           }}
           onDelete={async () => {
-            if (!window.confirm(`Är du säker på att du vill radera "${selected.title}"?`)) return;
-
+            if (!window.confirm(`Vill du radera "${selected.title}"?`)) return;
             try {
-              // 1. Vi försöker ta bort den från backend i bakgrunden...
               await deleteRecipe(selected._id);
+              setMyRecipes(prev => prev.filter(r => r._id !== selected._id));
             } catch {
-              // HÄR: Tog bort (err) eftersom vi inte använder variabeln!
-              console.log("Backend stödde inte delete, rensar i frontend istället.");
+              console.log("Rensar i frontend.");
             }
-
-            // 2. Rensa bort receptet från ditt state direkt!
-            setMyRecipes(prevRecipes => prevRecipes.filter(r => r._id !== selected._id));
-            
-            // 3. Stäng modalen
             setSelected(null);
           }}
         />
       )}
 
-      {/* Formulärhantering för Nytt recept */}
       {showAddForm && (
-        <AddRecipeForm
-          onClose={() => setShowAddForm(false)}
-          onSuccess={() => {
-            setShowAddForm(false);
-            fetchMyRecipes();
-          }}
-        />
+        <AddRecipeForm onClose={() => setShowAddForm(false)} onSuccess={() => { setShowAddForm(false); fetchMyRecipes(); }} />
       )}
     </div>
   );
