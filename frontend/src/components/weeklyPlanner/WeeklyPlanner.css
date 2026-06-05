@@ -1,4 +1,6 @@
-/* Layout & Grund */
+/* ==========================================================================
+   LAYOUT & GRUND
+   ========================================================================== */
 .planner-page-wrapper {
   display: flex;
   flex-direction: column;
@@ -11,13 +13,14 @@
   flex: 1;
   max-width: 1300px;
   margin: 0 auto;
-  /* Balanserad padding: tillräckligt för luft, men sparar plats */
   padding: 60px 2rem 40px 2rem; 
   width: 100%;
   box-sizing: border-box;
 }
 
-/* Header */
+/* ==========================================================================
+   HEADER & FLIKAR (TABS)
+   ========================================================================== */
 .planner-header h1 {
   font-family: 'Playfair Display', serif;
   font-size: 2.5rem;
@@ -28,9 +31,46 @@
 .planner-header p {
   color: #66615e;
   font-size: 1.1rem;
-  margin-bottom: 2rem; 
+  margin-bottom: 1.5rem; 
 }
 
+.planner-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 2rem;
+}
+
+.planner-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #e5e0da;
+  padding: 12px 24px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 550;
+  font-size: 0.95rem;
+  color: #66615e;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+}
+
+.planner-tab-btn:hover {
+  background: #faf7f5;
+  color: #c56a2d;
+  border-color: #c56a2d;
+}
+
+.planner-tab-btn.active {
+  background: #c56a2d;
+  color: white;
+  border-color: #c56a2d;
+}
+
+/* ==========================================================================
+   PLANNER VY
+   ========================================================================== */
 .planner-content {
   display: flex;
   gap: 2.5rem;
@@ -41,7 +81,7 @@
   flex: 2;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem; /* Lagom avstånd mellan dagarna */
+  gap: 0.8rem;
 }
 
 .day-row {
@@ -56,7 +96,7 @@
 .day-label {
   width: 140px;
   background-color: #f5f4ef;
-  padding: 1.6rem; /* Balanserad höjd */
+  padding: 1.6rem;
   font-weight: 550;
   color: #47403d;
   font-family: "Playfair Display", serif;
@@ -71,7 +111,7 @@
   flex: 1;
   background: white;
   border: none;
-  padding: 1.1rem 1.5rem; /* Samma höjd som etiketten */
+  padding: 1.1rem 1.5rem;
   text-align: left;
   color: #817878;
   font-size: 1rem;
@@ -86,6 +126,11 @@
   line-height: 1;
 }
 
+.selected-meal-text {
+  color: #c56a2d;
+  font-weight: 550;
+}
+
 .add-meal-btn:hover {
   background-color: #fcfcfc;
   color: #c56a2d;
@@ -94,6 +139,34 @@
 .active-row {
   border-color: #c56a2d !important;
   box-shadow: 0 0 0 1px #c56a2d;
+}
+
+/* Automatiskt Generera Knapp */
+.generate-list-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  width: 100%;
+  transition: background 0.2s, transform 0.1s;
+  box-shadow: 0 4px 6px rgba(16, 185, 129, 0.15);
+}
+
+.generate-list-btn:hover {
+  background: #059669;
+}
+
+.generate-list-btn:active {
+  transform: scale(0.99);
 }
 
 /* Sidebar & Receptväljare */
@@ -109,6 +182,7 @@
   padding: 2.5rem 2rem;
   text-align: center;
   color: #999;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.02);
 }
 
 .chef-hat-icon {
@@ -133,19 +207,26 @@
 }
 
 .recipe-selector { text-align: left; }
-.recipe-selector h3 { margin-bottom: 1rem; color: #1a1a1a; }
-.selector-subtitle { font-size: 0.9rem; margin-bottom: 1rem; }
+.recipe-selector h3 { margin-bottom: 0.5rem; color: #1a1a1a; font-family: "Playfair Display", serif; font-size: 1.4rem; }
+.selector-subtitle { font-size: 0.9rem; margin-bottom: 1.2rem; color: #66615e; }
 
 .recipe-list { display: flex; flex-direction: column; gap: 10px; }
 .recipe-item {
-  padding: 12px 15px;
+  padding: 14px 15px;
   background: #faf7f5;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  color: #47403d;
+  font-weight: 500;
   transition: 0.2s;
+  border: 1px solid #f0ebe8;
 }
-.recipe-item:hover { background: #f0ebe8; color: #c56a2d; }
+.recipe-item:hover { 
+  background: #f0ebe8; 
+  color: #c56a2d; 
+  border-color: #c56a2d;
+}
 
 .back-btn {
   display: flex;
@@ -156,11 +237,197 @@
   color: #c56a2d;
   cursor: pointer;
   margin-bottom: 1rem;
+  font-weight: 550;
+  padding: 0;
 }
 
-/* Mobil-anpassning */
+.no-recipes-alert {
+  font-size: 0.95rem;
+  color: #66615e;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   INKÖPSLISTA VY
+   ========================================================================== */
+.shopping-layout {
+  width: 100%;
+  animation: fadeIn 0.2s ease;
+}
+
+.shopping-card {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
+  border: 1px solid #eee;
+}
+
+.shopping-card h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.8rem;
+  color: #1d1813;
+  margin-bottom: 1.5rem;
+}
+
+.shopping-list-items {
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+  border-top: 1px solid #f3f4f6;
+}
+
+.shopping-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 8px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.shopping-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #333;
+}
+
+.shopping-item-left input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #c56a2d;
+  cursor: pointer;
+}
+
+.checked-text {
+  text-decoration: line-through;
+  color: #9ca3af;
+}
+
+.shopping-item-right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.shopping-amount-badge {
+  background: #f5efe6;
+  color: #47403d;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 1px solid #e5e0da;
+}
+
+.shopping-delete-btn {
+  background: none;
+  border: none;
+  color: #ef4444;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.shopping-delete-btn:hover {
+  background: #fee2e2;
+}
+
+/* Manuellt Inmatningsfält */
+.shopping-manual-input {
+  display: flex;
+  gap: 12px;
+  margin-top: 30px;
+  background: #faf7f5;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #eee9e8;
+}
+
+.manual-input-name {
+  flex: 2;
+  padding: 12px;
+  border: 1px solid #e5e0da;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.manual-input-amount {
+  flex: 0.6;
+  padding: 12px;
+  border: 1px solid #e5e0da;
+  border-radius: 8px;
+  font-size: 0.95rem;
+}
+
+.manual-unit-select {
+  padding: 12px;
+  border: 1px solid #e5e0da;
+  border-radius: 8px;
+  background: white;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.manual-input-name:focus, .manual-input-amount:focus, .manual-unit-select:focus {
+  outline: none;
+  border-color: #c56a2d;
+  box-shadow: 0 0 0 1px #c56a2d;
+}
+
+.manual-add-btn {
+  background: #c56a2d;
+  color: white;
+  border: none;
+  padding: 0 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.manual-add-btn:hover {
+  background: #a95620;
+}
+
+.shopping-empty {
+  text-align: center;
+  color: #817878;
+  padding: 50px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.shopping-empty p {
+  max-width: 400px;
+  line-height: 1.5;
+  font-size: 1rem;
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   MOBIL-ANPASSNING
+   ========================================================================== */
 @media (max-width: 900px) {
   .planner-content { flex-direction: column; }
   .info-sidebar { width: 100%; position: static; }
-  .footer-content { flex-direction: column; gap: 1.2rem; }
+  .shopping-manual-input { flex-direction: column; gap: 8px; }
+  .manual-add-btn { padding: 12px; }
+  .day-label { width: 100px; padding: 1rem; font-size: 0.95rem; }
+  .add-meal-btn { padding: 1rem; font-size: 0.95rem; }
 }

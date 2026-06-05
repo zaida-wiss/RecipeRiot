@@ -1,9 +1,10 @@
+import 'dotenv/config';
 import { z } from "zod";
 
 const envSchema = z.object({
   NODE_ENV: z
-  .enum(["development", "test", "production"])
-  .default("development"),
+    .enum(["development", "test", "production"])
+    .default("development"),
   PORT: z.coerce.number().int().positive().default(3000),
   MONGO_URI: z.url("MONGO_URI måste vara en giltig URL"),
   CORS_ORIGIN: z.url("CORS_ORIGIN måste vara ett giltigt URL"),

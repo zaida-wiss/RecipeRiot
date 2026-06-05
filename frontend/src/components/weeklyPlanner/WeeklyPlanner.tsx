@@ -1,6 +1,17 @@
-import { useState } from 'react';
-import { ChefHat, Plus, UtensilsCrossed, ArrowLeft, } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChefHat, Plus, UtensilsCrossed, ArrowLeft } from 'lucide-react';
+import { getFavorites } from '../../api/favoritesApi';
+import { getAllRecipes } from '../../api/recipesApi';
+import type { Recipe } from '../../types';
 import './WeeklyPlanner.css';
+
+// Interface för att hantera olika möjliga svar från backend
+interface Favorite {
+  recipeId?: string;
+  _id?: string;
+  id?: string;
+  title?: string;
+}
 
 const WeeklyPlanner = () => {
   const days = [
@@ -9,18 +20,52 @@ const WeeklyPlanner = () => {
   ];
 
   const [activeDay, setActiveDay] = useState<string | null>(null);
-  const [selectedMeals, setSelectedMeals] = useState<Record<string, string>>({});
+  const [selectedMeals, setSelectedMeals] = useState<Record<string, Recipe>>({});
+  const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const savedRecipes = [
-    { id: 1, title: "Krämig Pasta med Basilika" },
-    { id: 2, title: "Hemgjorda Tacos" },
-    { id: 3, title: "Linssoppa med Citron" },
-    { id: 4, title: "Smashed Burgers" }
-  ];
+  // Synka planerade måltider till localStorage
+  useEffect(() => {
+    localStorage.setItem('plannedMeals', JSON.stringify(selectedMeals));
+  }, [selectedMeals]);
 
-  const selectRecipe = (recipeTitle: string) => {
+  // Hämta recept och favoriter
+  useEffect(() => {
+    const fetchPlannerRecipes = async () => {
+      setLoading(true);
+      try {
+        const [allRecipes, favorites] = await Promise.all([
+          getAllRecipes(),
+          getFavorites()
+        ]);
+
+        // Om favorites returnerar hela objekt
+        if (favorites.length > 0 && typeof favorites[0] === 'object' && 'title' in favorites[0]) {
+          setMyRecipes(favorites as unknown as Recipe[]);
+        } else {
+          // Om favorites returnerar ID-lista, filtrera allRecipes
+          const favIds = favorites.map((f: Favorite) => 
+            f.recipeId || f._id || ''
+);
+          
+          const filtered = allRecipes.filter((r) => 
+            favIds.includes(r._id)
+          );
+          setMyRecipes(filtered.length > 0 ? filtered : allRecipes);
+        }
+      } catch (err) {
+        console.error("Kunde inte hämta recept:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlannerRecipes();
+  }, []);
+
+  const selectRecipe = (recipe: Recipe) => {
     if (activeDay) {
-      setSelectedMeals((prev) => ({ ...prev, [activeDay]: recipeTitle }));
+      setSelectedMeals((prev) => ({ ...prev, [activeDay]: recipe }));
       setActiveDay(null);
     }
   };
@@ -30,34 +75,22 @@ const WeeklyPlanner = () => {
       <div className="planner-container">
         <header className="planner-header">
           <h1>Veckoplanering</h1>
-          <p>Planera veckans måltider och generera inköpslista automatiskt</p>
         </header>
 
         <div className="planner-content">
           <div className="days-list">
             {days.map((day) => (
-              <div 
-                key={day} 
-                className={`day-row ${activeDay === day ? 'active-row' : ''}`}
-              >
+              <div key={day} className={`day-row ${activeDay === day ? 'active-row' : ''}`}>
                 <div className="day-label">{day}</div>
-                <button 
-                  className="add-meal-btn" 
-                  onClick={() => setActiveDay(day)}
-                >
+                <button className="add-meal-btn" onClick={() => setActiveDay(day)}>
                   {selectedMeals[day] ? (
                     <div className="selected-meal-text">
                       <UtensilsCrossed size={18} /> 
-                      <span>{selectedMeals[day]}</span>
+                      <span>{selectedMeals[day].title}</span>
                     </div>
                   ) : (
                     <div className="btn-content">
-                      <Plus size={18} /> 
-                      <span>
-                        {activeDay === day 
-                          ? 'Välj recept i menyn till höger...' 
-                          : 'Lägg till måltid'}
-                      </span>
+                      <Plus size={18} /> <span>{activeDay === day ? 'Välj recept...' : 'Lägg till måltid'}</span>
                     </div>
                   )}
                 </button>
@@ -72,26 +105,19 @@ const WeeklyPlanner = () => {
                   <button className="back-btn" onClick={() => setActiveDay(null)}>
                     <ArrowLeft size={16} /> Tillbaka
                   </button>
-                  <h3>Mina recept</h3>
-                  <p className="selector-subtitle">Välj ett recept för {activeDay}:</p>
+                  <h3>Mina recept & favoriter</h3>
                   <div className="recipe-list">
-                    {savedRecipes.map((recipe) => (
-                      <div 
-                        key={recipe.id} 
-                        className="recipe-item"
-                        onClick={() => selectRecipe(recipe.title)}
-                      >
-                        {recipe.title}
+                    {loading ? <p>Laddar...</p> : myRecipes.map((r) => (
+                      <div key={r._id} className="recipe-item" onClick={() => selectRecipe(r)}>
+                        {r.title}
                       </div>
                     ))}
                   </div>
                 </div>
               ) : (
                 <div className="default-info">
-                  <div className="chef-hat-icon">
-                    <ChefHat size={48} strokeWidth={1.5} />
-                  </div>
-                  <p>Välj recept för varje dag så genereras din inköpslista automatiskt</p>
+                  <ChefHat size={48} />
+                  <p>Klicka på en dag för att lägga till ett recept.</p>
                 </div>
               )}
             </div>

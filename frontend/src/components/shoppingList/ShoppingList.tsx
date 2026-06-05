@@ -1,11 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./ShoppingList.module.css";
 import { ShoppingCart, Plus, Trash2 } from "lucide-react";
-import { recipes } from "../data/mockRecipes";
-
-/* =========================
-   TYPES
-========================= */
+import type { Recipe } from "../../types";
 
 type ShoppingItem = {
   id: number;
@@ -14,97 +10,60 @@ type ShoppingItem = {
   checked: boolean;
 };
 
-/* =========================
-   COMPONENT
-========================= */
-
 export default function ShoppingList() {
   const [items, setItems] = useState<ShoppingItem[]>([]);
+  const [plannedRecipes, setPlannedRecipes] = useState<Recipe[]>([]);
+  const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
 
+  // States för manuell inmatning
   const [input, setInput] = useState("");
   const [amountValue, setAmountValue] = useState("");
   const [unit, setUnit] = useState("st");
 
-  const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
-
-  const selectedRecipe = recipes.find((r) => r.id === selectedRecipeId);
-
-  const parseAmount = (amount?: string) => {
-    if (!amount) return null;
-
-    const match = amount.match(/^(\d+(?:\.\d+)?)\s*(.*)$/);
-    if (!match) return null;
-
-    return {
-      value: parseFloat(match[1]),
-      unit: match[2] || "",
+  // Hämta från localStorage
+  useEffect(() => {
+    const loadPlannedMeals = () => {
+      const saved = localStorage.getItem('plannedMeals');
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          setPlannedRecipes(Object.values(parsed) as Recipe[]);
+        } catch (e) {
+          console.error("Kunde inte läsa sparade måltider:", e);
+        }
+      }
     };
-  };
+    loadPlannedMeals();
+  }, []);
 
+  const selectedRecipe = plannedRecipes.find((r) => r._id === selectedRecipeId);
+
+  /* Logik för att slå ihop ingredienser */
   const addItem = (name: string, amount?: string) => {
     setItems((prev) => {
-      const existing = prev.find(
-        (item) => item.name.toLowerCase() === name.toLowerCase()
-      );
-
-      const newParsed = parseAmount(amount);
-
-      if (!existing) {
-        return [
-          ...prev,
-          {
-            id: Date.now() + Math.random(),
-            name,
-            amount,
-            checked: false,
-          },
-        ];
+      const existing = prev.find((i) => i.name.toLowerCase() === name.toLowerCase());
+      if (existing) {
+        return prev.map((item) =>
+          item.name.toLowerCase() === name.toLowerCase()
+            ? { ...item, amount: item.amount && amount ? `${item.amount} + ${amount}` : item.amount || amount }
+            : item
+        );
       }
-
-      const existingParsed = parseAmount(existing.amount);
-
-      return prev.map((item) => {
-        if (item.name.toLowerCase() !== name.toLowerCase()) return item;
-
-        if (
-          existingParsed &&
-          newParsed &&
-          existingParsed.unit === newParsed.unit
-        ) {
-          return {
-            ...item,
-            amount: `${existingParsed.value + newParsed.value} ${existingParsed.unit}`,
-          };
-        }
-
-        return {
-          ...item,
-          amount: item.amount && amount ? `${item.amount} + ${amount}` : item.amount || amount,
-        };
-      });
+      return [...prev, { id: Date.now(), name, amount, checked: false }];
     });
   };
 
   const handleAddManual = () => {
     if (!input.trim()) return;
-
-    const name = input.trim();
-
-    const finalAmount = amountValue
-      ? `${amountValue} ${unit}`
-      : undefined;
-
-    addItem(name, finalAmount);
-
+    const finalAmount = amountValue ? `${amountValue} ${unit}` : undefined;
+    addItem(input.trim(), finalAmount);
     setInput("");
     setAmountValue("");
   };
 
   const toggleItem = (id: number) => {
     setItems((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, checked: !item.checked } : item
-      )
+      prev.map((item) => (item.id === id ? { ...item, checked: !item.checked } : item))
     );
   };
 
@@ -112,17 +71,12 @@ export default function ShoppingList() {
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  const handleIngredientClick = (name: string, amount?: string) => {
-    addItem(name, amount);
-  };
-
   return (
     <div className={styles.page}>
       <div className={styles.layout}>
-
+        {/* VÄNSTER: Inköpslistan */}
         <div className={styles.left}>
           <div className={styles.card}>
-
             <div className={styles.header}>
               <h2>Inköpslista</h2>
             </div>
@@ -137,126 +91,70 @@ export default function ShoppingList() {
             <ul className={styles.list}>
               {items.map((item) => (
                 <li key={item.id} className={styles.item}>
-
                   <label className={styles.row}>
                     <input
                       type="checkbox"
                       checked={item.checked}
                       onChange={() => toggleItem(item.id)}
                     />
-                    <span className={item.checked ? styles.checked : ""}>
-                      {item.name}
-                    </span>
+                    <span className={item.checked ? styles.checked : ""}>{item.name}</span>
                   </label>
-
                   <div className={styles.itemRight}>
-                    <span className={styles.amount}>
-                      {item.amount ?? ""}
-                    </span>
-
-                    <button
-                      onClick={() => removeItem(item.id)}
-                      className={styles.deleteButton}
-                    >
+                    <span className={styles.amount}>{item.amount ?? ""}</span>
+                    <button onClick={() => removeItem(item.id)} className={styles.deleteButton}>
                       <Trash2 size={16} />
                     </button>
                   </div>
-
                 </li>
               ))}
             </ul>
 
             <div className={styles.inputWrapper}>
-
-              <input
-                type="text"
-                placeholder="Vad vill du köpa?"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className={styles.input}
-              />
-
-              <input
-                type="number"
-                placeholder="Mängd"
-                value={amountValue}
-                onChange={(e) => setAmountValue(e.target.value)}
-                className={styles.amountInput}
-              />
-
-              <select
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
-                className={styles.unitSelect}
-              >
-                <option value="st">st</option>
-                <option value="g">g</option>
-                <option value="kg">kg</option>
-                <option value="dl">dl</option>
-                <option value="ml">ml</option>
+              <input type="text" placeholder="Vad vill du köpa?" value={input} onChange={(e) => setInput(e.target.value)} className={styles.input} />
+              <input type="number" placeholder="Mängd" value={amountValue} onChange={(e) => setAmountValue(e.target.value)} className={styles.amountInput} />
+              <select value={unit} onChange={(e) => setUnit(e.target.value)} className={styles.unitSelect}>
+                <option value="st">st</option><option value="g">g</option><option value="kg">kg</option>
+                <option value="dl">dl</option><option value="ml">ml</option>
               </select>
-
               <button onClick={handleAddManual} className={styles.button}>
                 <Plus size={18} />
               </button>
-
             </div>
-
           </div>
         </div>
 
+        {/* HÖGER: Recepten */}
         <div className={styles.right}>
           <div className={styles.card}>
-
-            {!selectedRecipe && (
+            {!selectedRecipe ? (
               <div className={styles.recipeGrid}>
-                {recipes.map((recipe) => (
-                  <div
-                    key={recipe.id}
-                    className={styles.recipeCard}
-                    onClick={() => setSelectedRecipeId(recipe.id)}
-                  >
-                    <img src={recipe.image} alt={recipe.title} />
-                    <h3>{recipe.title}</h3>
+                {plannedRecipes.map((r) => (
+                  <div key={r._id} className={styles.recipeCard} onClick={() => setSelectedRecipeId(r._id)}>
+                    <h3>{r.title}</h3>
                   </div>
                 ))}
               </div>
-            )}
-
-            {selectedRecipe && (
+            ) : (
               <div className={styles.recipeDetail}>
-
-                <button
-                  className={styles.backButton}
-                  onClick={() => setSelectedRecipeId(null)}
-                >
-                  ← Tillbaka
-                </button>
-
+                <button className={styles.backButton} onClick={() => setSelectedRecipeId(null)}>← Tillbaka</button>
                 <h2>{selectedRecipe.title}</h2>
-
                 <ul className={styles.ingredients}>
-                  {selectedRecipe.ingredients.map((ing, i) => (
-                    <li key={i}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          onChange={() =>
-                            handleIngredientClick(ing.name, ing.amount)
-                          }
-                        />
-                        {ing.name} {ing.amount}
-                      </label>
-                    </li>
-                  ))}
+                {selectedRecipe.ingredients?.map((ing, i) => (
+                  <li key={i}>
+                    <label>
+                      <input 
+                        type="checkbox" 
+                        onChange={() => addItem(ing.name, `${ing.quantity} ${ing.unit}`)} 
+                      />
+                      {ing.name} {ing.quantity} {ing.unit}
+                    </label>
+                  </li>
+                ))}
                 </ul>
-
               </div>
             )}
-
           </div>
         </div>
-
       </div>
     </div>
   );

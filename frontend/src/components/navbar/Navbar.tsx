@@ -9,6 +9,7 @@ type NavbarProps = {
   isLoggedIn: boolean;
   statusMessage?: string | null;
   username?: string;
+  role?: string;
 };
 
 const navLinks = [
@@ -17,7 +18,7 @@ const navLinks = [
   { to: "/inkopslista", label: "Inköpslista", icon: ShoppingCart },
 ];
 
-const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, username }: NavbarProps) => {
+const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, username, role }: NavbarProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -44,7 +45,6 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, userna
       <a className="skip-link" href="#main-content">Hoppa till innehåll</a>
 
       <nav className="navbar" aria-label="Huvudnavigation">
-        {/* Logo */}
         <NavLink to="/" className="navbar-logo" aria-label="RecipeRiot – startsidan">
           <span className="navbar-logo-icon" aria-hidden="true">
             <GitFork size={13} strokeWidth={2} />
@@ -52,7 +52,6 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, userna
           <span className="navbar-logo-name">RecipeRiot</span>
         </NavLink>
 
-        {/* Desktop sökfält */}
         <div className="navbar-search" role="search">
           <label htmlFor="navbar-search-input" className="sr-only">Sök bland recept</label>
           <span className="navbar-search-icon" aria-hidden="true">
@@ -71,7 +70,6 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, userna
           <kbd className="navbar-kbd" aria-hidden="true">⏎</kbd>
         </div>
 
-        {/* Desktop länkar */}
         <ul className="navbar-links" role="list">
           {navLinks.map((link) => (
             <li key={link.to}>
@@ -80,11 +78,18 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, userna
           ))}
         </ul>
 
-        {/* Actions */}
         <div className="navbar-actions">
           {isLoggedIn ? (
             <>
               <span className="navbar-welcome" aria-live="polite">Hej, {username}</span>
+              <NavLink to="/profil" className="navbar-btn navbar-btn--ghost">
+                Min profil
+              </NavLink>
+              {role === 'admin' && (
+                <NavLink to="/admin" className="navbar-btn navbar-btn--cta">
+                  Admin
+                </NavLink>
+              )}
               <button
                 className="navbar-btn navbar-btn--ghost"
                 onClick={onLogoutClick}
@@ -109,7 +114,6 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, userna
                 <LogIn size={14} aria-hidden="true" />
                 Logga in
               </button>
-              {/* Dold på mobil via CSS */}
               <NavLink to="/utforska" className="navbar-btn navbar-btn--cta">
                 Kom igång
               </NavLink>
@@ -117,7 +121,6 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, userna
           )}
         </div>
 
-        {/* Hamburger — mobil */}
         <button
           className="navbar-hamburger"
           aria-label={menuOpen ? "Stäng meny" : "Öppna meny"}
@@ -125,14 +128,10 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, userna
           aria-controls="mobile-drawer"
           onClick={() => setMenuOpen((v) => !v)}
         >
-          {menuOpen
-            ? <X size={17} strokeWidth={2} />
-            : <Menu size={17} strokeWidth={2} />
-          }
+          {menuOpen ? <X size={17} strokeWidth={2} /> : <Menu size={17} strokeWidth={2} />}
         </button>
       </nav>
 
-      {/* Mobile drawer */}
       <div
         id="mobile-drawer"
         className={`navbar-drawer${menuOpen ? " open" : ""}`}

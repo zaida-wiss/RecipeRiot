@@ -1,7 +1,6 @@
 import type { Recipe } from '../types';
 import { getAuthHeaders } from './authApi';
 
-
 export type ApiIngredient = {
   name: string;
   quantity: number;
@@ -12,6 +11,8 @@ export type ApiRecipe = {
   _id: string;
   title: string;
   createdBy: string;
+  createdByUsername?: string;
+  imageUrl?: string;
   ingredients: ApiIngredient[];
   steps: string[];
   originalRef?: string;
@@ -37,35 +38,35 @@ export type CreateRecipeInput = {
   steps?: string[];
 };
 
-
-const API_URL =
-  import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api/v1';
+const API_URL = '/api/v1';
 
 const fetchRecipesPage = async (page: number): Promise<RecipesResponse> => {
   const response = await fetch(`${API_URL}/recipes?page=${page}&limit=100`);
-
   if (!response.ok) {
     throw new Error('Kunde inte hämta recept från servern');
   }
-
   return response.json() as Promise<RecipesResponse>;
 };
 
-export const getAllRecipes = async (): Promise<ApiRecipe[]> => {
-  const allRecipes: ApiRecipe[] = [];
+export const getAllRecipes = async (): Promise<Recipe[]> => {
+  const allRecipes: Recipe[] = [];
   let page = 1;
   let totalPages = 1;
 
   while (page <= totalPages) {
     const response = await fetchRecipesPage(page);
-
-    allRecipes.push(...response.data);
+    allRecipes.push(...response.data as unknown as Recipe[]);
     totalPages = response.pagination.totalPages;
     page += 1;
   }
 
   return allRecipes;
 };
+
+export async function getRecipeById(id: string): Promise<Recipe> {
+  const res = await fetch(`${API_URL}/recipes/${id}`);
+  return res.json();
+}
 
 export const createRecipe = async (
   recipe: CreateRecipeInput
@@ -78,42 +79,25 @@ export const createRecipe = async (
     },
     body: JSON.stringify(recipe),
   });
-
-  if (!response.ok) {
-    throw new Error('Kunde inte skapa recept');
-  }
-
+if (!response.ok) {
+  const errorData = await response.json();
+  // Detta kommer visa exakt vilka fält som backenden klagar på
+  console.log("--- SERVERNS FELMEDDELANDE ---", errorData);
+  throw new Error(errorData.message || 'Kunde inte skapa recept');
+}
   return response.json() as Promise<ApiRecipe>;
 };
 
+// --- HÄR ÄR DEN NYA RADERINGSFUNKTIONEN ---
+export const deleteRecipe = async (id: string): Promise<void> => {
+  const response = await fetch(`${API_URL}/recipes/${id}`, {
+    method: 'DELETE',
+    headers: {
+      ...getAuthHeaders(),
+    },
+  });
 
-const fallbackImages = [
-  'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80',
-  'https://images.unsplash.com/photo-1495521821757-a1efb6729352?auto=format&fit=crop&w=1200&q=80',
-];
-
-const getFallbackImage = (index: number): string => {
-  return fallbackImages[index % fallbackImages.length];
-};
-
-export const toUiRecipe = (recipe: ApiRecipe, index: number): Recipe => {
-  return {
-    id: recipe._id,
-    title: recipe.title,
-    time: '30 min',
-    difficulty: 'Lätt',
-    image: getFallbackImage(index),
-    tags: ['Community'],
-    servings: 4,
-    rating: 0,
-    reviews: 0,
-    description:
-      recipe.steps[0] ?? 'Ett recept från RecipeRiot-communityt.',
-    ingredients: recipe.ingredients.map((ingredient) => ({
-      name: ingredient.name,
-      amount: `${ingredient.quantity} ${ingredient.unit}`,
-    })),
-    steps: recipe.steps,
-  };
+  if (!response.ok) {
+    throw new Error('Kunde inte radera receptet');
+  }
 };

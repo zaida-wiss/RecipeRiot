@@ -6,10 +6,9 @@ export interface IUser extends Document {
   _id: mongoose.Types.ObjectId;
   username: string;
   email: string;
-    // Vi lagrar aldrig password i klartext.
-  // Därför heter fältet passwordHash.
   passwordHash: string;
   role: UserRole;
+  favorites: mongoose.Types.ObjectId[];
   isDeleted: boolean;
   deletedAt?: Date | null;
   createdAt: Date;
@@ -32,17 +31,12 @@ const UserSchema = new Schema<IUser>(
       required: [true, 'Email är obligatorisk'],
       trim: true,
       lowercase: true,
-      // unique skapar ett unikt index i MongoDB.
-      // Det hjälper mot dubbla konton med samma email.
       unique: true,
       index: true,
     },
     passwordHash: {
       type: String,
       required: [true, "PasswordHash är obligatoriskt"],
-      // select: false betyder att passwordHash inte kommer med automatiskt
-      // när vi hämtar en User. Vid login måste vi aktivt välja det med:
-      // .select('+passwordHash')
       select: false,
     },
     role: {
@@ -50,6 +44,11 @@ const UserSchema = new Schema<IUser>(
       enum: ["user", "admin"],
       default: "user",
       required: true,
+    },
+    favorites: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: 'Recipe',
+      default: [],
     },
     isDeleted: {
       type: Boolean,
