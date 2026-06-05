@@ -286,3 +286,14 @@
 .modal__btn--save:hover {
   background: #a85a25;
 }
+
+.step-input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ede8e2;
+  font-family: "Inter", sans-serif;
+  font-size: 13px;
+  min-height: 60px;
+  resize: vertical;
+}

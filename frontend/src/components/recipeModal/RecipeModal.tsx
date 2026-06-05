@@ -169,6 +169,44 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
               {isForking && <button onClick={addIngredient} className="add-btn"><Plus size={16} /> Lägg till ingrediens</button>}
             </ul>
           )}
+
+          {activeTab === "steps" && (
+          <ul className="step-list">
+            {(isForking ? editedRecipe?.steps : recipe.steps)?.map((step, i) => (
+              <li key={i} className="step-item">
+                <div className="step-item__number">{i + 1}</div>
+                {isForking ? (
+                  <textarea 
+                    className="step-input"
+                    value={step} 
+                    onChange={(e) => {
+                      if (!editedRecipe) return;
+                      const newSteps = [...(editedRecipe.steps || [])];
+                      newSteps[i] = e.target.value;
+                      setEditedRecipe({ ...editedRecipe, steps: newSteps });
+                    }} 
+                  />
+                ) : (
+                  <p className="step-item__text">{step}</p>
+                )}
+              </li>
+            ))}
+            {isForking && (
+              <button 
+                onClick={() => {
+                  if (!editedRecipe) return;
+                  setEditedRecipe({
+                    ...editedRecipe,
+                    steps: [...(editedRecipe.steps || []), ""],
+                  });
+                }} 
+                className="add-btn"
+              >
+                <Plus size={16} /> Lägg till steg
+              </button>
+            )}
+          </ul>
+        )}
         </div>
       </div>
     </>
