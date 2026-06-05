@@ -196,6 +196,56 @@ const ProfilePage = () => {
     fetchData();
   }, [user?.id]);
 
+  const handleForkRecipe = async (forkedRecipe: Partial<Recipe>) => {
+    try {
+      await createRecipe(normalizeForkedRecipe(forkedRecipe));
+      await fetchMyRecipes();
+      setSelected(null);
+      alert('Receptet har kopierats till dina recept!');
+    } catch (err) {
+      console.error('Det gick inte att forka receptet:', err);
+      alert('Kunde inte skapa receptet. Kontrollera konsolen för detaljer.');
+    }
+  };
+
+  const handleDeleteRecipe = async (id: string) => {
+    await deleteRecipe(id);
+    setMyRecipes((prev) => prev.filter((recipe) => recipe._id !== id));
+    setSelected(null);
+  };
+
+  const handleAddRecipeSuccess = async () => {
+    setShowAddForm(false);
+    await fetchMyRecipes();
+  };
+
+  const renderActiveTab = () => {
+    if (loading) {
+      return <p className="profile-loading">Laddar...</p>;
+    }
+
+    if (activeTab === 'mina-recept') {
+      return (
+        <MyRecipesSection
+          recipes={myRecipes}
+          onAddRecipe={() => setShowAddForm(true)}
+          onSelectRecipe={setSelected}
+        />
+      );
+    }
+
+    if (activeTab === 'favoriter') {
+      return <FavoritesSection recipes={favorites} onSelectRecipe={setSelected} />;
+    }
+
+    return (
+      <SettingsSection
+        isAdmin={user?.role === 'admin'}
+        onOpenAdmin={() => navigate('/admin')}
+      />
+    );
+  };
+
   if (!user) {
     return (
       <div className="profile-page">
@@ -220,55 +270,21 @@ const ProfilePage = () => {
 
       <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="profile-content">
-        {loading ? (
-          <p className="profile-loading">Laddar...</p>
-        ) : activeTab === 'mina-recept' ? (
-          <MyRecipesSection
-            recipes={myRecipes}
-            onAddRecipe={() => setShowAddForm(true)}
-            onSelectRecipe={setSelected}
-          />
-        ) : activeTab === 'favoriter' ? (
-          <FavoritesSection recipes={favorites} onSelectRecipe={setSelected} />
-        ) : (
-          <SettingsSection
-            isAdmin={user.role === 'admin'}
-            onOpenAdmin={() => navigate('/admin')}
-          />
-        )}
-      </div>
+      <div className="profile-content">{renderActiveTab()}</div>
 
       {selected && (
         <RecipeModal
           recipe={selected}
           onClose={() => setSelected(null)}
-          onFork={async (forkedRecipe: Partial<Recipe>) => {
-            try {
-              await createRecipe(normalizeForkedRecipe(forkedRecipe));
-              await fetchMyRecipes();
-              setSelected(null);
-              alert('Receptet har kopierats till dina recept!');
-            } catch (err) {
-              console.error('Det gick inte att forka receptet:', err);
-              alert('Kunde inte skapa receptet. Kontrollera konsolen för detaljer.');
-            }
-          }}
-          onDelete={async (id) => {
-            await deleteRecipe(id);
-            setMyRecipes((prev) => prev.filter((recipe) => recipe._id !== id));
-            setSelected(null);
-          }}
+          onFork={handleForkRecipe}
+          onDelete={handleDeleteRecipe}
         />
       )}
 
       {showAddForm && (
         <AddRecipeForm
           onClose={() => setShowAddForm(false)}
-          onSuccess={async () => {
-            setShowAddForm(false);
-            await fetchMyRecipes();
-          }}
+          onSuccess={handleAddRecipeSuccess}
         />
       )}
     </div>
