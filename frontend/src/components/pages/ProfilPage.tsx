@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getAuthData } from '../../api/authApi';
 import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
 import { getFavorites } from '../../api/favoritesApi';
@@ -11,6 +12,7 @@ import './ProfilePage.css';
 type Tab = 'mina-recept' | 'favoriter' | 'installningar';
 
 const ProfilePage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('mina-recept');
   const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
   const [favorites, setFavorites] = useState<Recipe[]>([]);
@@ -144,55 +146,67 @@ const ProfilePage = () => {
                 <button type="submit" className="settings-btn">Spara lösenord</button>
               </form>
             </div>
+            <div>
+              {user.role === "admin" && (
+                <div className="settings-card">
+                  <h3>Adminbehörigheter</h3>
+                  <p>Hantera användare och recept.</p>
+                  <button
+                    type="button"
+                    className="settings-btn"
+                    onClick={() => navigate("/admin")}
+                  >
+                    Öppna adminverktyg
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
-      </div>
+        </div>
 
-      {selected && (
+{selected && (
         <RecipeModal
           recipe={selected}
           onClose={() => setSelected(null)}
           onFork={async (forkedRecipe: Partial<Recipe>) => {
             try {
               const ingredients = forkedRecipe.ingredients || [];
+
+              // Städa upp ingredienserna
               const cleanedIngredients = ingredients.map((ing) => ({
                 ...ing,
-                quantity: typeof ing.quantity === 'string' ? Number(ing.quantity) : (ing.quantity as number),
+                quantity: typeof ing.quantity === 'string' ? Number(ing.quantity) : (ing.quantity as number)
               }));
 
+              // Skapa objektet direkt - vi inkluderar inte _id här
               const recipeToSave = {
-                title: forkedRecipe.title || 'Nytt recept',
+                title: forkedRecipe.title || "Nytt recept",
                 ingredients: cleanedIngredients,
                 steps: forkedRecipe.steps || [],
-                imageUrl: forkedRecipe.imageUrl || '',
-                createdBy: forkedRecipe.createdBy,
+                imageUrl: forkedRecipe.imageUrl || "",
+                createdBy: forkedRecipe.createdBy // Behåll användar-ID om det finns
               };
 
               await createRecipe(recipeToSave);
               await fetchMyRecipes();
               setSelected(null);
-              alert('Receptet har kopierats till dina recept!');
+              alert("Receptet har kopierats till dina recept!");
             } catch (err) {
-              console.error('Det gick inte att forka receptet:', err);
-              alert('Kunde inte skapa receptet. Kontrollera konsolen för detaljer.');
+              console.error("Det gick inte att forka receptet:", err);
+              alert("Kunde inte skapa receptet. Kontrollera konsolen för detaljer.");
             }
           }}
           onDelete={async (id) => {
             await deleteRecipe(id);
-            setMyRecipes((prev) => prev.filter((r) => r._id !== id));
+            setMyRecipes(prev => prev.filter(r => r._id !== id));
             setSelected(null);
           }}
         />
       )}
 
       {showAddForm && (
-        <AddRecipeForm
-          onClose={() => setShowAddForm(false)}
-          onSuccess={() => {
-            setShowAddForm(false);
-            fetchMyRecipes();
-          }}
-        />
+        <AddRecipeForm onClose={() => setShowAddForm(false)} onSuccess={() => { setShowAddForm(false); fetchMyRecipes(); }} />
       )}
     </div>
   );
