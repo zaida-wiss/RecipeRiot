@@ -58,9 +58,9 @@ const RecipeGrid = () => {
     <section className="recipes-section">
       <div className="recipes-content">
         <div className="recipes-header">
-          <span className="section-label">Trendande nu</span>
-          <h2>Veckans mest älskade recept</h2>
-          <p>De mest forkade recepten från vår community</p>
+          <span className="section-label">Trendande</span>
+          <h2>Recept att börja med</h2>
+          <p>Recept utvalda av teamet bakom RecipeRiot</p>
 
           {isLoggedIn && (
             <button
