@@ -1,0 +1,284 @@
+/* ── Base ── */
+.profile-page {
+  min-height: 100vh;
+  background: #f6f1eb;
+}
+
+.profile-not-logged-in {
+  text-align: center;
+  padding: 4rem 1.25rem;
+  color: #888;
+}
+
+/* ── Header ── */
+.profile-header {
+  background: #fff;
+  border-bottom: 1px solid #ede8e2;
+  padding: 24px 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.profile-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #c56a2d;
+  color: #fff;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.profile-info h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+}
+
+.profile-info p {
+  color: #888;
+  font-size: 0.85rem;
+  margin: 0 0 8px;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.profile-stats strong {
+  color: #1a1a1a;
+}
+
+/* ── Tabs ── */
+.profile-tabs {
+  background: #fff;
+  border-bottom: 1px solid #ede8e2;
+  display: flex;
+  padding: 0 1.25rem;
+  overflow-x: auto;
+}
+
+.profile-tab {
+  background: none;
+  border: none;
+  padding: 14px 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #888;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.profile-tab:hover { color: #1a1a1a; }
+.profile-tab.active {
+  color: #c56a2d;
+  border-bottom-color: #c56a2d;
+}
+
+/* ── Innehåll ── */
+.profile-content {
+  padding: 20px 1.25rem;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.profile-loading,
+.profile-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #888;
+}
+
+/* ── CTA ── */
+.profile-cta {
+  text-align: center;
+  padding: 3rem 1.25rem;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px dashed #d7c8b5;
+}
+
+.profile-cta-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+}
+
+.profile-cta h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+}
+
+.profile-cta p {
+  color: #888;
+  margin: 0 0 20px;
+  font-size: 0.9rem;
+}
+
+/* ── Knappar ── */
+.profile-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #c56a2d;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: background 0.2s;
+}
+
+.profile-add-btn:hover { background: #a85525; }
+
+/* ── Inställningar ── */
+.profile-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #ede8e2;
+}
+
+.settings-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+  margin: 0 0 14px;
+}
+
+.settings-desc {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-form label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #3f2f22;
+}
+
+.settings-form input {
+  border: 1px solid #d7c8b5;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  background: #fffdfb;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.settings-form input:focus {
+  border-color: #c56a2d;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(197,106,45,0.1);
+}
+
+.settings-btn {
+  margin-top: 8px;
+  background: #c56a2d;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+
+.settings-btn:hover { background: #a85525; }
+
+/* ── Tablet ── */
+@media (min-width: 560px) {
+  .profile-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .profile-avatar {
+    width: 70px;
+    height: 70px;
+    font-size: 1.8rem;
+  }
+}
+
+/* ── Desktop ── */
+@media (min-width: 900px) {
+  .profile-page {
+    padding-top: 10px;
+  }
+
+  .profile-header {
+    padding: 40px 2rem;
+    gap: 24px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .profile-avatar {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+  }
+
+  .profile-info h1 {
+    font-size: 1.8rem;
+  }
+
+  .profile-tabs {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+
+  .profile-content {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 32px 2rem;
+  }
+
+  .profile-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .profile-settings {
+    max-width: 600px;
+  }
+
+  .settings-btn {
+    width: auto;
+    padding: 12px 24px;
+  }
+}

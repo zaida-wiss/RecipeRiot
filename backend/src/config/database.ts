@@ -1,9 +1,10 @@
 // src/config/database.ts
 import mongoose from 'mongoose';
+import { env } from "./env.js";
 
-async function connectToDatabase() {
+export const connectToDatabase= async (): Promise<void> =>{
   try {
-    await mongoose.connect(process.env.MONGO_URI as string);
+    await mongoose.connect(env.MONGO_URI as string);
     console.log('Ansluten till MongoDB');
   } catch (error) {
     console.error('Kunde inte ansluta till MongoDB:', error);
@@ -11,4 +12,3 @@ async function connectToDatabase() {
   }
 }
 
-export { connectToDatabase };
