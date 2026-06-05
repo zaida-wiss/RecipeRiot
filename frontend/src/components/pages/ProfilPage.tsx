@@ -91,6 +91,9 @@ const MyRecipesSection = ({
         <div className="profile-cta-icon">🍳</div>
         <h3>Du har inga recept än</h3>
         <p>Dela ditt första recept med communityn!</p>
+        <button className="profile-add-btn" onClick={onAddRecipe}>
+          + Lägg till ditt första recept
+        </button>
       </div>
     )}
   </div>
