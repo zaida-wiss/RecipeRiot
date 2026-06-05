@@ -3,7 +3,7 @@ import { Search } from 'lucide-react';
 import RecipeModal from '../recipeModal/RecipeModal';
 import RecipeCard from '../recipeCard/RecipeCard';
 import type { Recipe } from '../../types';
-import { getAllRecipes } from '../../api/recipesApi';
+import { getAllRecipes, deleteRecipe } from '../../api/recipesApi';
 import './ExplorePage.css';
 
 const ExplorePage: React.FC = () => {
@@ -120,11 +120,23 @@ const ExplorePage: React.FC = () => {
             alert(`Redigera: Öppnar formulär för att ändra originalet "${recipeToEdit.title}"`);
             // TODO: Här sätter du igång er redigeringsvy
           }}
-          onDelete={async () => {
+          onDelete={async (recipeId) => {
             if (!window.confirm(`Är du säker på att du vill radera "${selectedRecipe.title}"?`)) return;
-            alert("Receptet raderat!");
-            setSelectedRecipe(null);
-            // TODO: API-anrop för att radera i databasen: await deleteRecipe(selectedRecipe._id)
+
+            try {
+              // 1. Anropa API:et
+              await deleteRecipe(recipeId);
+              
+              // 2. Uppdatera listan i state så receptet försvinner direkt
+              setRecipes((prevRecipes) => prevRecipes.filter(r => r._id !== recipeId));
+              
+              // 3. Stäng modalen
+              setSelectedRecipe(null);
+              
+            } catch (err) {
+              console.error("Kunde inte radera recept", err);
+              alert("Det gick inte att radera receptet. Kontrollera din inloggning.");
+            }
           }}
         />
       )}
