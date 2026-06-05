@@ -14,13 +14,16 @@ import logger from './middleware/logger.js';
 import { env } from './config/env.js';
 
 const app = express();
-const allowedOrigin = env.CORS_ORIGIN;
+app.set('trust proxy', 1);
 
 // Säkerhetsheaders
 app.use(helmet());
 
 // CORS
-app.use(cors({ origin: allowedOrigin }));
+app.use(cors({
+  origin: env.CORS_ORIGIN ?? 'http://localhost:5173',
+  credentials: true,
+}));
 
 // Rate limiting
 const generalLimiter = rateLimit({
