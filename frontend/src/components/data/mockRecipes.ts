@@ -1,4 +1,4 @@
-import type { Recipe } from "../../types";
+/*import type { Recipe } from "../../types";
 
 export const recipes: Recipe[] = [
   {
@@ -64,4 +64,4 @@ export const recipes: Recipe[] = [
     ],
     steps: ["Schnitzel kycklingen", "Sautera ingredienser", "Tillsätt kokosmjölk", "Låt sjuda 30 minuter"]
   },
-];
+];*/
