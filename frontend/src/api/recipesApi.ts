@@ -36,6 +36,9 @@ export type CreateRecipeInput = {
   title: string;
   ingredients?: ApiIngredient[];
   steps?: string[];
+  imageUrl?: string;
+  difficulty?: string;
+  tags?: string[];
 };
 
 const API_URL = '/api/v1';
@@ -55,7 +58,7 @@ export const getAllRecipes = async (): Promise<Recipe[]> => {
 
   while (page <= totalPages) {
     const response = await fetchRecipesPage(page);
-    allRecipes.push(...response.data as unknown as Recipe[]);
+    allRecipes.push(...(response.data as unknown as Recipe[]));
     totalPages = response.pagination.totalPages;
     page += 1;
   }
@@ -79,16 +82,33 @@ export const createRecipe = async (
     },
     body: JSON.stringify(recipe),
   });
-if (!response.ok) {
-  const errorData = await response.json();
-  // Detta kommer visa exakt vilka fält som backenden klagar på
-  console.log("--- SERVERNS FELMEDDELANDE ---", errorData);
-  throw new Error(errorData.message || 'Kunde inte skapa recept');
-}
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("--- SERVERNS DETALJERADE FEL (create) ---", JSON.stringify(errorData, null, 2));
+    throw new Error(errorData.message || 'Kunde inte skapa recept');
+  }
   return response.json() as Promise<ApiRecipe>;
 };
 
-// --- HÄR ÄR DEN NYA RADERINGSFUNKTIONEN ---
+export const forkRecipe = async (recipeId: string): Promise<Recipe> => {
+  const response = await fetch(`${API_URL}/recipes/${recipeId}/fork`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+    },
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("--- SERVERNS DETALJERADE FEL (fork) ---", JSON.stringify(errorData, null, 2));
+    throw new Error(errorData.message || "Kunde inte forka");
+  }
+  
+  return response.json();
+};
+
 export const deleteRecipe = async (id: string): Promise<void> => {
   const response = await fetch(`${API_URL}/recipes/${id}`, {
     method: 'DELETE',
@@ -98,6 +118,8 @@ export const deleteRecipe = async (id: string): Promise<void> => {
   });
 
   if (!response.ok) {
+    const errorData = await response.json();
+    console.error("--- SERVERNS DETALJERADE FEL (delete) ---", JSON.stringify(errorData, null, 2));
     throw new Error('Kunde inte radera receptet');
   }
 };

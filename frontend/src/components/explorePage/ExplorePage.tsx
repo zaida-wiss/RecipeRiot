@@ -3,7 +3,7 @@ import { Search } from 'lucide-react';
 import RecipeModal from '../recipeModal/RecipeModal';
 import RecipeCard from '../recipeCard/RecipeCard';
 import type { Recipe } from '../../types';
-import { getAllRecipes, deleteRecipe } from '../../api/recipesApi';
+import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
 import './ExplorePage.css';
 
 const ExplorePage: React.FC = () => {
@@ -41,6 +41,35 @@ const ExplorePage: React.FC = () => {
     const matchesDiff = activeDifficulty === 'Alla' || recipe.difficulty === activeDifficulty;
     return matchesSearch && matchesTag && matchesDiff;
   });
+
+  const handleFork = async (forkedRecipe: Partial<Recipe>) => {
+    try {
+      // Tvätta datan för att undvika 400 Bad Request
+      const cleanedIngredients = (forkedRecipe.ingredients || []).map(ing => ({
+        ...ing,
+        quantity: typeof ing.quantity === 'string' ? parseFloat(ing.quantity) : Number(ing.quantity)
+      }));
+
+      const recipeToSave = {
+        title: forkedRecipe.title || "Nytt recept",
+        ingredients: cleanedIngredients,
+        steps: forkedRecipe.steps || [],
+        imageUrl: forkedRecipe.imageUrl || "",
+        tags: forkedRecipe.tags || [],
+        difficulty: forkedRecipe.difficulty || "Medel"
+      };
+
+      await createRecipe(recipeToSave);
+      
+      // Stäng modalen men stanna på sidan
+      setSelectedRecipe(null);
+      alert("Receptet har lagts till i dina recept!");
+      
+    } catch (err) {
+      console.error("Det gick inte att forka receptet:", err);
+      alert("Kunde inte kopiera receptet. Kontrollera att du är inloggad.");
+    }
+  };
 
   if (loading) return <p>Laddar recept...</p>;
 
@@ -110,32 +139,18 @@ const ExplorePage: React.FC = () => {
         <RecipeModal
           recipe={selectedRecipe}
           onClose={() => setSelectedRecipe(null)}
-          onFork={(forkedData) => {
+          onFork={handleFork}
+          onEdit={() => {
             setSelectedRecipe(null);
-            alert(`Forka: Kopian "${forkedData.title}" skapas och förbereds för ingrediensändringar!`);
-            // TODO: Här skickar du 'forkedData' vidare till ert receptformulär
-          }}
-          onEdit={(recipeToEdit) => {
-            setSelectedRecipe(null);
-            alert(`Redigera: Öppnar formulär för att ändra originalet "${recipeToEdit.title}"`);
-            // TODO: Här sätter du igång er redigeringsvy
           }}
           onDelete={async (recipeId) => {
             if (!window.confirm(`Är du säker på att du vill radera "${selectedRecipe.title}"?`)) return;
-
             try {
-              // 1. Anropa API:et
               await deleteRecipe(recipeId);
-              
-              // 2. Uppdatera listan i state så receptet försvinner direkt
               setRecipes((prevRecipes) => prevRecipes.filter(r => r._id !== recipeId));
-              
-              // 3. Stäng modalen
               setSelectedRecipe(null);
-              
             } catch (err) {
               console.error("Kunde inte radera recept", err);
-              alert("Det gick inte att radera receptet. Kontrollera din inloggning.");
             }
           }}
         />
