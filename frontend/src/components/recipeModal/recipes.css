@@ -208,3 +208,81 @@
   background: #c56a2d;
   color: #fff;
 }
+
+/* ── Redigeringsläge - Titelfält ── */
+.modal__hero-title-input {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px dashed rgba(255, 255, 255, 0.5);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: #fff;
+  font-family: "Playfair Display", serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  width: 100%;
+}
+
+.modal__hero-title-input:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.3);
+  border-style: solid;
+}
+
+/* ── Redigeringsläge - Ingrediensrad ── */
+.edit-row {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.edit-row input {
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid #ede8e2;
+  font-size: 13px;
+  font-family: "Inter", sans-serif;
+}
+
+/* Namn-input får ta mer plats */
+.edit-row input:nth-child(1) { flex: 2; }
+/* Mängd och enhet får mindre plats */
+.edit-row input:nth-child(2),
+.edit-row input:nth-child(3) { flex: 1; }
+
+.edit-row input:focus {
+  border-color: #c56a2d;
+  outline: none;
+}
+
+/* ── Lägg till-knapp ── */
+.add-btn {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px;
+  background: #fdf9f6;
+  border: 1px dashed #c56a2d;
+  color: #c56a2d;
+  border-radius: 9px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.add-btn:hover {
+  background: #fff5ef;
+}
+
+/* ── Spara-knapp (särskild stil för fork-spara) ── */
+.modal__btn--save {
+  background: #c56a2d;
+  color: #fff;
+  border: none;
+}
+
+.modal__btn--save:hover {
+  background: #a85a25;
+}
