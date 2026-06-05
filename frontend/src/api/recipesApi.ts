@@ -79,9 +79,12 @@ export const createRecipe = async (
     },
     body: JSON.stringify(recipe),
   });
-  if (!response.ok) {
-    throw new Error('Kunde inte skapa recept');
-  }
+if (!response.ok) {
+  const errorData = await response.json();
+  // Detta kommer visa exakt vilka fält som backenden klagar på
+  console.log("--- SERVERNS FELMEDDELANDE ---", errorData);
+  throw new Error(errorData.message || 'Kunde inte skapa recept');
+}
   return response.json() as Promise<ApiRecipe>;
 };
 

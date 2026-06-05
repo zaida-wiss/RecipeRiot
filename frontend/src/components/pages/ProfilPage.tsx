@@ -24,8 +24,6 @@ const ProfilePage = () => {
   const fetchMyRecipes = async () => {
     try {
       const all = await getAllRecipes();
-      // Använder samma filtreringslogik som du använde i originalet, 
-      // men med en kontroll för att vara säker
       setMyRecipes(all.filter((r) => String(r.createdBy) === String(user?.id)));
     } catch (err) {
       console.error(err);
@@ -124,30 +122,40 @@ const ProfilePage = () => {
                 <button type="submit" className="settings-btn">Spara lösenord</button>
               </form>
             </div>
-            <div className="settings-card">
-              <h3>Profilbild</h3>
-              <p className="settings-desc">Profilbild via URL kommer snart!</p>
-            </div>
           </div>
         )}
       </div>
 
-      {selected && (
+{selected && (
         <RecipeModal 
           recipe={selected} 
           onClose={() => setSelected(null)} 
-          onFork={async (forkedRecipe) => {
+          onFork={async (forkedRecipe: Partial<Recipe>) => {
             try {
-              await createRecipe({
-                ...forkedRecipe,
-                title: forkedRecipe.title || "Nytt recept"
-              });
+              const ingredients = forkedRecipe.ingredients || [];
+              
+              // Städa upp ingredienserna
+              const cleanedIngredients = ingredients.map((ing) => ({
+                ...ing,
+                quantity: typeof ing.quantity === 'string' ? Number(ing.quantity) : (ing.quantity as number)
+              }));
+
+              // Skapa objektet direkt - vi inkluderar inte _id här
+              const recipeToSave = {
+                title: forkedRecipe.title || "Nytt recept",
+                ingredients: cleanedIngredients,
+                steps: forkedRecipe.steps || [],
+                imageUrl: forkedRecipe.imageUrl || "",
+                createdBy: forkedRecipe.createdBy // Behåll användar-ID om det finns
+              };
+
+              await createRecipe(recipeToSave);
               await fetchMyRecipes();
               setSelected(null);
               alert("Receptet har kopierats till dina recept!");
             } catch (err) {
               console.error("Det gick inte att forka receptet:", err);
-              alert("Något gick fel, försök igen.");
+              alert("Kunde inte skapa receptet. Kontrollera konsolen för detaljer.");
             }
           }}
           onDelete={async (id) => {
