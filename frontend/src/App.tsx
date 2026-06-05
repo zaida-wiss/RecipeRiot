@@ -8,7 +8,6 @@ import ProfilePage from "./components/pages/ProfilPage";
 import AboutPage from "./components/pages/aboutpage";
 import ContactPage from "./components/pages/contactpage";
 import PrivacyPage from "./components/pages/privacypage";
-import AdminPage from "./components/pages/AdminPage";
 
 function App() {
   return (
@@ -24,7 +23,6 @@ function App() {
             <Route path="/om" element={<AboutPage />} />
             <Route path="/kontakt" element={<ContactPage />} />
             <Route path="/integritet" element={<PrivacyPage />} />
-            <Route path="/admin" element={<AdminPage />} />
           </Route>
         </Routes>
       </main>
