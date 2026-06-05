@@ -42,13 +42,20 @@ const AddRecipeForm = ({ onClose, onSuccess }: { onClose: () => void; onSuccess:
     setLoading(true);
 
     try {
+      const recipePayload = {
+        title,
+        ingredients,
+        steps,
+        ...(imageUrl.trim() ? { imageUrl: imageUrl.trim() } : {}),
+      };
+
       const res = await fetch('/api/v1/recipes', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...getAuthHeaders(),
         },
-        body: JSON.stringify({ title, imageUrl, ingredients, steps }),
+        body: JSON.stringify(recipePayload),
       });
 
       if (!res.ok) {

@@ -33,7 +33,9 @@ const normalizeForkedRecipe = (forkedRecipe: Partial<Recipe>) => {
     title: forkedRecipe.title || 'Nytt recept',
     ingredients: cleanedIngredients,
     steps: forkedRecipe.steps || [],
-    imageUrl: forkedRecipe.imageUrl || '',
+    ...(forkedRecipe.imageUrl?.trim()
+      ? { imageUrl: forkedRecipe.imageUrl.trim() }
+      : {}),
     createdBy: forkedRecipe.createdBy,
   };
 };
@@ -60,6 +62,8 @@ const ProfileTabs = ({ activeTab, onTabChange }: ProfileTabsProps) => (
 type RecipeSectionProps = {
   recipes: Recipe[];
   onSelectRecipe: (recipe: Recipe) => void;
+  favoriteIds: Set<string>;
+  onFavoriteChanged: () => void;
 };
 
 type MyRecipesSectionProps = RecipeSectionProps & {
@@ -70,6 +74,8 @@ const MyRecipesSection = ({
   recipes,
   onAddRecipe,
   onSelectRecipe,
+  favoriteIds,
+  onFavoriteChanged,
 }: MyRecipesSectionProps) => (
   <div>
     <button className="profile-add-btn" onClick={onAddRecipe}>
@@ -82,7 +88,9 @@ const MyRecipesSection = ({
           <RecipeCard
             key={recipe._id}
             recipe={recipe}
+            isFavorite={favoriteIds.has(recipe._id)}
             onClick={() => onSelectRecipe(recipe)}
+            onFavoriteChanged={onFavoriteChanged}
           />
         ))}
       </div>
@@ -99,14 +107,21 @@ const MyRecipesSection = ({
   </div>
 );
 
-const FavoritesSection = ({ recipes, onSelectRecipe }: RecipeSectionProps) => (
+const FavoritesSection = ({
+  recipes,
+  onSelectRecipe,
+  favoriteIds,
+  onFavoriteChanged,
+}: RecipeSectionProps) => (
   <div className="profile-grid">
     {recipes.length > 0 ? (
       recipes.map((recipe) => (
         <RecipeCard
           key={recipe._id}
           recipe={recipe}
+          isFavorite={favoriteIds.has(recipe._id)}
           onClick={() => onSelectRecipe(recipe)}
+          onFavoriteChanged={onFavoriteChanged}
         />
       ))
     ) : (
@@ -162,6 +177,7 @@ const ProfilePage = () => {
 
   const authData = getAuthData();
   const user = authData?.user;
+  const favoriteIds = new Set(favorites.map((recipe) => recipe._id));
 
   const fetchMyRecipes = async () => {
     if (!user?.id) {
@@ -172,6 +188,20 @@ const ProfilePage = () => {
     try {
       const allRecipes = await getAllRecipes();
       setMyRecipes(filterRecipesByUser(allRecipes, user.id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const refreshFavorites = async () => {
+    if (!user?.id) {
+      setFavorites([]);
+      return;
+    }
+
+    try {
+      const favs = await getFavorites();
+      setFavorites(favs);
     } catch (err) {
       console.error(err);
     }
@@ -231,14 +261,23 @@ const ProfilePage = () => {
       return (
         <MyRecipesSection
           recipes={myRecipes}
+          favoriteIds={favoriteIds}
           onAddRecipe={() => setShowAddForm(true)}
           onSelectRecipe={setSelected}
+          onFavoriteChanged={refreshFavorites}
         />
       );
     }
 
     if (activeTab === 'favoriter') {
-      return <FavoritesSection recipes={favorites} onSelectRecipe={setSelected} />;
+      return (
+        <FavoritesSection
+          recipes={favorites}
+          favoriteIds={favoriteIds}
+          onSelectRecipe={setSelected}
+          onFavoriteChanged={refreshFavorites}
+        />
+      );
     }
 
     return (

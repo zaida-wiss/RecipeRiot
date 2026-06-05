@@ -54,7 +54,9 @@ const ExplorePage: React.FC = () => {
         title: forkedRecipe.title || "Nytt recept",
         ingredients: cleanedIngredients,
         steps: forkedRecipe.steps || [],
-        imageUrl: forkedRecipe.imageUrl || "",
+        ...(forkedRecipe.imageUrl?.trim()
+          ? { imageUrl: forkedRecipe.imageUrl.trim() }
+          : {}),
         tags: forkedRecipe.tags || [],
         difficulty: forkedRecipe.difficulty || "Medel"
       };

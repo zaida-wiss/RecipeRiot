@@ -1,19 +1,30 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Clock, Heart } from "lucide-react";
 import "./RecipeCard.css";
 import type { Recipe } from "../../types";
 import { getAuthData } from "../../api/authApi";
 import { addFavorite, removeFavorite } from "../../api/favoritesApi";
+import { recipeFallbackImage } from "../../constants/recipeImage";
 
 type RecipeCardProps = {
   recipe: Recipe;
   onClick: () => void;
   isFavorite?: boolean;
+  onFavoriteChanged?: () => void;
 };
 
-const RecipeCard = ({ recipe, onClick, isFavorite: initialFavorite = false }: RecipeCardProps) => {
+const RecipeCard = ({
+  recipe,
+  onClick,
+  isFavorite: initialFavorite = false,
+  onFavoriteChanged,
+}: RecipeCardProps) => {
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const isLoggedIn = getAuthData() !== null;
+
+  useEffect(() => {
+    setIsFavorite(initialFavorite);
+  }, [initialFavorite]);
 
   const handleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -27,6 +38,8 @@ const RecipeCard = ({ recipe, onClick, isFavorite: initialFavorite = false }: Re
         await addFavorite(recipe._id);
         setIsFavorite(true);
       }
+
+      onFavoriteChanged?.();
     } catch (err) {
       console.error('Fel med favorit', err);
     }
@@ -35,7 +48,7 @@ const RecipeCard = ({ recipe, onClick, isFavorite: initialFavorite = false }: Re
   return (
     <div className="card" onClick={onClick}>
       <div className="card-image-wrapper">
-        <img src={recipe.imageUrl || '/placeholder.jpg'} alt={recipe.title} />
+        <img src={recipe.imageUrl || recipeFallbackImage} alt={recipe.title} />
         {isLoggedIn && (
           <button
             className={`favorite-btn ${isFavorite ? 'favorite-btn--active' : ''}`}
