@@ -219,3 +219,25 @@ Följ dessa steg för att sätta upp projektet lokalt på under 10 minuter:
    ```text
    http://localhost:5000
    ```
+
+---
+
+# Dokumentation: Forka ett recept
+
+Det här diagrammet visar flödet när en användare skapar en kopia av ett befintligt recept.
+
+```mermaid
+sequenceDiagram
+    participant U as Användare
+    participant R as Router
+    participant M as Middleware (Auth/Val)
+    participant C as Controller
+    participant DB as Databas
+
+    U->>R: POST /api/v1/recipes/:id/fork
+    R->>M: authenticate + validate
+    M-->>R: OK
+    R->>C: forkRecipe(req, res)
+    C->>DB: Hämta original + Spara kopia
+    DB-->>C: Nytt recept-ID
+    C-->>U: 201 Created
