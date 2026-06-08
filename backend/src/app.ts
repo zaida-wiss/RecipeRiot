@@ -35,7 +35,7 @@ const generalLimiter = rateLimit({
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 50,
   message: { message: 'För många inloggningsförsök, försök igen senare' },
 });
 
