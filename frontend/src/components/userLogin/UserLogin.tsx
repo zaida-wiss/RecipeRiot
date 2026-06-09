@@ -189,7 +189,10 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
   }
 
   return (
-    <div className="user-login-backdrop" onClick={onClose}>
+    <div
+      className="user-login-backdrop"
+      onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
       <div className="user-login-modal" onClick={stopModalClose}>
         <button className="user-login-close" type="button" aria-label="Stäng" onClick={onClose}>
           ×
