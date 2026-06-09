@@ -8,6 +8,8 @@ const ingredientSchema = z.object({
   unit: z.string().min(1, 'Enhet är obligatorisk').max(50).trim(),
 });
 
+const difficultySchema = z.enum(['Lätt', 'Medel', 'Svår']);
+
 // ─── POST /recipes ────────────────────────────────────────────────────────────
 export const createRecipeSchema = z.object({
   title: z
@@ -16,6 +18,9 @@ export const createRecipeSchema = z.object({
     .max(200, 'Titel får inte överstiga 200 tecken')
     .trim(),
   imageUrl: z.url().optional(),
+  time: z.string().max(50, 'Tillagningstid får inte överstiga 50 tecken').trim().optional(),
+  difficulty: difficultySchema.optional(),
+  tags: z.array(z.string().min(1).max(40).trim()).optional().default([]),
   ingredients: z.array(ingredientSchema).optional().default([]),
   steps: z.array(
     z.string().min(1, "Steg får inte vara tomt").max(1000).trim()

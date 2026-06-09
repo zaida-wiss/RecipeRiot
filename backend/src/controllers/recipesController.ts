@@ -116,6 +116,11 @@ export const forkRecipe = asyncHandler(async (req, res): Promise<void> => {
   const forkedRecipe = await Recipe.create({
     title: original.title,
     createdBy: userId,
+    createdByUsername: req.user?.username ?? 'Okänd',
+    imageUrl: original.imageUrl,
+    time: original.time,
+    difficulty: original.difficulty,
+    tags: original.tags,
     ingredients: original.ingredients,
     steps: original.steps,
     originalRef: original._id,

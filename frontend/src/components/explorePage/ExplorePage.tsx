@@ -33,12 +33,13 @@ const ExplorePage: React.FC = () => {
     return ['Alla', ...Array.from(new Set(tags))];
   }, [recipes]);
 
-  const difficulties = ['Alla', 'Lätt', 'Medel', 'Svår'];
+  const difficulties = ['Alla', 'Lätt', 'Medel', 'Svår', 'Ej angiven'];
 
   const filteredRecipes = recipes.filter((recipe) => {
     const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTag = activeTag === 'Alla' || (recipe.tags ?? []).includes(activeTag);
-    const matchesDiff = activeDifficulty === 'Alla' || recipe.difficulty === activeDifficulty;
+    const recipeDifficulty = recipe.difficulty?.trim() || 'Ej angiven';
+    const matchesDiff = activeDifficulty === 'Alla' || recipeDifficulty === activeDifficulty;
     return matchesSearch && matchesTag && matchesDiff;
   });
 
@@ -58,7 +59,8 @@ const ExplorePage: React.FC = () => {
           ? { imageUrl: forkedRecipe.imageUrl.trim() }
           : {}),
         tags: forkedRecipe.tags || [],
-        difficulty: forkedRecipe.difficulty || "Medel"
+        difficulty: forkedRecipe.difficulty || "Medel",
+        ...(forkedRecipe.time?.trim() ? { time: forkedRecipe.time.trim() } : {}),
       };
 
       await createRecipe(recipeToSave);
