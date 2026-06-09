@@ -33,7 +33,7 @@ const RecipeSchema = new Schema<IRecipe>(
   {
     title: { type: String, required: [true, 'Titel är obligatorisk'], trim: true },
     createdBy: { type: String, required: [true, 'createdBy är obligatorisk'], trim: true },
-    createdByUsername: { type: String, default: 'Okänd' },
+    createdByUsername: { type: String, default: 'RecipeRiot' },
     imageUrl: { type: String, default: '' },
     time: { type: String, default: '', trim: true },
     difficulty: {

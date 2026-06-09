@@ -1,6 +1,8 @@
 // src/controllers/recipesController.ts
+import mongoose from 'mongoose';
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import { Recipe, type IRecipe } from '../models/Recipe.js';
+import { User } from '../models/User.js';
 import { NotFoundError, UnauthorizedError, ForbiddenError } from '../errors/AppError.js';
 
 // helpers
@@ -22,6 +24,35 @@ const buildRecipeFilter = (search?: string) => {
   if (!search) return {};
   const textMatch = { $regex: escapeRegex(search), $options: 'i' };
   return { $or: [{ title: textMatch }, { 'ingredients.name': textMatch }] };
+};
+
+const UNKNOWN_CREATOR_NAME = 'RecipeRiot';
+
+const hasUsefulCreatorName = (name?: string): boolean => {
+  if (!name) return false;
+  const normalizedName = name.trim().toLowerCase();
+  return normalizedName !== '' && normalizedName !== 'okänd' && normalizedName !== 'okänd användare';
+};
+
+const withCreatorUsernames = async (recipes: IRecipe[]) => {
+  const recipeObjects = recipes.map((recipe) => recipe.toObject());
+  const creatorIds = Array.from(new Set(
+    recipeObjects
+      .map((recipe) => String(recipe.createdBy))
+      .filter((id) => mongoose.Types.ObjectId.isValid(id))
+  ));
+
+  const users = await User.find({ _id: { $in: creatorIds }, isDeleted: false })
+    .select('username')
+    .lean();
+  const usernamesById = new Map(users.map((user) => [String(user._id), user.username]));
+
+  return recipeObjects.map((recipe) => ({
+    ...recipe,
+    createdByUsername: hasUsefulCreatorName(recipe.createdByUsername)
+      ? recipe.createdByUsername
+      : usernamesById.get(String(recipe.createdBy)) ?? UNKNOWN_CREATOR_NAME,
+  }));
 };
 
 const getAuthenticatedUserId = (req: Request): string => {
@@ -65,9 +96,10 @@ export const getAllRecipes = asyncHandler(async (req, res): Promise<void> => {
     Recipe.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
     Recipe.countDocuments(filter),
   ]);
+  const recipesWithCreatorNames = await withCreatorUsernames(recipes);
 
   res.json({
-    data: recipes,
+    data: recipesWithCreatorNames,
     pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
   });
 });
@@ -76,7 +108,8 @@ export const getAllRecipes = asyncHandler(async (req, res): Promise<void> => {
 export const getRecipeById = asyncHandler(async (req, res): Promise<void> => {
   const { id } = req.validatedParams;
   const recipe = await getRecipeOrThrow(id);
-  res.json(recipe);
+  const [recipeWithCreatorName] = await withCreatorUsernames([recipe]);
+  res.json(recipeWithCreatorName);
 });
 
 // POST /api/v1/recipes
@@ -85,7 +118,7 @@ export const createRecipe = asyncHandler(async (req, res): Promise<void> => {
   const recipe = await Recipe.create({
     ...req.validatedBody,
     createdBy: userId,
-    createdByUsername: req.user?.username ?? 'Okänd',
+    createdByUsername: req.user?.username ?? UNKNOWN_CREATOR_NAME,
   });
   res.status(201).json(recipe);
 });
@@ -116,7 +149,7 @@ export const forkRecipe = asyncHandler(async (req, res): Promise<void> => {
   const forkedRecipe = await Recipe.create({
     title: original.title,
     createdBy: userId,
-    createdByUsername: req.user?.username ?? 'Okänd',
+    createdByUsername: req.user?.username ?? UNKNOWN_CREATOR_NAME,
     imageUrl: original.imageUrl,
     time: original.time,
     difficulty: original.difficulty,
