@@ -23,6 +23,11 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
   const currentUserId = auth?.user?.id;
   const difficulty = recipe.difficulty?.trim() || "Ej angiven";
   const time = recipe.time?.trim() || "Tid saknas";
+  const authorName = recipe.createdByUsername?.trim()
+    || (typeof recipe.createdBy === "object" && recipe.createdBy !== null
+      ? (recipe.createdBy as { username?: string }).username
+      : undefined)
+    || "RecipeRiot";
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -123,12 +128,8 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
                 <span className="modal__meta-item">
                   <Clock size={13} /> {time}
                 </span>
-                <span className="modal__meta-item">
-                  <Users size={13} /> Av {
-                    typeof recipe.createdBy === "object" && recipe.createdBy !== null 
-                      ? (recipe.createdBy as { username?: string }).username 
-                      : recipe.createdBy
-                  }
+                <span className="modal__meta-item modal__meta-author">
+                  <Users size={13} /> Av {authorName}
                 </span>
               </div>
               {(recipe.tags ?? []).length > 0 && (

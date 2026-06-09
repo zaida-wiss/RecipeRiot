@@ -346,7 +346,7 @@ const AdminPage = () => {
                           <span className="admin-badge">Fork</span>
                         )}
                       </div>
-                      <p>{recipe.createdByUsername || "Okänd användare"}</p>
+                      <p>{recipe.createdByUsername || "RecipeRiot"}</p>
                       <div className="admin-meta">
                         <span>Skapad {formatDate(recipe.createdAt)}</span>
                         <span>{recipe.ingredients?.length ?? 0} ingredienser</span>

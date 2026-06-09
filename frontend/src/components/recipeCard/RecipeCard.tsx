@@ -23,6 +23,7 @@ const RecipeCard = ({
   const isLoggedIn = getAuthData() !== null;
   const difficulty = recipe.difficulty?.trim() || "Ej angiven";
   const time = recipe.time?.trim() || "Tid saknas";
+  const authorName = recipe.createdByUsername?.trim() || "RecipeRiot";
 
   useEffect(() => {
     setIsFavorite(initialFavorite);
@@ -75,7 +76,7 @@ const RecipeCard = ({
             <span key={tag}>{tag}</span>
           ))}
         </div>
-        <p className="card-author">Av {recipe.createdByUsername ?? recipe.createdBy}</p>
+        <p className="card-author">Av <span>{authorName}</span></p>
       </div>
     </div>
   );

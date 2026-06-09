@@ -45,6 +45,24 @@
   background: #f5f2ef; padding: 2px 8px; border-radius: 6px;
 }
 
+.card-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 12px 0 0;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #f7efe7;
+  color: #76665d;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.card-author span {
+  color: #c56a2d;
+  font-weight: 800;
+}
+
 .card-rating {
   display: flex; align-items: center; gap: 6px;
   margin-top: 12px; padding-top: 10px;
