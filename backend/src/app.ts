@@ -10,6 +10,7 @@ import usersRouter from './routes/users.js';
 import healthRouter from "./routes/health.js";
 import gdprRouter from "./routes/gdpr.js";
 import favoritesRouter from './routes/favorites.js';
+import adminRouter from './routes/admin.js';
 import logger from './middleware/logger.js';
 import { env } from './config/env.js';
 
@@ -34,7 +35,7 @@ const generalLimiter = rateLimit({
 
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 5,
+  max: 50,
   message: { message: 'För många inloggningsförsök, försök igen senare' },
 });
 
@@ -52,6 +53,7 @@ app.use('/api/v1/favorites', favoritesRouter);
 app.use('/api/v1/users', usersRouter);
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/gdpr', gdprRouter);
+app.use("/api/v1/admin", adminRouter);
 
 // 404
 app.use((_req: express.Request, res: express.Response) => {

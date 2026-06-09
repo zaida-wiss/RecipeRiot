@@ -87,7 +87,7 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, userna
               </NavLink>
               {role === 'admin' && (
                 <NavLink to="/admin" className="navbar-btn navbar-btn--cta">
-                  Admin
+                  Adminverktyg
                 </NavLink>
               )}
               <button
@@ -167,6 +167,17 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, userna
             {label}
           </NavLink>
         ))}
+
+        {isLoggedIn && role === 'admin' && (
+          <NavLink
+            to="/admin"
+            className={drawerLinkClass}
+            onClick={() => setMenuOpen(false)}
+          >
+            <GitFork size={16} strokeWidth={1.8} aria-hidden="true" />
+            Adminverktyg
+          </NavLink>
+        )}
       </div>
     </>
   );

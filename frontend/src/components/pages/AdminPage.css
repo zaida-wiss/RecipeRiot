@@ -1,0 +1,246 @@
+.admin-page {
+  min-height: 100vh;
+  background: #f6f1eb;
+  padding: 24px 1.25rem 40px;
+}
+
+.admin-header {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 0 auto 24px;
+  max-width: 1200px;
+}
+
+.admin-eyebrow {
+  margin: 0 0 8px;
+  color: #a85525;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.admin-header h1 {
+  margin: 0 0 10px;
+  color: #1a1a1a;
+  font-family: "Playfair Display", serif;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+}
+
+.admin-subtitle {
+  margin: 0;
+  max-width: 700px;
+  color: #6b625b;
+  line-height: 1.6;
+}
+
+.admin-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.admin-summary-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: #fff;
+  border: 1px solid #ede2d5;
+  border-radius: 8px;
+  color: #3f2f22;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.admin-feedback,
+.admin-status {
+  max-width: 1200px;
+  margin: 0 auto 18px;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid #ede2d5;
+  color: #4d443d;
+}
+
+.admin-feedback--success {
+  border-color: #c9dfc7;
+  background: #f4fbf2;
+  color: #255b2c;
+}
+
+.admin-feedback--error {
+  border-color: #ebc8c8;
+  background: #fff7f7;
+  color: #8c2f2f;
+}
+
+.admin-layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.admin-section {
+  background: #fff;
+  border: 1px solid #ede2d5;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.admin-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.admin-section-label {
+  margin: 0 0 6px;
+  color: #a85525;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.admin-section h2 {
+  margin: 0;
+  color: #1a1a1a;
+  font-family: "Playfair Display", serif;
+  font-size: 1.35rem;
+}
+
+.admin-section-copy {
+  margin: 0;
+  color: #776c62;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.admin-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  border: 1px solid #efe5da;
+  border-radius: 8px;
+  background: #fcfaf7;
+}
+
+.admin-row-main {
+  min-width: 0;
+}
+
+.admin-row-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.admin-row-heading h3 {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 1rem;
+}
+
+.admin-row-main p {
+  margin: 0 0 8px;
+  color: #61564d;
+}
+
+.admin-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: #8c8178;
+  font-size: 0.84rem;
+}
+
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #efe5da;
+  color: #5d4b3c;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.admin-badge--admin {
+  background: #efe2d4;
+  color: #9a4a16;
+}
+
+.admin-row-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.admin-danger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  border: none;
+  border-radius: 8px;
+  padding: 0 14px;
+  background: #9d2f2f;
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.admin-danger-btn:hover:not(:disabled) {
+  background: #7f2424;
+}
+
+.admin-danger-btn:disabled {
+  background: #d5ccc2;
+  color: #7e746b;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-page {
+    padding: 20px 1rem 36px;
+  }
+
+  .admin-row {
+    flex-direction: column;
+  }
+
+  .admin-row-actions {
+    width: 100%;
+  }
+
+  .admin-danger-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

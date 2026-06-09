@@ -1,0 +1,37 @@
+<svg width="1200" height="800" viewBox="0 0 1200 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="800" fill="#F7F0E7"/>
+  <rect y="560" width="1200" height="240" fill="#E9D7C3"/>
+  <ellipse cx="600" cy="600" rx="270" ry="42" fill="#C9B29C" opacity="0.45"/>
+
+  <rect x="425" y="260" width="350" height="230" rx="38" fill="#3E4C59"/>
+  <rect x="445" y="280" width="310" height="190" rx="28" fill="#556270"/>
+  <rect x="400" y="310" width="28" height="110" rx="14" fill="#3E4C59"/>
+  <rect x="772" y="310" width="28" height="110" rx="14" fill="#3E4C59"/>
+
+  <rect x="470" y="235" width="260" height="34" rx="17" fill="#2F3A44"/>
+  <rect x="560" y="200" width="80" height="26" rx="13" fill="#2F3A44"/>
+  <ellipse cx="600" cy="198" rx="58" ry="18" fill="#44525E"/>
+
+  <ellipse cx="600" cy="352" rx="118" ry="64" fill="#E6A15C"/>
+  <ellipse cx="600" cy="340" rx="108" ry="46" fill="#F0BB7E"/>
+  <circle cx="548" cy="332" r="18" fill="#D96C4E"/>
+  <circle cx="638" cy="352" r="16" fill="#8EB26F"/>
+  <circle cx="610" cy="322" r="12" fill="#D96C4E"/>
+  <circle cx="575" cy="358" r="10" fill="#8EB26F"/>
+  <circle cx="668" cy="326" r="11" fill="#D96C4E"/>
+
+  <path d="M520 170C495 138 502 106 520 82" stroke="#D9D9D9" stroke-width="16" stroke-linecap="round"/>
+  <path d="M600 158C578 126 585 95 602 70" stroke="#D9D9D9" stroke-width="16" stroke-linecap="round"/>
+  <path d="M680 170C657 139 665 109 683 84" stroke="#D9D9D9" stroke-width="16" stroke-linecap="round"/>
+
+  <rect x="170" y="168" width="130" height="320" rx="24" fill="#D6B89A"/>
+  <rect x="182" y="180" width="106" height="296" rx="18" fill="#E6CDB4"/>
+  <circle cx="235" cy="260" r="30" fill="#F7F0E7"/>
+  <rect x="222" y="290" width="26" height="112" rx="13" fill="#F7F0E7"/>
+
+  <rect x="892" y="150" width="150" height="340" rx="24" fill="#D6B89A"/>
+  <rect x="906" y="164" width="122" height="312" rx="18" fill="#E6CDB4"/>
+  <circle cx="968" cy="242" r="44" fill="#C56A2D"/>
+  <path d="M968 196C988 196 1004 212 1004 232C1004 262 968 292 968 292C968 292 932 262 932 232C932 212 948 196 968 196Z" fill="#E19A63"/>
+  <path d="M968 210C980 210 990 220 990 232C990 249 968 270 968 270C968 270 946 249 946 232C946 220 956 210 968 210Z" fill="#F7C69A"/>
+</svg>

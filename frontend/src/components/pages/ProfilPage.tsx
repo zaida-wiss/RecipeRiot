@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getAuthData } from '../../api/authApi';
 import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
 import { getFavorites } from '../../api/favoritesApi';
@@ -10,7 +11,163 @@ import './ProfilePage.css';
 
 type Tab = 'mina-recept' | 'favoriter' | 'installningar';
 
+const profileTabs: Array<{ value: Tab; label: string }> = [
+  { value: 'mina-recept', label: 'Mina recept' },
+  { value: 'favoriter', label: 'Favoriter' },
+  { value: 'installningar', label: 'Inställningar' },
+];
+
+const filterRecipesByUser = (recipes: Recipe[], userId?: string) =>
+  recipes.filter((recipe) => String(recipe.createdBy) === String(userId));
+
+const normalizeForkedRecipe = (forkedRecipe: Partial<Recipe>) => {
+  const cleanedIngredients = (forkedRecipe.ingredients ?? []).map((ingredient) => ({
+    ...ingredient,
+    quantity:
+      typeof ingredient.quantity === 'string'
+        ? Number(ingredient.quantity)
+        : (ingredient.quantity as number),
+  }));
+
+  return {
+    title: forkedRecipe.title || 'Nytt recept',
+    ingredients: cleanedIngredients,
+    steps: forkedRecipe.steps || [],
+    ...(forkedRecipe.imageUrl?.trim()
+      ? { imageUrl: forkedRecipe.imageUrl.trim() }
+      : {}),
+    createdBy: forkedRecipe.createdBy,
+  };
+};
+
+type ProfileTabsProps = {
+  activeTab: Tab;
+  onTabChange: (tab: Tab) => void;
+};
+
+const ProfileTabs = ({ activeTab, onTabChange }: ProfileTabsProps) => (
+  <div className="profile-tabs">
+    {profileTabs.map((tab) => (
+      <button
+        key={tab.value}
+        className={`profile-tab ${activeTab === tab.value ? 'active' : ''}`}
+        onClick={() => onTabChange(tab.value)}
+      >
+        {tab.label}
+      </button>
+    ))}
+  </div>
+);
+
+type RecipeSectionProps = {
+  recipes: Recipe[];
+  onSelectRecipe: (recipe: Recipe) => void;
+  favoriteIds: Set<string>;
+  onFavoriteChanged: () => void;
+};
+
+type MyRecipesSectionProps = RecipeSectionProps & {
+  onAddRecipe: () => void;
+};
+
+const MyRecipesSection = ({
+  recipes,
+  onAddRecipe,
+  onSelectRecipe,
+  favoriteIds,
+  onFavoriteChanged,
+}: MyRecipesSectionProps) => (
+  <div>
+    <button className="profile-add-btn" onClick={onAddRecipe}>
+      + Lägg till nytt recept
+    </button>
+
+    {recipes.length > 0 ? (
+      <div className="profile-grid">
+        {recipes.map((recipe) => (
+          <RecipeCard
+            key={recipe._id}
+            recipe={recipe}
+            isFavorite={favoriteIds.has(recipe._id)}
+            onClick={() => onSelectRecipe(recipe)}
+            onFavoriteChanged={onFavoriteChanged}
+          />
+        ))}
+      </div>
+    ) : (
+      <div className="profile-cta">
+        <div className="profile-cta-icon">🍳</div>
+        <h3>Du har inga recept än</h3>
+        <p>Dela ditt första recept med communityn!</p>
+        <button className="profile-add-btn" onClick={onAddRecipe}>
+          + Lägg till ditt första recept
+        </button>
+      </div>
+    )}
+  </div>
+);
+
+const FavoritesSection = ({
+  recipes,
+  onSelectRecipe,
+  favoriteIds,
+  onFavoriteChanged,
+}: RecipeSectionProps) => (
+  <div className="profile-grid">
+    {recipes.length > 0 ? (
+      recipes.map((recipe) => (
+        <RecipeCard
+          key={recipe._id}
+          recipe={recipe}
+          isFavorite={favoriteIds.has(recipe._id)}
+          onClick={() => onSelectRecipe(recipe)}
+          onFavoriteChanged={onFavoriteChanged}
+        />
+      ))
+    ) : (
+      <div className="profile-empty">
+        <p>Du har inga favoriter än.</p>
+      </div>
+    )}
+  </div>
+);
+
+type SettingsSectionProps = {
+  isAdmin: boolean;
+  onOpenAdmin: () => void;
+};
+
+const SettingsSection = ({ isAdmin, onOpenAdmin }: SettingsSectionProps) => (
+  <div className="profile-settings">
+    <div className="settings-card">
+      <h3>Byt lösenord</h3>
+      <form className="settings-form">
+        <label>Nuvarande lösenord</label>
+        <input type="password" placeholder="••••••••" />
+        <label>Nytt lösenord</label>
+        <input type="password" placeholder="••••••••" />
+        <label>Bekräfta nytt lösenord</label>
+        <input type="password" placeholder="••••••••" />
+        <button type="submit" className="settings-btn">
+          Spara lösenord
+        </button>
+      </form>
+    </div>
+
+    {isAdmin && (
+      <div className="settings-card">
+        <h3>Adminbehörigheter</h3>
+        <p>Hantera användare och recept.</p>
+        <button type="button" className="settings-btn" onClick={onOpenAdmin}>
+          Öppna adminverktyg
+        </button>
+      </div>
+    )}
+  </div>
+);
+
 const ProfilePage = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('mina-recept');
   const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
   const [favorites, setFavorites] = useState<Recipe[]>([]);
@@ -20,11 +177,31 @@ const ProfilePage = () => {
 
   const authData = getAuthData();
   const user = authData?.user;
+  const favoriteIds = new Set(favorites.map((recipe) => recipe._id));
 
   const fetchMyRecipes = async () => {
+    if (!user?.id) {
+      setMyRecipes([]);
+      return;
+    }
+
     try {
-      const all = await getAllRecipes();
-      setMyRecipes(all.filter((r) => String(r.createdBy) === String(user?.id)));
+      const allRecipes = await getAllRecipes();
+      setMyRecipes(filterRecipesByUser(allRecipes, user.id));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const refreshFavorites = async () => {
+    if (!user?.id) {
+      setFavorites([]);
+      return;
+    }
+
+    try {
+      const favs = await getFavorites();
+      setFavorites(favs);
     } catch (err) {
       console.error(err);
     }
@@ -41,7 +218,7 @@ const ProfilePage = () => {
           getAllRecipes(),
           getFavorites(),
         ]);
-        setMyRecipes(allRecipes.filter((r) => String(r.createdBy) === String(user.id)));
+        setMyRecipes(filterRecipesByUser(allRecipes, user.id));
         setFavorites(favs);
       } catch (err) {
         console.error(err);
@@ -51,6 +228,65 @@ const ProfilePage = () => {
     };
     fetchData();
   }, [user?.id]);
+
+  const handleForkRecipe = async (forkedRecipe: Partial<Recipe>) => {
+    try {
+      await createRecipe(normalizeForkedRecipe(forkedRecipe));
+      await fetchMyRecipes();
+      setSelected(null);
+      alert('Receptet har kopierats till dina recept!');
+    } catch (err) {
+      console.error('Det gick inte att forka receptet:', err);
+      alert('Kunde inte skapa receptet. Kontrollera konsolen för detaljer.');
+    }
+  };
+
+  const handleDeleteRecipe = async (id: string) => {
+    await deleteRecipe(id);
+    setMyRecipes((prev) => prev.filter((recipe) => recipe._id !== id));
+    setSelected(null);
+  };
+
+  const handleAddRecipeSuccess = async () => {
+    setShowAddForm(false);
+    await fetchMyRecipes();
+  };
+
+  const renderActiveTab = () => {
+    if (loading) {
+      return <p className="profile-loading">Laddar...</p>;
+    }
+
+    if (activeTab === 'mina-recept') {
+      return (
+        <MyRecipesSection
+          recipes={myRecipes}
+          favoriteIds={favoriteIds}
+          onAddRecipe={() => setShowAddForm(true)}
+          onSelectRecipe={setSelected}
+          onFavoriteChanged={refreshFavorites}
+        />
+      );
+    }
+
+    if (activeTab === 'favoriter') {
+      return (
+        <FavoritesSection
+          recipes={favorites}
+          favoriteIds={favoriteIds}
+          onSelectRecipe={setSelected}
+          onFavoriteChanged={refreshFavorites}
+        />
+      );
+    }
+
+    return (
+      <SettingsSection
+        isAdmin={user?.role === 'admin'}
+        onOpenAdmin={() => navigate('/admin')}
+      />
+    );
+  };
 
   if (!user) {
     return (
@@ -74,124 +310,23 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      <div className="profile-tabs">
-        <button
-          className={`profile-tab ${activeTab === 'mina-recept' ? 'active' : ''}`}
-          onClick={() => setActiveTab('mina-recept')}
-        >
-          Mina recept
-        </button>
-        <button
-          className={`profile-tab ${activeTab === 'favoriter' ? 'active' : ''}`}
-          onClick={() => setActiveTab('favoriter')}
-        >
-          Favoriter
-        </button>
-        <button
-          className={`profile-tab ${activeTab === 'installningar' ? 'active' : ''}`}
-          onClick={() => setActiveTab('installningar')}
-        >
-          Inställningar
-        </button>
-      </div>
+      <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="profile-content">
-        {loading ? (
-          <p className="profile-loading">Laddar...</p>
-        ) : activeTab === 'mina-recept' ? (
-          <div>
-            <button className="profile-add-btn" onClick={() => setShowAddForm(true)}>
-              + Lägg till nytt recept
-            </button>
-
-            {myRecipes.length > 0 ? (
-              <div className="profile-grid">
-                {myRecipes.map((r) => (
-                  <RecipeCard key={r._id} recipe={r} onClick={() => setSelected(r)} />
-                ))}
-              </div>
-            ) : (
-              <div className="profile-cta">
-                <div className="profile-cta-icon">🍳</div>
-                <h3>Du har inga recept än</h3>
-                <p>Dela ditt första recept med communityn!</p>
-              </div>
-            )}
-          </div>
-        ) : activeTab === 'favoriter' ? (
-          <div className="profile-grid">
-            {favorites.length > 0 ? (
-              favorites.map((r) => (
-                <RecipeCard key={r._id} recipe={r} onClick={() => setSelected(r)} />
-              ))
-            ) : (
-              <div className="profile-empty">
-                <p>Du har inga favoriter än.</p>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="profile-settings">
-            <div className="settings-card">
-              <h3>Byt lösenord</h3>
-              <form className="settings-form">
-                <label>Nuvarande lösenord</label>
-                <input type="password" placeholder="••••••••" />
-                <label>Nytt lösenord</label>
-                <input type="password" placeholder="••••••••" />
-                <label>Bekräfta nytt lösenord</label>
-                <input type="password" placeholder="••••••••" />
-                <button type="submit" className="settings-btn">Spara lösenord</button>
-              </form>
-            </div>
-          </div>
-        )}
-      </div>
+      <div className="profile-content">{renderActiveTab()}</div>
 
       {selected && (
         <RecipeModal
           recipe={selected}
           onClose={() => setSelected(null)}
-          onFork={async (forkedRecipe: Partial<Recipe>) => {
-            try {
-              const ingredients = forkedRecipe.ingredients || [];
-              const cleanedIngredients = ingredients.map((ing) => ({
-                ...ing,
-                quantity: typeof ing.quantity === 'string' ? Number(ing.quantity) : (ing.quantity as number),
-              }));
-
-              const recipeToSave = {
-                title: forkedRecipe.title || 'Nytt recept',
-                ingredients: cleanedIngredients,
-                steps: forkedRecipe.steps || [],
-                imageUrl: forkedRecipe.imageUrl || '',
-                createdBy: forkedRecipe.createdBy,
-              };
-
-              await createRecipe(recipeToSave);
-              await fetchMyRecipes();
-              setSelected(null);
-              alert('Receptet har kopierats till dina recept!');
-            } catch (err) {
-              console.error('Det gick inte att forka receptet:', err);
-              alert('Kunde inte skapa receptet. Kontrollera konsolen för detaljer.');
-            }
-          }}
-          onDelete={async (id) => {
-            await deleteRecipe(id);
-            setMyRecipes((prev) => prev.filter((r) => r._id !== id));
-            setSelected(null);
-          }}
+          onFork={handleForkRecipe}
+          onDelete={handleDeleteRecipe}
         />
       )}
 
       {showAddForm && (
         <AddRecipeForm
           onClose={() => setShowAddForm(false)}
-          onSuccess={() => {
-            setShowAddForm(false);
-            fetchMyRecipes();
-          }}
+          onSuccess={handleAddRecipeSuccess}
         />
       )}
     </div>

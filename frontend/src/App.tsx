@@ -5,6 +5,7 @@ import ExplorePage from "./components/explorePage/ExplorePage";
 import WeeklyPlanner from "./components/weeklyPlanner/WeeklyPlanner";
 import ShoppingList from "./components/shoppingList/ShoppingList";
 import ProfilePage from "./components/pages/ProfilPage";
+import AdminPage from "./components/pages/AdminPage";
 import AboutPage from "./components/pages/aboutpage";
 import ContactPage from "./components/pages/contactpage";
 import PrivacyPage from "./components/pages/privacypage";
@@ -20,6 +21,7 @@ function App() {
             <Route path="/veckomeny" element={<WeeklyPlanner />} />
             <Route path="/inkopslista" element={<ShoppingList />} />
             <Route path="/profil" element={<ProfilePage />} />
+            <Route path="/admin" element={<AdminPage />} />
             <Route path="/om" element={<AboutPage />} />
             <Route path="/kontakt" element={<ContactPage />} />
             <Route path="/integritet" element={<PrivacyPage />} />

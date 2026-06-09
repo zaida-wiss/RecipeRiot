@@ -10,7 +10,7 @@ export const getAllUsers = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const users = await User.find();
+    const users = await User.find({ isDeleted: false });
     res.json(users);
   } catch (error) {
     next(error);
@@ -24,7 +24,10 @@ export const getUserById = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const user = await User.findById(req.params.id);
+    const user = await User.findOne({
+      _id: req.params.id,
+      isDeleted: false,
+    });
     if (!user) throw new NotFoundError('Användaren hittades inte');
       res.json(user);
 

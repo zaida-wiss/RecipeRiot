@@ -3,6 +3,7 @@ import { Clock, Users, ShoppingCart, ChefHat, Trash2, Edit3, GitFork, Save, Plus
 import "./recipes.css";
 import type { Recipe } from "../../types";
 import { getAuthData } from "../../api/authApi";
+import { recipeFallbackImage } from "../../constants/recipeImage";
 
 interface RecipeModalProps {
   recipe: Recipe;
@@ -81,7 +82,7 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
       <div className="modal-backdrop" onClick={onClose} aria-hidden="true" />
       <div className="modal" role="dialog" aria-modal="true">
         <div className="modal__hero">
-          <img className="modal__hero-image" src={recipe.imageUrl || "/placeholder.jpg"} alt={recipe.title} />
+          <img className="modal__hero-image" src={recipe.imageUrl || recipeFallbackImage} alt={recipe.title} />
           <div className="modal__hero-gradient" aria-hidden="true" />
           <button className="modal__close" onClick={onClose}>×</button>
           <div className="modal__hero-title-wrap">
