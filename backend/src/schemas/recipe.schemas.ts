@@ -4,8 +4,8 @@ import { z } from 'zod';
 // ─── Hjälpschema: ingrediens ──────────────────────────────────────────────────
 const ingredientSchema = z.object({
   name: z.string().min(1, 'Ingrediensnamn är obligatoriskt').max(100).trim(),
-  quantity: z.number().positive('Mängd måste vara ett positivt tal'),
-  unit: z.string().min(1, 'Enhet är obligatorisk').max(50).trim(),
+  quantity: z.number().min(0).default(0),
+  unit: z.string().max(50).trim().default(''),
 });
 
 const difficultySchema = z.enum(['Lätt', 'Medel', 'Svår']);
