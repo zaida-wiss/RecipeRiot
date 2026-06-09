@@ -47,6 +47,8 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
         _id: undefined,
         createdBy: currentUserId,
         createdByUsername: auth?.user?.username,
+        originalRef: recipe._id,
+        originalCreatedByUsername: recipe.createdByUsername,
       });
       setIsForking(false);
       onClose();

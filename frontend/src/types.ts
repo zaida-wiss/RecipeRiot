@@ -17,6 +17,7 @@ export interface Recipe {
   ingredients?: Ingredient[];
   steps?: string[];
   originalRef?: string;
+  originalCreatedByUsername?: string;
   createdAt: string;
   updatedAt: string;
 }
