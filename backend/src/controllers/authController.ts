@@ -21,8 +21,7 @@ import type { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types/
  }
 
  // Helper: skapar JWT-token.
-// Den motsvarar lärarens jwt.sign(...), men med TypeScript-typer.
- function createToken(user: IUser): string {
+function createToken(user: IUser): string {
    const secret = env.JWT_SECRET;
 
    if (!secret) {
@@ -43,9 +42,7 @@ import type { AuthResponse, AuthUser, JwtPayload, UserResponse } from '../types/
    return jwt.sign(payload, secret, options);
  }
 
-
 // POST /api/v1/auth/register
-// Motsvarar lärarens router.post('/register', ...)
 export const register = async (
   req: Request,
   res: Response<AuthResponse>,
@@ -67,7 +64,7 @@ export const register = async (
 
     const saltRounds = Number(env.BCRYPT_SALT_ROUNDS || 10);
 
-        // Här gör vi Joakims bcrypt.hash(password, 10),
+
     // men saltRounds kommer från .env.
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
@@ -89,7 +86,6 @@ export const register = async (
 }
 
 // POST /api/v1/auth/login
-// Motsvarar lärarens router.post('/login', ...)
 export const login = async (
   req: Request,
   res: Response<AuthResponse>,
@@ -131,7 +127,6 @@ export const login = async (
 }
 
 // GET /api/v1/auth/me
-// Motsvarar Joakims router.get('/profile', authMiddleware, ...)
 export const getMe = async (
   req: Request,
   res: Response<{ message: string; user: AuthUser }>,

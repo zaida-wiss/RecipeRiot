@@ -1,5 +1,12 @@
 import { useEffect, useState, type FormEvent, type MouseEvent } from "react";
-import { loginUser, registerUser, saveAuthData, type AuthUser } from "../../api/authApi";
+import {
+  loginUser,
+  registerUser,
+  requestPasswordReset,
+  resetPassword,
+  saveAuthData,
+  type AuthUser,
+} from "../../api/authApi";
 import "./UserLogin.css";
 
 type UserLoginProps = {
@@ -9,8 +16,10 @@ type UserLoginProps = {
 };
 
 const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
+  type ViewMode = "login" | "register" | "forgot" | "reset";
+
   // isRegisterMode avgör om samma modal visar login-formulär eller registreringsformulär.
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("login");
 
   // Login använder ett gemensamt fält eftersom backend kan söka på både username och email.
   const [loginIdentifier, setLoginIdentifier] = useState("");
@@ -20,6 +29,11 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [username, setUsername] = useState("");
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetToken, setResetToken] = useState("");
+  const [devResetToken, setDevResetToken] = useState("");
+  const [resetPasswordValue, setResetPasswordValue] = useState("");
+  const [resetPasswordConfirm, setResetPasswordConfirm] = useState("");
 
   // error och success visas i modalen för att användaren ska förstå vad som händer.
   const [error, setError] = useState("");
@@ -30,12 +44,17 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     if (!isOpen) return;
 
     // Varje ny öppning ska börja i login-läge, inte visa gammal success eller register-form.
-    setIsRegisterMode(false);
+    setViewMode("login");
     setLoginIdentifier("");
     setEmail("");
     setPassword("");
     setPasswordConfirm("");
     setUsername("");
+    setResetEmail("");
+    setResetToken("");
+    setDevResetToken("");
+    setResetPasswordValue("");
+    setResetPasswordConfirm("");
     setError("");
     setSuccess("");
 
@@ -56,6 +75,11 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     setPassword("");
     setPasswordConfirm("");
     setUsername("");
+    setResetEmail("");
+    setResetToken("");
+    setDevResetToken("");
+    setResetPasswordValue("");
+    setResetPasswordConfirm("");
     setError("");
     setSuccess("");
   };
@@ -63,7 +87,7 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
   // Växlar mellan login och registrering utan att gamla fältvärden följer med.
   const toggleMode = () => {
     resetForm();
-    setIsRegisterMode(!isRegisterMode);
+    setViewMode((currentMode) => currentMode === "register" ? "login" : "register");
   };
 
   // Frontendvalidering hjälper användaren snabbt, men backendens Zod-schema är fortfarande säkerhetsgränsen.
@@ -101,12 +125,29 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     setSuccess("Inloggningen lyckades! Välkommen tillbaka.");
   };
 
-  // Riktig lösenordsåterställning kräver mail/reset-token i backend, så länken visar bara nuläget.
-  const handleForgotPassword = () => {
+  const handleForgotPasswordRequest = async () => {
+    const result = await requestPasswordReset(resetEmail);
+    setSuccess(result.message);
+    setDevResetToken(result.resetToken ?? "");
+    setResetToken(result.resetToken ?? "");
+    setViewMode("reset");
+  };
+
+  const handleResetPassword = async () => {
+    if (resetPasswordValue !== resetPasswordConfirm) {
+      throw new Error("Lösenorden matchar inte");
+    }
+
+    if (resetPasswordValue.length < 8) {
+      throw new Error("Lösenordet måste vara minst 8 tecken");
+    }
+
+    const result = await resetPassword(resetToken, resetPasswordValue);
+    setSuccess(result.message);
     setError("");
-    setSuccess(
-      "Lösenordsåterställning är inte kopplad ännu. Be en administratör hjälpa dig tills reset-flödet finns på plats."
-    );
+    setViewMode("login");
+    setPassword("");
+    setLoginIdentifier(resetEmail);
   };
 
   // Ett gemensamt submit-flöde gör att knappen kan användas i både login- och registerläge.
@@ -117,13 +158,19 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
     setIsLoading(true);
 
     try {
-      if (isRegisterMode) {
+      if (viewMode === "register") {
         await handleRegister();
-      } else {
+      } else if (viewMode === "login") {
         await handleLogin();
+      } else if (viewMode === "forgot") {
+        await handleForgotPasswordRequest();
+      } else {
+        await handleResetPassword();
       }
 
-      setTimeout(onClose, 2000);
+      if (viewMode === "login" || viewMode === "register") {
+        setTimeout(onClose, 2000);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : "Ett fel inträffade";
       setError(message);
@@ -148,16 +195,30 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
           ×
         </button>
 
-        <h2 className="user-login-title">{isRegisterMode ? "Registrera dig" : "Logga in"}</h2>
+        <h2 className="user-login-title">
+          {viewMode === "register"
+            ? "Registrera dig"
+            : viewMode === "forgot"
+              ? "Återställ lösenord"
+              : viewMode === "reset"
+                ? "Sätt nytt lösenord"
+                : "Logga in"}
+        </h2>
         <p className="user-login-subtitle">
-          {isRegisterMode ? "Skapa ett konto för att börja dela recept" : "Välkommen tillbaka till RecipeRiot."}
+          {viewMode === "register"
+            ? "Skapa ett konto för att börja dela recept"
+            : viewMode === "forgot"
+              ? "Ange din e-postadress så skapar vi en återställningskod."
+              : viewMode === "reset"
+                ? "Ange reset-koden och välj ett nytt lösenord."
+                : "Välkommen tillbaka till RecipeRiot."}
         </p>
 
         {error && <div className="user-login-error">{error}</div>}
         {success && <div className="user-login-success">{success}</div>}
 
         <form className="user-login-form" onSubmit={handleSubmit}>
-          {isRegisterMode && (
+          {viewMode === "register" && (
             <>
               <label className="user-login-label" htmlFor="user-login-username">
                 Användarnamn
@@ -169,12 +230,12 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
                 value={username}
                 onChange={(event) => setUsername(event.target.value)}
                 placeholder="ditt_användarnamn"
-                required={isRegisterMode}
+                required={viewMode === "register"}
               />
             </>
           )}
 
-          {isRegisterMode ? (
+          {viewMode === "register" ? (
             <>
               <label className="user-login-label" htmlFor="user-login-email">
                 E-post
@@ -189,7 +250,7 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
                 required
               />
             </>
-          ) : (
+          ) : viewMode === "login" ? (
             <>
               <label className="user-login-label" htmlFor="user-login-identifier">
                 Användarnamn eller e-post
@@ -205,22 +266,63 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
                 required
               />
             </>
+          ) : viewMode === "forgot" ? (
+            <>
+              <label className="user-login-label" htmlFor="user-login-reset-email">
+                E-post
+              </label>
+              <input
+                id="user-login-reset-email"
+                className="user-login-input"
+                type="email"
+                value={resetEmail}
+                onChange={(event) => setResetEmail(event.target.value)}
+                placeholder="namn@email.com"
+                required
+              />
+            </>
+          ) : (
+            <>
+              <label className="user-login-label" htmlFor="user-login-reset-token">
+                Reset-kod
+              </label>
+              <input
+                id="user-login-reset-token"
+                className="user-login-input"
+                type="text"
+                value={resetToken}
+                onChange={(event) => setResetToken(event.target.value)}
+                placeholder="Klistra in din reset-kod"
+                required
+              />
+            </>
           )}
 
-          <label className="user-login-label" htmlFor="user-login-password">
-            Lösenord
-          </label>
-          <input
-            id="user-login-password"
-            className="user-login-input"
-            type="password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="••••••••"
-            required
-          />
+          {viewMode !== "forgot" && (
+            <>
+              <label className="user-login-label" htmlFor="user-login-password">
+                {viewMode === "reset" ? "Nytt lösenord" : "Lösenord"}
+              </label>
+              <input
+                id="user-login-password"
+                className="user-login-input"
+                type="password"
+                value={viewMode === "reset" ? resetPasswordValue : password}
+                onChange={(event) => {
+                  if (viewMode === "reset") {
+                    setResetPasswordValue(event.target.value);
+                    return;
+                  }
 
-          {isRegisterMode && (
+                  setPassword(event.target.value);
+                }}
+                placeholder="••••••••"
+                required
+              />
+            </>
+          )}
+
+          {(viewMode === "register" || viewMode === "reset") && (
             <>
               <label className="user-login-label" htmlFor="user-login-password-confirm">
                 Bekräfta lösenord
@@ -229,37 +331,76 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
                 id="user-login-password-confirm"
                 className="user-login-input"
                 type="password"
-                value={passwordConfirm}
-                onChange={(event) => setPasswordConfirm(event.target.value)}
+                value={viewMode === "reset" ? resetPasswordConfirm : passwordConfirm}
+                onChange={(event) => {
+                  if (viewMode === "reset") {
+                    setResetPasswordConfirm(event.target.value);
+                    return;
+                  }
+
+                  setPasswordConfirm(event.target.value);
+                }}
                 placeholder="••••••••"
                 required
               />
             </>
           )}
 
+          {viewMode === "reset" && devResetToken && (
+            <div className="user-login-dev-token">
+              <strong>Utvecklingsläge:</strong> din reset-kod är <code>{devResetToken}</code>
+            </div>
+          )}
+
           <button className="user-login-submit" type="submit" disabled={isLoading}>
-            {isLoading ? "Laddar..." : isRegisterMode ? "Registrera" : "Logga in"}
+            {isLoading
+              ? "Laddar..."
+              : viewMode === "register"
+                ? "Registrera"
+                : viewMode === "forgot"
+                  ? "Skicka reset-kod"
+                  : viewMode === "reset"
+                    ? "Spara nytt lösenord"
+                    : "Logga in"}
           </button>
         </form>
 
-        {!isRegisterMode && (
+        {viewMode === "login" && (
           <button
             type="button"
             className="user-login-forgot"
-            onClick={handleForgotPassword}
+            onClick={() => {
+              resetForm();
+              setViewMode("forgot");
+            }}
           >
             Glömt lösenordet?
           </button>
         )}
 
-        <div className="user-login-toggle">
+        {(viewMode === "forgot" || viewMode === "reset") && (
+          <button
+            type="button"
+            className="user-login-forgot"
+            onClick={() => {
+              resetForm();
+              setViewMode("login");
+            }}
+          >
+            Tillbaka till inloggning
+          </button>
+        )}
+
+        {(viewMode === "login" || viewMode === "register") && (
+          <div className="user-login-toggle">
           <p className="user-login-toggle-text">
-            {isRegisterMode ? "Redan medlem?" : "Ny medlem?"}
+            {viewMode === "register" ? "Redan medlem?" : "Ny medlem?"}
           </p>
           <button type="button" className="user-login-toggle-btn" onClick={toggleMode}>
-            {isRegisterMode ? "Logga in här" : "Registrera dig här"}
+            {viewMode === "register" ? "Logga in här" : "Registrera dig här"}
           </button>
         </div>
+        )}
       </div>
     </div>
   );

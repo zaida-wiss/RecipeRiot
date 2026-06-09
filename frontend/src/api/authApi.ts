@@ -77,6 +77,15 @@ export type AuthResponse = {
   user: AuthUser;
 };
 
+export type ForgotPasswordResponse = {
+  message: string;
+  resetToken?: string;
+};
+
+export type ResetPasswordResponse = {
+  message: string;
+};
+
 
 
 // Export-funktioner
@@ -95,6 +104,27 @@ export const loginUser = async (
   password: string
 ): Promise<AuthResponse> => {
   return postAuth<AuthResponse>('login', { identifier, password });
+};
+
+export const requestPasswordReset = async (
+  email: string
+): Promise<ForgotPasswordResponse> => {
+  return requestJson<ForgotPasswordResponse>(`${BASE_URL}/api/v1/password-reset/request`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+};
+
+export const resetPassword = async (
+  token: string,
+  password: string
+): Promise<ResetPasswordResponse> => {
+  return requestJson<ResetPasswordResponse>(`${BASE_URL}/api/v1/password-reset/confirm`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, password }),
+  });
 };
 
 // Token och publik user-info sparas så appen kan komma ihåg inloggningen efter sidladdning.

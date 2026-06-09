@@ -11,6 +11,8 @@ export interface IUser extends Document {
   passwordHash: string;
   role: UserRole;
   favorites: mongoose.Types.ObjectId[];
+  passwordResetTokenHash?: string | null;
+  passwordResetExpiresAt?: Date | null;
   isDeleted: boolean;
   deletedAt?: Date | null;
   createdAt: Date;
@@ -56,6 +58,16 @@ const UserSchema = new Schema<IUser>(
       type: [mongoose.Schema.Types.ObjectId],
       ref: 'Recipe',
       default: [],
+    },
+    passwordResetTokenHash: {
+      type: String,
+      default: null,
+      select: false,
+    },
+    passwordResetExpiresAt: {
+      type: Date,
+      default: null,
+      select: false,
     },
     isDeleted: {
       type: Boolean,
