@@ -27,3 +27,22 @@ export const loginSchema = z.object({
     .string()
     .min(1, "Lösenord är obligatoriskt"),
 });
+
+export const forgotPasswordSchema = z.object({
+  email: z
+    .email("Ogiltig e-postadress")
+    .trim()
+    .toLowerCase(),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z
+    .string()
+    .min(1, "Reset-kod krävs")
+    .max(200, "Reset-koden är för lång")
+    .trim(),
+  password: z
+    .string()
+    .min(8, "Lösenordet måste vara minst 8 tecken")
+    .max(100, "Lösenordet är för långt"),
+});

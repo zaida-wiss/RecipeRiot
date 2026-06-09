@@ -137,6 +137,69 @@ describe('GET /api/v1/auth/me', () => {
   });
 });
 
+describe('POST /api/v1/password-reset/request', () => {
+  test('ska returnera generiskt svar även om e-post saknas i systemet', async () => {
+    const res = await request(app)
+      .post('/api/v1/password-reset/request')
+      .send({ email: 'saknas@example.com' });
+
+    expect(res.status).toBe(200);
+    expect(res.body.message).toContain('Om kontot finns');
+  });
+
+  test('ska skapa reset-token för befintlig användare', async () => {
+    await registerTestUser();
+
+    const res = await request(app)
+      .post('/api/v1/password-reset/request')
+      .send({ email: 'annapanna@example.com' });
+
+    const updatedUser = await User.findOne({ email: 'annapanna@example.com' })
+      .select('+passwordResetTokenHash +passwordResetExpiresAt');
+
+    expect(res.status).toBe(200);
+    expect(updatedUser?.passwordResetTokenHash).toBeDefined();
+    expect(updatedUser?.passwordResetExpiresAt).toBeInstanceOf(Date);
+  });
+});
+
+describe('POST /api/v1/password-reset/confirm', () => {
+  test('ska uppdatera lösenord med giltig reset-kod', async () => {
+    await registerTestUser();
+
+    const forgotRes = await request(app)
+      .post('/api/v1/password-reset/request')
+      .send({ email: 'annapanna@example.com' });
+
+    const resetRes = await request(app)
+      .post('/api/v1/password-reset/confirm')
+      .send({
+        token: forgotRes.body.resetToken,
+        password: 'nyttsuperhemligt123',
+      });
+
+    const loginRes = await loginTestUser({
+      password: 'nyttsuperhemligt123',
+    });
+
+    expect(resetRes.status).toBe(200);
+    expect(loginRes.status).toBe(200);
+  });
+
+  test('ska returnera 401 för ogiltig reset-kod', async () => {
+    await registerTestUser();
+
+    const res = await request(app)
+      .post('/api/v1/password-reset/confirm')
+      .send({
+        token: 'felkod',
+        password: 'nyttsuperhemligt123',
+      });
+
+    expect(res.status).toBe(401);
+  });
+});
+
 test('ska neka vanlig user från admin-route', async () => {
   const registerRes = await registerTestUser();
 

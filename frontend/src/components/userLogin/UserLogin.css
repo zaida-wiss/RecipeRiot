@@ -69,6 +69,22 @@
   font-weight: 500;
 }
 
+.user-login-dev-token {
+  margin-top: 6px;
+  padding: 12px 14px;
+  border: 1px dashed #c56a2d;
+  border-radius: 10px;
+  background: #fff6ed;
+  color: #6e4a2f;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.user-login-dev-token code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  word-break: break-all;
+}
+
 .user-login-form {
   display: grid;
   gap: 10px;

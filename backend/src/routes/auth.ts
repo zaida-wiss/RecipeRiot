@@ -3,7 +3,12 @@ import { validateRequest } from '../middleware/validate.js';
 import { authenticate } from '../middleware/auth.js';
 import { authorizeRoles} from '../middleware/authorize.js';
 import { registerSchema, loginSchema } from '../schemas/auth.schemas.js';
-import { register, login, getMe, getAdminStatus } from '../controllers/authController.js';
+import {
+  register,
+  login,
+  getMe,
+  getAdminStatus,
+} from '../controllers/authController.js';
 
 
 
