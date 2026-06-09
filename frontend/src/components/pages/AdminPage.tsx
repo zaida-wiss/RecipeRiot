@@ -15,6 +15,8 @@ import type { Recipe } from "../../types";
 import "./AdminPage.css";
 
 type AdminAccessStatus = "checking" | "allowed" | "denied";
+type UserRoleFilter = "all" | "admin" | "user";
+type RecipeFilter = "all" | "forks" | "originals";
 
 const formatDate = (value?: string): string => {
   if (!value) {
@@ -53,6 +55,11 @@ const AdminPage = () => {
   const [pageError, setPageError] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
+  const [userSearch, setUserSearch] = useState("");
+  const [userRoleFilter, setUserRoleFilter] =
+    useState<UserRoleFilter>("all");
+  const [recipeSearch, setRecipeSearch] = useState("");
+  const [recipeFilter, setRecipeFilter] = useState<RecipeFilter>("all");
 
   const handleAdminApiError = (error: unknown): boolean => {
     const status = (error as ApiStatusError).status;
@@ -116,6 +123,36 @@ const AdminPage = () => {
   }, [currentUserId, navigate]);
 
   const adminCount = users.filter((user) => user.role === "admin").length;
+  const normalizedUserSearch = userSearch.trim().toLowerCase();
+  const normalizedRecipeSearch = recipeSearch.trim().toLowerCase();
+
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      normalizedUserSearch.length === 0 ||
+      user.username.toLowerCase().includes(normalizedUserSearch) ||
+      user.email.toLowerCase().includes(normalizedUserSearch);
+
+    const matchesRole =
+      userRoleFilter === "all" || user.role === userRoleFilter;
+
+    return matchesSearch && matchesRole;
+  });
+
+  const filteredRecipes = recipes.filter((recipe) => {
+    const matchesSearch =
+      normalizedRecipeSearch.length === 0 ||
+      recipe.title.toLowerCase().includes(normalizedRecipeSearch) ||
+      (recipe.createdByUsername ?? "")
+        .toLowerCase()
+        .includes(normalizedRecipeSearch);
+
+    const matchesType =
+      recipeFilter === "all" ||
+      (recipeFilter === "forks" && Boolean(recipe.originalRef)) ||
+      (recipeFilter === "originals" && !recipe.originalRef);
+
+    return matchesSearch && matchesType;
+  });
 
   const canDeleteUser = (user: AdminUser): boolean => {
     if (user.role !== "admin") {
@@ -278,8 +315,35 @@ const AdminPage = () => {
               </p>
             </div>
 
+            <div className="admin-toolbar">
+              <input
+                type="search"
+                className="admin-input"
+                placeholder="Sök på användarnamn eller e-post"
+                value={userSearch}
+                onChange={(event) => setUserSearch(event.target.value)}
+              />
+              <select
+                className="admin-select"
+                value={userRoleFilter}
+                onChange={(event) =>
+                  setUserRoleFilter(event.target.value as UserRoleFilter)
+                }
+              >
+                <option value="all">Alla roller</option>
+                <option value="admin">Admins</option>
+                <option value="user">Users</option>
+              </select>
+            </div>
+
             <ul className="admin-list" role="list">
-              {users.map((user) => {
+              {filteredUsers.length === 0 && (
+                <li className="admin-empty-state">
+                  Ingen användare matchar din sökning eller filtrering.
+                </li>
+              )}
+
+              {filteredUsers.map((user) => {
                 const disabled = !canDeleteUser(user);
                 const isPending = pendingAction === `user:${user._id}`;
                 const isSelf = user._id === currentUserId;
@@ -333,8 +397,35 @@ const AdminPage = () => {
               </p>
             </div>
 
+            <div className="admin-toolbar">
+              <input
+                type="search"
+                className="admin-input"
+                placeholder="Sök på recept eller skapare"
+                value={recipeSearch}
+                onChange={(event) => setRecipeSearch(event.target.value)}
+              />
+              <select
+                className="admin-select"
+                value={recipeFilter}
+                onChange={(event) =>
+                  setRecipeFilter(event.target.value as RecipeFilter)
+                }
+              >
+                <option value="all">Alla recept</option>
+                <option value="forks">Endast forks</option>
+                <option value="originals">Endast original</option>
+              </select>
+            </div>
+
             <ul className="admin-list" role="list">
-              {recipes.map((recipe) => {
+              {filteredRecipes.length === 0 && (
+                <li className="admin-empty-state">
+                  Inget recept matchar din sökning eller filtrering.
+                </li>
+              )}
+
+              {filteredRecipes.map((recipe) => {
                 const isPending = pendingAction === `recipe:${recipe._id}`;
 
                 return (
