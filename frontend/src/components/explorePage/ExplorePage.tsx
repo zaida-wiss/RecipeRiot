@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Search } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import RecipeModal from '../recipeModal/RecipeModal';
 import RecipeCard from '../recipeCard/RecipeCard';
 import type { Recipe } from '../../types';
@@ -7,12 +8,19 @@ import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi'
 import './ExplorePage.css';
 
 const ExplorePage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const urlQuery = searchParams.get('q') ?? '';
+
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(urlQuery);
   const [activeTag, setActiveTag] = useState('Alla');
   const [activeDifficulty, setActiveDifficulty] = useState('Alla');
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+
+  useEffect(() => {
+    setSearchTerm(urlQuery);
+  }, [urlQuery]);
 
   useEffect(() => {
     const fetchRecipes = async () => {
