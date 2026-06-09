@@ -13,6 +13,9 @@ export type ApiRecipe = {
   createdBy: string;
   createdByUsername?: string;
   imageUrl?: string;
+  time?: string;
+  difficulty?: string;
+  tags?: string[];
   ingredients: ApiIngredient[];
   steps: string[];
   originalRef?: string;
@@ -37,6 +40,7 @@ export type CreateRecipeInput = {
   ingredients?: ApiIngredient[];
   steps?: string[];
   imageUrl?: string;
+  time?: string;
   difficulty?: string;
   tags?: string[];
 };

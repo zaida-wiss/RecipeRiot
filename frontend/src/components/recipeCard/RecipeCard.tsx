@@ -21,6 +21,8 @@ const RecipeCard = ({
 }: RecipeCardProps) => {
   const [isFavorite, setIsFavorite] = useState(initialFavorite);
   const isLoggedIn = getAuthData() !== null;
+  const difficulty = recipe.difficulty?.trim() || "Ej angiven";
+  const time = recipe.time?.trim() || "Tid saknas";
 
   useEffect(() => {
     setIsFavorite(initialFavorite);
@@ -49,6 +51,13 @@ const RecipeCard = ({
     <div className="card" onClick={onClick}>
       <div className="card-image-wrapper">
         <img src={recipe.imageUrl || recipeFallbackImage} alt={recipe.title} />
+        <div className="card-image-meta" aria-label="Receptinformation">
+          <span className="difficulty">{difficulty}</span>
+          <span className="card-time">
+            <Clock size={12} strokeWidth={2} />
+            {time}
+          </span>
+        </div>
         {isLoggedIn && (
           <button
             className={`favorite-btn ${isFavorite ? 'favorite-btn--active' : ''}`}
@@ -60,13 +69,6 @@ const RecipeCard = ({
         )}
       </div>
       <div className="card-info">
-        <div className="top">
-          <span className="difficulty">{recipe.difficulty}</span>
-          <span className="card-time">
-            <Clock size={12} strokeWidth={2} />
-            {recipe.time}
-          </span>
-        </div>
         <h3>{recipe.title}</h3>
         <div className="tags">
           {(recipe.tags ?? []).map((tag) => (

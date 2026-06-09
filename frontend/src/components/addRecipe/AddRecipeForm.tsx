@@ -11,6 +11,8 @@ type Ingredient = {
 const AddRecipeForm = ({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) => {
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [time, setTime] = useState('');
+  const [difficulty, setDifficulty] = useState('Medel');
   const [steps, setSteps] = useState(['']);
   const [ingredients, setIngredients] = useState<Ingredient[]>([
     { name: '', quantity: 0, unit: '' }
@@ -46,7 +48,9 @@ const AddRecipeForm = ({ onClose, onSuccess }: { onClose: () => void; onSuccess:
         title,
         ingredients,
         steps,
+        difficulty,
         ...(imageUrl.trim() ? { imageUrl: imageUrl.trim() } : {}),
+        ...(time.trim() ? { time: time.trim() } : {}),
       };
 
       const res = await fetch('/api/v1/recipes', {
@@ -95,6 +99,28 @@ const AddRecipeForm = ({ onClose, onSuccess }: { onClose: () => void; onSuccess:
             onChange={(e) => setImageUrl(e.target.value)}
             placeholder="https://..."
           />
+
+          <div className="recipe-details-row">
+            <div>
+              <label>Tillagningstid</label>
+              <input
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                placeholder="30 min"
+              />
+            </div>
+            <div>
+              <label>Svårighetsgrad</label>
+              <select
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value)}
+              >
+                <option value="Lätt">Lätt</option>
+                <option value="Medel">Medel</option>
+                <option value="Svår">Svår</option>
+              </select>
+            </div>
+          </div>
 
           <label>Ingredienser</label>
           {ingredients.map((ing, i) => (

@@ -12,6 +12,9 @@ export interface IRecipe extends Document {
   createdBy: string;
   createdByUsername: string;
   imageUrl?: string;
+  time?: string;
+  difficulty?: string;
+  tags: string[];
   ingredients: IIngredient[];
   steps: string[];
   originalRef?: mongoose.Types.ObjectId;
@@ -32,6 +35,14 @@ const RecipeSchema = new Schema<IRecipe>(
     createdBy: { type: String, required: [true, 'createdBy är obligatorisk'], trim: true },
     createdByUsername: { type: String, default: 'Okänd' },
     imageUrl: { type: String, default: '' },
+    time: { type: String, default: '', trim: true },
+    difficulty: {
+      type: String,
+      enum: ['Lätt', 'Medel', 'Svår', ''],
+      default: '',
+      trim: true,
+    },
+    tags: { type: [String], default: [] },
     ingredients: { type: [IngredientSchema], default: [] },
     steps: { type: [String], default: [] },
     originalRef: { type: mongoose.Schema.Types.ObjectId, ref: 'Recipe' },

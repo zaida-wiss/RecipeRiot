@@ -21,6 +21,8 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
   const auth = getAuthData();
   const isLoggedIn = !!auth;
   const currentUserId = auth?.user?.id;
+  const difficulty = recipe.difficulty?.trim() || "Ej angiven";
+  const time = recipe.time?.trim() || "Tid saknas";
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -117,12 +119,10 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
           {!isForking && (
             <>
               <div className="modal__meta-row">
-                {recipe.difficulty && <span className="badge">{recipe.difficulty}</span>}
-                {recipe.time && (
-                  <span className="modal__meta-item">
-                    <Clock size={13} /> {recipe.time}
-                  </span>
-                )}
+                <span className="badge">{difficulty}</span>
+                <span className="modal__meta-item">
+                  <Clock size={13} /> {time}
+                </span>
                 <span className="modal__meta-item">
                   <Users size={13} /> Av {
                     typeof recipe.createdBy === "object" && recipe.createdBy !== null 
