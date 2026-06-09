@@ -234,10 +234,12 @@ sequenceDiagram
     participant C as Controller
     participant DB as Databas
 
-    U->>R: POST /api/v1/recipes/:id/fork
-    R->>M: authenticate + validate
-    M-->>R: OK
-    R->>C: forkRecipe(req, res)
-    C->>DB: Hämta original + Spara kopia
-    DB-->>C: Nytt recept-ID
-    C-->>U: 201 Created
+   U ->> R: POST /api/v1/recipes/:id/fork
+   R ->> M: kör middleware-kedja
+   M -->> R: OK (req.user satt)
+   R ->> C: forkRecipe(req, res)
+   C ->> DB: Recipe.findById(id)
+   DB -->> C: originalRecept
+   C ->> DB: Recipe.create({...kopia, originalRef})
+   DB -->> C: Nytt recept-ID
+   C -->> U: 201 Created
