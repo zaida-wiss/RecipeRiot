@@ -31,17 +31,12 @@ const WeeklyPlanner = () => {
     const fetchPlannerRecipes = async () => {
       setLoading(true);
       try {
-        const [allRecipes, favorites] = await Promise.all([
-          getAllRecipes(),
-          getFavorites()
-        ]);
-
-        if (favorites.length > 0 && typeof favorites[0] === 'object' && 'title' in favorites[0]) {
-          setMyRecipes(favorites as unknown as Recipe[]);
-        } else {
-          const favIds = favorites.map((f: Favorite) => f.recipeId || f._id || '');
-          const filtered = allRecipes.filter((r) => favIds.includes(r._id));
-          setMyRecipes(filtered.length > 0 ? filtered : allRecipes);
+        const allRecipes = await getAllRecipes();
+        setMyRecipes(allRecipes);
+        try {
+          await getFavorites();
+        } catch {
+          // Ignorera — användaren kanske inte är inloggad
         }
       } catch (err) {
         console.error("Kunde inte hämta recept:", err);
@@ -93,7 +88,14 @@ const WeeklyPlanner = () => {
                 <button className="add-meal-btn" onClick={() => setActiveDay(day)}>
                   {selectedMeals[day] ? (
                     <div className="selected-meal-text">
-                      <UtensilsCrossed size={18} />
+                      {selectedMeals[day].imageUrl && (
+                        <img
+                          src={selectedMeals[day].imageUrl}
+                          alt={selectedMeals[day].title}
+                          className="selected-meal-img"
+                        />
+                      )}
+                      <UtensilsCrossed size={16} />
                       <span>{selectedMeals[day].title}</span>
                     </div>
                   ) : (
@@ -123,13 +125,26 @@ const WeeklyPlanner = () => {
                   <button className="back-btn" onClick={() => setActiveDay(null)}>
                     <ArrowLeft size={16} /> Tillbaka
                   </button>
-                  <h3>Mina recept & favoriter</h3>
+                  <h3>Välj recept för {activeDay}</h3>
                   <div className="recipe-list">
-                    {loading ? <p>Laddar...</p> : myRecipes.map((r) => (
-                      <div key={r._id} className="recipe-item" onClick={() => selectRecipe(r)}>
-                        {r.title}
-                      </div>
-                    ))}
+                    {loading ? (
+                      <p>Laddar recept...</p>
+                    ) : myRecipes.length === 0 ? (
+                      <p className="no-recipes-alert">Inga recept hittades.</p>
+                    ) : (
+                      myRecipes.map((r) => (
+                        <div key={r._id} className="recipe-item" onClick={() => selectRecipe(r)}>
+                          {r.imageUrl && (
+                            <img
+                              src={r.imageUrl}
+                              alt={r.title}
+                              className="recipe-item-img"
+                            />
+                          )}
+                          <span>{r.title}</span>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               ) : (
