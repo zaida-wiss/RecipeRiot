@@ -25,7 +25,9 @@ const WeeklyPlanner = () => {
       setLoading(true);
       try {
         const allRecipes = await getAllRecipes();
-        setMyRecipes(allRecipes);
+        // Filtrera bort dubletter
+        const unique = [...new Map(allRecipes.map(r => [r._id, r])).values()];
+        setMyRecipes(unique);
         try { await getFavorites(); } catch { /* ignorera */ }
       } catch (err) {
         console.error("Kunde inte hämta recept:", err);
@@ -102,7 +104,11 @@ const WeeklyPlanner = () => {
                     {selectedMeals[day] ? (
                       <div className="selected-meal-text">
                         {selectedMeals[day].imageUrl && (
-                          <img src={selectedMeals[day].imageUrl} alt={selectedMeals[day].title} className="selected-meal-img" />
+                          <img
+                            src={selectedMeals[day].imageUrl}
+                            alt={selectedMeals[day].title}
+                            className="selected-meal-img"
+                          />
                         )}
                         <UtensilsCrossed size={15} />
                         <span>{selectedMeals[day].title}</span>
@@ -116,9 +122,18 @@ const WeeklyPlanner = () => {
                   </div>
                   <div className="day-actions">
                     {selectedMeals[day] && (
-                      <button className="remove-meal-btn" onClick={(e) => removeDay(day, e)}>×</button>
+                      <button
+                        className="remove-meal-btn"
+                        onClick={(e) => removeDay(day, e)}
+                        aria-label={`Ta bort ${day}`}
+                      >
+                        ×
+                      </button>
                     )}
-                    <ChevronDown size={18} className={`chevron ${activeDay === day ? 'chevron-up' : ''}`} />
+                    <ChevronDown
+                      size={18}
+                      className={`chevron ${activeDay === day ? 'chevron-up' : ''}`}
+                    />
                   </div>
                 </div>
 
@@ -136,7 +151,11 @@ const WeeklyPlanner = () => {
           {plannedCount > 0 && (
             <div className="planner-footer">
               <p className="summary-text">{plannedCount} av 7 dagar planerade</p>
-              <button className="send-to-shopping-btn" onClick={handleSendToShoppingList} disabled={sent}>
+              <button
+                className="send-to-shopping-btn"
+                onClick={handleSendToShoppingList}
+                disabled={sent}
+              >
                 <ShoppingCart size={18} />
                 {sent ? 'Skickat! ✓' : 'Skicka till inköpslistan'}
               </button>
@@ -156,13 +175,20 @@ const WeeklyPlanner = () => {
           <div className="planner-content">
             <div className="days-list">
               {days.map((day) => (
-                <div key={day} className={`day-row ${activeDay === day ? 'active-row' : ''}`}>
+                <div
+                  key={day}
+                  className={`day-row ${activeDay === day ? 'active-row' : ''}`}
+                >
                   <div className="day-label">{day}</div>
                   <button className="add-meal-btn" onClick={() => toggleDay(day)}>
                     {selectedMeals[day] ? (
                       <div className="selected-meal-text">
                         {selectedMeals[day].imageUrl && (
-                          <img src={selectedMeals[day].imageUrl} alt={selectedMeals[day].title} className="selected-meal-img" />
+                          <img
+                            src={selectedMeals[day].imageUrl}
+                            alt={selectedMeals[day].title}
+                            className="selected-meal-img"
+                          />
                         )}
                         <UtensilsCrossed size={18} />
                         <span>{selectedMeals[day].title}</span>
@@ -170,12 +196,20 @@ const WeeklyPlanner = () => {
                     ) : (
                       <div className="btn-content">
                         <Plus size={18} />
-                        <span>{activeDay === day ? 'Välj recept...' : 'Lägg till måltid'}</span>
+                        <span>
+                          {activeDay === day ? 'Välj recept...' : 'Lägg till måltid'}
+                        </span>
                       </div>
                     )}
                   </button>
                   {selectedMeals[day] && (
-                    <button className="remove-meal-btn" onClick={(e) => removeDay(day, e)}>×</button>
+                    <button
+                      className="remove-meal-btn"
+                      onClick={(e) => removeDay(day, e)}
+                      aria-label={`Ta bort ${day}`}
+                    >
+                      ×
+                    </button>
                   )}
                 </div>
               ))}
@@ -199,8 +233,14 @@ const WeeklyPlanner = () => {
                     <p>Klicka på en dag för att lägga till ett recept.</p>
                     {plannedCount > 0 && (
                       <div className="planner-summary">
-                        <p className="summary-text">{plannedCount} av 7 dagar planerade</p>
-                        <button className="send-to-shopping-btn" onClick={handleSendToShoppingList} disabled={sent}>
+                        <p className="summary-text">
+                          {plannedCount} av 7 dagar planerade
+                        </p>
+                        <button
+                          className="send-to-shopping-btn"
+                          onClick={handleSendToShoppingList}
+                          disabled={sent}
+                        >
                           <ShoppingCart size={18} />
                           {sent ? 'Skickat! ✓' : 'Skicka till inköpslistan'}
                         </button>
