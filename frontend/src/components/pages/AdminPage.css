@@ -122,6 +122,32 @@
   line-height: 1.5;
 }
 
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.admin-input,
+.admin-select {
+  min-height: 42px;
+  border: 1px solid #d8cbbb;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #fff;
+  color: #3f2f22;
+  font-size: 0.95rem;
+}
+
+.admin-input {
+  flex: 1 1 240px;
+}
+
+.admin-select {
+  flex: 0 0 180px;
+}
+
 .admin-list {
   margin: 0;
   padding: 0;
@@ -129,6 +155,15 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.admin-empty-state {
+  padding: 16px;
+  border: 1px dashed #e3d4c6;
+  border-radius: 8px;
+  background: #fcfaf7;
+  color: #776c62;
+  text-align: center;
 }
 
 .admin-row {
@@ -242,5 +277,9 @@
   .admin-danger-btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .admin-select {
+    flex-basis: 100%;
   }
 }
