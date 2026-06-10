@@ -25,8 +25,8 @@ export interface IRecipe extends Document {
 
 const IngredientSchema = new Schema<IIngredient>({
   name: { type: String, required: [true, "Ingrediens är obligatorisk"], trim: true },
-  quantity: { type: Number, required: [true, "Antal är obligatoriskt"] },
-  unit: { type: String, required: [true, "Enhet är obligatoriskt"], trim: true }
+  quantity: { type: Number, default: 0 },
+  unit: { type: String, default: '', trim: true }
 });
 
 const RecipeSchema = new Schema<IRecipe>(

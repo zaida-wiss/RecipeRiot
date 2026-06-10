@@ -163,7 +163,9 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
                   ) : (
                     <>
                       <span className="ingredient-item__name">{ing.name}</span>
-                      <span className="ingredient-item__amount">{ing.quantity} {ing.unit}</span>
+                      <span className="ingredient-item__amount">
+                        {ing.quantity > 0 ? ing.quantity : ''}{ing.unit ? ' ' + ing.unit : ''}
+                      </span>
                     </>
                   )}
                 </li>

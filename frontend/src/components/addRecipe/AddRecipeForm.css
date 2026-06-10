@@ -142,6 +142,180 @@
   cursor: not-allowed;
 }
 
+.bulk-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.bulk-tab-btn {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid #d7c8b5;
+  border-radius: 10px;
+  background: #fffdfb;
+  color: #66615e;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.bulk-tab-btn.active {
+  background: #c56a2d;
+  border-color: #c56a2d;
+  color: #fff;
+}
+
+.bulk-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bulk-description {
+  font-size: 0.9rem;
+  color: #66615e;
+  margin: 0;
+}
+
+.bulk-description code {
+  background: #f5efe6;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #c56a2d;
+}
+
+.template-btn {
+  align-self: flex-start;
+  padding: 8px 14px;
+  border: 1px solid #c56a2d;
+  border-radius: 8px;
+  background: transparent;
+  color: #c56a2d;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.template-btn:hover {
+  background: #fdf0e7;
+}
+
+.bulk-file-area {
+  border: 2px dashed #d7c8b5;
+  border-radius: 10px;
+  padding: 28px;
+  text-align: center;
+  color: #817878;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.bulk-file-area:hover {
+  border-color: #c56a2d;
+  color: #c56a2d;
+}
+
+.bulk-file-input {
+  display: none;
+}
+
+.bulk-found {
+  font-weight: 600;
+  color: #3f2f22;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.bulk-preview {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.bulk-preview-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f5efe6;
+  border-radius: 8px;
+  gap: 12px;
+}
+
+.bulk-preview-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1d1813;
+}
+
+.bulk-preview-meta {
+  font-size: 0.8rem;
+  color: #817878;
+  white-space: nowrap;
+}
+
+.bulk-progress {
+  position: relative;
+  height: 8px;
+  background: #f0e7db;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bulk-progress-bar {
+  height: 100%;
+  background: #c56a2d;
+  border-radius: 999px;
+  transition: width 0.2s;
+}
+
+.bulk-progress-label {
+  display: block;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #817878;
+  margin-top: 4px;
+}
+
+.bulk-result {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bulk-result-summary {
+  font-size: 1rem;
+  color: #1d1813;
+  margin: 0;
+}
+
+.bulk-result-failed-label {
+  font-weight: 600;
+  color: #c33;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.bulk-result-failed-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.875rem;
+  color: #c33;
+}
+
 @media (max-width: 560px) {
   .recipe-details-row,
   .ingredient-row {
