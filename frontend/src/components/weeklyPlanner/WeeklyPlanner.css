@@ -13,72 +13,39 @@
   flex: 1;
   max-width: 1300px;
   margin: 0 auto;
-  padding: 60px 2rem 40px 2rem; 
+  padding: 60px 1.25rem 40px 1.25rem;
   width: 100%;
   box-sizing: border-box;
 }
 
 /* ==========================================================================
-   HEADER & FLIKAR (TABS)
+   HEADER
    ========================================================================== */
 .planner-header h1 {
   font-family: 'Playfair Display', serif;
-  font-size: 2.5rem;
+  font-size: 2rem;
   margin-bottom: 0.5rem;
   color: #1d1813;
 }
 
 .planner-header p {
   color: #66615e;
-  font-size: 1.1rem;
-  margin-bottom: 1.5rem; 
-}
-
-.planner-tabs {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 2rem;
-}
-
-.planner-tab-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #fff;
-  border: 1px solid #e5e0da;
-  padding: 12px 24px;
-  border-radius: 30px;
-  cursor: pointer;
-  font-weight: 550;
-  font-size: 0.95rem;
-  color: #66615e;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-}
-
-.planner-tab-btn:hover {
-  background: #faf7f5;
-  color: #c56a2d;
-  border-color: #c56a2d;
-}
-
-.planner-tab-btn.active {
-  background: #c56a2d;
-  color: white;
-  border-color: #c56a2d;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 /* ==========================================================================
-   PLANNER VY
+   PLANNER CONTENT
    ========================================================================== */
 .planner-content {
   display: flex;
-  gap: 2.5rem;
+  flex-direction: column;
+  gap: 1.5rem;
   align-items: flex-start;
 }
 
 .days-list {
-  flex: 2;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
@@ -91,12 +58,14 @@
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  align-items: center;
 }
 
 .day-label {
-  width: 140px;
+  width: 90px;
+  min-width: 90px;
   background-color: #f5f4ef;
-  padding: 1.6rem;
+  padding: 1rem 0.75rem;
   font-weight: 550;
   color: #47403d;
   font-family: "Playfair Display", serif;
@@ -104,25 +73,26 @@
   align-items: center;
   justify-content: center;
   border-right: 1px solid #eee9e8;
+  font-size: 0.9rem;
 }
 
-/* Knappar & Ikoner */
 .add-meal-btn {
   flex: 1;
   background: white;
   border: none;
-  padding: 1.1rem 1.5rem;
+  padding: 1rem 1rem;
   text-align: left;
   color: #817878;
-  font-size: 1rem;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.2s;
+  min-height: 56px;
 }
 
 .btn-content, .selected-meal-text {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   line-height: 1;
 }
 
@@ -141,76 +111,114 @@
   box-shadow: 0 0 0 1px #c56a2d;
 }
 
-/* Automatiskt Generera Knapp */
-.generate-list-btn {
+/* Ta bort knapp per dag */
+.remove-meal-btn {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1.3rem;
+  padding: 0 12px;
+  cursor: pointer;
+  transition: color 0.2s;
+  line-height: 1;
+  min-height: 44px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  background: #10b981;
-  color: white;
-  border: none;
-  padding: 16px;
-  border-radius: 12px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 1.5rem;
-  width: 100%;
-  transition: background 0.2s, transform 0.1s;
-  box-shadow: 0 4px 6px rgba(16, 185, 129, 0.15);
 }
 
-.generate-list-btn:hover {
-  background: #059669;
-}
+.remove-meal-btn:hover { color: #c56a2d; }
 
-.generate-list-btn:active {
-  transform: scale(0.99);
-}
-
-/* Sidebar & Receptväljare */
+/* ==========================================================================
+   SIDEBAR
+   ========================================================================== */
 .info-sidebar {
-  flex: 1;
-  top: 60px;
+  width: 100%;
 }
 
 .info-card {
   background: #fff;
   border: 1px solid #eee;
   border-radius: 16px;
-  padding: 2.5rem 2rem;
+  padding: 2rem 1.5rem;
   text-align: center;
   color: #999;
   box-shadow: 0 4px 10px rgba(0,0,0,0.02);
 }
 
-.chef-hat-icon {
-  margin-bottom: 1.5rem; 
-  color: #c56a2d;
+.default-info {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: #817878;
+}
+
+.default-info p {
+  font-size: 0.95rem;
+  max-width: 260px;
+  line-height: 1.5;
+}
+
+/* Sammanfattning + skicka-knapp */
+.planner-summary {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.summary-text {
+  font-size: 0.9rem;
+  color: #817878;
+  margin: 0;
+}
+
+.send-to-shopping-btn {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  align-items: center; 
-  opacity: 1; 
-  margin-left: auto;
-  margin-right: auto;
-  background-color: #faf4f2;
-  width: 80px; 
-  height: 80px; 
-  border-radius: 20px;
+  gap: 8px;
+  background: #c56a2d;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+  font-family: "Inter", sans-serif;
 }
 
-.chef-hat-icon svg {
-  width: 40px; 
-  height: 40px;
-  stroke-width: 2.5;
+.send-to-shopping-btn:hover { background: #a85525; }
+.send-to-shopping-btn:disabled {
+  background: #4caf50;
+  cursor: default;
 }
 
+/* ==========================================================================
+   RECEPTVÄLJARE
+   ========================================================================== */
 .recipe-selector { text-align: left; }
-.recipe-selector h3 { margin-bottom: 0.5rem; color: #1a1a1a; font-family: "Playfair Display", serif; font-size: 1.4rem; }
-.selector-subtitle { font-size: 0.9rem; margin-bottom: 1.2rem; color: #66615e; }
 
-.recipe-list { display: flex; flex-direction: column; gap: 10px; }
+.recipe-selector h3 {
+  margin-bottom: 0.5rem;
+  color: #1a1a1a;
+  font-family: "Playfair Display", serif;
+  font-size: 1.3rem;
+}
+
+.recipe-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
 .recipe-item {
   padding: 14px 15px;
   background: #faf7f5;
@@ -221,10 +229,14 @@
   font-weight: 500;
   transition: 0.2s;
   border: 1px solid #f0ebe8;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
-.recipe-item:hover { 
-  background: #f0ebe8; 
-  color: #c56a2d; 
+
+.recipe-item:hover {
+  background: #f0ebe8;
+  color: #c56a2d;
   border-color: #c56a2d;
 }
 
@@ -239,6 +251,7 @@
   margin-bottom: 1rem;
   font-weight: 550;
   padding: 0;
+  min-height: 44px;
 }
 
 .no-recipes-alert {
@@ -247,187 +260,75 @@
   line-height: 1.4;
 }
 
-/* ==========================================================================
-   INKÖPSLISTA VY
-   ========================================================================== */
-.shopping-layout {
-  width: 100%;
-  animation: fadeIn 0.2s ease;
-}
-
-.shopping-card {
-  background: white;
-  padding: 2.5rem;
-  border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.02);
-  border: 1px solid #eee;
-}
-
-.shopping-card h2 {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.8rem;
-  color: #1d1813;
-  margin-bottom: 1.5rem;
-}
-
-.shopping-list-items {
-  list-style: none;
-  padding: 0;
-  margin: 20px 0;
-  border-top: 1px solid #f3f4f6;
-}
-
-.shopping-item-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 8px;
-  border-bottom: 1px solid #f3f4f6;
-}
-
-.shopping-item-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  font-size: 1rem;
-  color: #333;
-}
-
-.shopping-item-left input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  accent-color: #c56a2d;
-  cursor: pointer;
-}
-
-.checked-text {
-  text-decoration: line-through;
-  color: #9ca3af;
-}
-
-.shopping-item-right {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.shopping-amount-badge {
-  background: #f5efe6;
-  color: #47403d;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  border: 1px solid #e5e0da;
-}
-
-.shopping-delete-btn {
-  background: none;
-  border: none;
-  color: #ef4444;
-  cursor: pointer;
-  padding: 6px;
-  border-radius: 6px;
+/* Generera lista knapp */
+.generate-list-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
-}
-
-.shopping-delete-btn:hover {
-  background: #fee2e2;
-}
-
-/* Manuellt Inmatningsfält */
-.shopping-manual-input {
-  display: flex;
-  gap: 12px;
-  margin-top: 30px;
-  background: #faf7f5;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid #eee9e8;
-}
-
-.manual-input-name {
-  flex: 2;
-  padding: 12px;
-  border: 1px solid #e5e0da;
-  border-radius: 8px;
-  font-size: 0.95rem;
-}
-
-.manual-input-amount {
-  flex: 0.6;
-  padding: 12px;
-  border: 1px solid #e5e0da;
-  border-radius: 8px;
-  font-size: 0.95rem;
-}
-
-.manual-unit-select {
-  padding: 12px;
-  border: 1px solid #e5e0da;
-  border-radius: 8px;
-  background: white;
-  font-size: 0.95rem;
-  cursor: pointer;
-}
-
-.manual-input-name:focus, .manual-input-amount:focus, .manual-unit-select:focus {
-  outline: none;
-  border-color: #c56a2d;
-  box-shadow: 0 0 0 1px #c56a2d;
-}
-
-.manual-add-btn {
-  background: #c56a2d;
+  gap: 10px;
+  background: #10b981;
   color: white;
   border: none;
-  padding: 0 16px;
-  border-radius: 8px;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin-top: 1.5rem;
+  width: 100%;
   transition: background 0.2s;
 }
 
-.manual-add-btn:hover {
-  background: #a95620;
-}
+.generate-list-btn:hover { background: #059669; }
 
-.shopping-empty {
-  text-align: center;
-  color: #817878;
-  padding: 50px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.shopping-empty p {
-  max-width: 400px;
-  line-height: 1.5;
-  font-size: 1rem;
-}
-
-/* Animation */
+/* ==========================================================================
+   ANIMATION
+   ========================================================================== */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 /* ==========================================================================
-   MOBIL-ANPASSNING
+   TABLET — 560px+
    ========================================================================== */
-@media (max-width: 900px) {
-  .planner-content { flex-direction: column; }
-  .info-sidebar { width: 100%; position: static; }
-  .shopping-manual-input { flex-direction: column; gap: 8px; }
-  .manual-add-btn { padding: 12px; }
-  .day-label { width: 100px; padding: 1rem; font-size: 0.95rem; }
-  .add-meal-btn { padding: 1rem; font-size: 0.95rem; }
+@media (min-width: 560px) {
+  .planner-header h1 { font-size: 2.2rem; }
+  .day-label { width: 110px; padding: 1.2rem 1rem; font-size: 0.95rem; }
+  .add-meal-btn { font-size: 1rem; }
+}
+
+/* ==========================================================================
+   DESKTOP — 900px+
+   ========================================================================== */
+@media (min-width: 900px) {
+  .planner-container {
+    padding: 60px 2rem 40px 2rem;
+  }
+
+  .planner-header h1 { font-size: 2.5rem; }
+  .planner-header p { font-size: 1.1rem; }
+
+  .planner-content {
+    flex-direction: row;
+    gap: 2.5rem;
+  }
+
+  .days-list { flex: 2; }
+
+  .info-sidebar {
+    flex: 1;
+    position: sticky;
+    top: 80px;
+  }
+
+  .day-label {
+    width: 140px;
+    padding: 1.6rem;
+    font-size: 1rem;
+  }
+
+  .add-meal-btn {
+    padding: 1.1rem 1.5rem;
+  }
 }
