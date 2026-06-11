@@ -135,7 +135,7 @@ const Navbar = ({ onLoginClick, onLogoutClick, isLoggedIn, statusMessage, userna
       <div
         id="mobile-drawer"
         className={`navbar-drawer${menuOpen ? " open" : ""}`}
-        aria-hidden={!menuOpen}
+        aria-hidden={!menuOpen ? true : undefined}
       >
         <div className="navbar-drawer-search" role="search">
           <label htmlFor="drawer-search-input" className="sr-only">Sök bland recept</label>
