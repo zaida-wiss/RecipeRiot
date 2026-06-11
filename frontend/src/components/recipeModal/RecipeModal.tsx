@@ -3,6 +3,7 @@ import { Clock, Users, ShoppingCart, ChefHat, Trash2, Edit3, GitFork, Save, Plus
 import "./recipes.css";
 import type { Recipe } from "../../types";
 import { getAuthData } from "../../api/authApi";
+import { getRecipeById } from "../../api/recipesApi";
 import { recipeFallbackImage } from "../../constants/recipeImage";
 
 interface RecipeModalProps {
@@ -50,7 +51,7 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit, onOpenRecipe }
 
   const handleSaveFork = () => {
     if (editedRecipe) {
-      onFork(recipe._id, {
+      void onFork(recipe._id, {
         ...editedRecipe,
         _id: undefined,
         createdBy: currentUserId,
@@ -84,6 +85,18 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit, onOpenRecipe }
     : recipe.createdBy;
 
   const isOwner = isLoggedIn && !!currentUserId && String(currentUserId).trim() === String(recipeCreatorId).trim();
+
+  const handleOpenOriginal = async () => {
+    if (!recipe.originalRecipe) return;
+
+    try {
+      const originalRecipe = await getRecipeById(recipe.originalRecipe._id);
+      onOpenRecipe?.(originalRecipe);
+    } catch (error) {
+      console.error("Kunde inte öppna originalreceptet:", error);
+      alert("Kunde inte öppna originalreceptet.");
+    }
+  };
 
   return (
     <>

@@ -153,9 +153,6 @@ const ExplorePage: React.FC = () => {
           recipe={selectedRecipe}
           onClose={() => setSelectedRecipe(null)}
           onFork={handleFork}
-          onEdit={() => {
-            setSelectedRecipe(null);
-          }}
           onDelete={async (recipeId) => {
             if (!window.confirm(`Är du säker på att du vill radera "${selectedRecipe.title}"?`)) return;
             try {

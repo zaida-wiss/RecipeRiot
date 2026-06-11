@@ -17,6 +17,11 @@ export interface Recipe {
   ingredients?: Ingredient[];
   steps?: string[];
   originalRef?: string;
+  originalRecipe?: {
+    _id: string;
+    title: string;
+    createdByUsername: string;
+  };
   createdAt: string;
   updatedAt: string;
 }

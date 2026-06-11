@@ -19,6 +19,11 @@ export type ApiRecipe = {
   ingredients: ApiIngredient[];
   steps: string[];
   originalRef?: string;
+  originalRecipe?: {
+    _id: string;
+    title: string;
+    createdByUsername: string;
+  };
   createdAt: string;
   updatedAt: string;
 };
@@ -96,13 +101,17 @@ export const createRecipe = async (
   return response.json() as Promise<ApiRecipe>;
 };
 
-export const forkRecipe = async (recipeId: string): Promise<Recipe> => {
+export const forkRecipe = async (
+  recipeId: string,
+  changes: CreateRecipeInput
+): Promise<Recipe> => {
   const response = await fetch(`${API_URL}/recipes/${recipeId}/fork`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       ...getAuthHeaders(),
     },
+    body: JSON.stringify(changes),
   });
   
   if (!response.ok) {

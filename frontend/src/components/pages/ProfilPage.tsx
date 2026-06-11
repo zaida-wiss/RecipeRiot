@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuthData } from '../../api/authApi';
-import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
+import { getAllRecipes, deleteRecipe, forkRecipe } from '../../api/recipesApi';
 import { getFavorites } from '../../api/favoritesApi';
 import RecipeCard from '../recipeCard/RecipeCard';
 import RecipeModal from '../recipeModal/RecipeModal';
@@ -36,7 +36,9 @@ const normalizeForkedRecipe = (forkedRecipe: Partial<Recipe>) => {
     ...(forkedRecipe.imageUrl?.trim()
       ? { imageUrl: forkedRecipe.imageUrl.trim() }
       : {}),
-    createdBy: forkedRecipe.createdBy,
+    tags: forkedRecipe.tags || [],
+    difficulty: forkedRecipe.difficulty || 'Medel',
+    ...(forkedRecipe.time?.trim() ? { time: forkedRecipe.time.trim() } : {}),
   };
 };
 
@@ -345,6 +347,17 @@ const ProfilePage = () => {
             void fetchMyRecipes();
           }}
           recipeToEdit={recipeToEdit || undefined}
+        />
+      )}
+
+      {recipeToEdit && (
+        <AddRecipeForm
+          recipe={recipeToEdit}
+          onClose={() => setRecipeToEdit(null)}
+          onSuccess={async () => {
+            await fetchMyRecipes();
+            setRecipeToEdit(null);
+          }}
         />
       )}
     </div>
