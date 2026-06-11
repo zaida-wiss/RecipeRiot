@@ -9,28 +9,43 @@ const ingredientSchema = z.object({
 });
 
 const difficultySchema = z.enum(['Lätt', 'Medel', 'Svår']);
+const titleSchema = z
+  .string()
+  .min(2, 'Titel måste ha minst 2 tecken')
+  .max(200, 'Titel får inte överstiga 200 tecken')
+  .trim();
+const timeSchema = z
+  .string()
+  .max(50, 'Tillagningstid får inte överstiga 50 tecken')
+  .trim();
+const tagsSchema = z.array(z.string().min(1).max(40).trim());
+const ingredientsSchema = z.array(ingredientSchema);
+const stepsSchema = z.array(
+  z.string().min(1, "Steg får inte vara tomt").max(1000).trim()
+);
 
 // ─── POST /recipes ────────────────────────────────────────────────────────────
 export const createRecipeSchema = z.object({
-  title: z
-    .string()
-    .min(2, 'Titel måste ha minst 2 tecken')
-    .max(200, 'Titel får inte överstiga 200 tecken')
-    .trim(),
+  title: titleSchema,
   imageUrl: z.url().optional(),
-  time: z.string().max(50, 'Tillagningstid får inte överstiga 50 tecken').trim().optional(),
+  time: timeSchema.optional(),
   difficulty: difficultySchema.optional(),
-  tags: z.array(z.string().min(1).max(40).trim()).optional().default([]),
-  ingredients: z.array(ingredientSchema).optional().default([]),
-  steps: z.array(
-    z.string().min(1, "Steg får inte vara tomt").max(1000).trim()
-  ).optional().default([]),
+  tags: tagsSchema.optional().default([]),
+  ingredients: ingredientsSchema.optional().default([]),
+  steps: stepsSchema.optional().default([]),
   /// originalRef sätts av fork-logiken, inte av klienten vid vanlig skapelse
 });
 
 // ─── PATCH /recipes/:id ───────────────────────────────────────────────────────
-// .partial() gör alla fält valfria
-export const updateRecipeSchema = createRecipeSchema.partial();
+export const updateRecipeSchema = z.object({
+  title: titleSchema.optional(),
+  imageUrl: z.union([z.url(), z.literal('')]).optional(),
+  time: timeSchema.optional(),
+  difficulty: difficultySchema.optional(),
+  tags: tagsSchema.optional(),
+  ingredients: ingredientsSchema.optional(),
+  steps: stepsSchema.optional(),
+});
 
 // ─── GET /recipes?search=&page=&limit= ───────────────────────────────────────
 export const listRecipesQuerySchema = z.object({

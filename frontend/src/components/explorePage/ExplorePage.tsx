@@ -3,8 +3,9 @@ import { Search } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import RecipeModal from '../recipeModal/RecipeModal';
 import RecipeCard from '../recipeCard/RecipeCard';
+import AddRecipeForm from '../addRecipe/AddRecipeForm';
 import type { Recipe } from '../../types';
-import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
+import { getAllRecipes, deleteRecipe, forkRecipe } from '../../api/recipesApi';
 import './ExplorePage.css';
 
 const ExplorePage: React.FC = () => {
@@ -17,6 +18,7 @@ const ExplorePage: React.FC = () => {
   const [activeTag, setActiveTag] = useState('Alla');
   const [activeDifficulty, setActiveDifficulty] = useState('Alla');
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
 
   useEffect(() => {
     setSearchTerm(urlQuery);
@@ -51,18 +53,20 @@ const ExplorePage: React.FC = () => {
     return matchesSearch && matchesTag && matchesDiff;
   });
 
-  const handleFork = async (forkedRecipe: Partial<Recipe>) => {
+  const handleFork = async (recipeId: string, forkedRecipe: Partial<Recipe>) => {
     try {
-      // Tvätta datan för att undvika 400 Bad Request
-      const cleanedIngredients = (forkedRecipe.ingredients || []).map(ing => ({
-        ...ing,
-        quantity: typeof ing.quantity === 'string' ? parseFloat(ing.quantity) : Number(ing.quantity)
-      }));
+      const cleanedIngredients = (forkedRecipe.ingredients || [])
+        .filter((ingredient) => ingredient.name.trim())
+        .map((ingredient) => ({
+          name: ingredient.name.trim(),
+          quantity: Number(ingredient.quantity) || 0,
+          unit: ingredient.unit.trim(),
+        }));
 
-      const recipeToSave = {
+      const forkChanges = {
         title: forkedRecipe.title || "Nytt recept",
         ingredients: cleanedIngredients,
-        steps: forkedRecipe.steps || [],
+        steps: (forkedRecipe.steps || []).map((step) => step.trim()).filter(Boolean),
         ...(forkedRecipe.imageUrl?.trim()
           ? { imageUrl: forkedRecipe.imageUrl.trim() }
           : {}),
@@ -71,7 +75,7 @@ const ExplorePage: React.FC = () => {
         ...(forkedRecipe.time?.trim() ? { time: forkedRecipe.time.trim() } : {}),
       };
 
-      await createRecipe(recipeToSave);
+      await forkRecipe(recipeId, forkChanges);
       
       // Stäng modalen men stanna på sidan
       setSelectedRecipe(null);
@@ -79,7 +83,7 @@ const ExplorePage: React.FC = () => {
       
     } catch (err) {
       console.error("Det gick inte att forka receptet:", err);
-      alert("Kunde inte kopiera receptet. Kontrollera att du är inloggad.");
+      alert(err instanceof Error ? err.message : "Kunde inte kopiera receptet.");
     }
   };
 
@@ -152,8 +156,9 @@ const ExplorePage: React.FC = () => {
           recipe={selectedRecipe}
           onClose={() => setSelectedRecipe(null)}
           onFork={handleFork}
-          onEdit={() => {
+          onEdit={(recipe) => {
             setSelectedRecipe(null);
+            setRecipeToEdit(recipe);
           }}
           onDelete={async (recipeId) => {
             if (!window.confirm(`Är du säker på att du vill radera "${selectedRecipe.title}"?`)) return;
@@ -164,6 +169,18 @@ const ExplorePage: React.FC = () => {
             } catch (err) {
               console.error("Kunde inte radera recept", err);
             }
+          }}
+        />
+      )}
+
+      {recipeToEdit && (
+        <AddRecipeForm
+          recipe={recipeToEdit}
+          onClose={() => setRecipeToEdit(null)}
+          onSuccess={async () => {
+            const updatedRecipes = await getAllRecipes();
+            setRecipes(updatedRecipes);
+            setRecipeToEdit(null);
           }}
         />
       )}

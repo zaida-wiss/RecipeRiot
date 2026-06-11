@@ -8,7 +8,7 @@ import { recipeFallbackImage } from "../../constants/recipeImage";
 interface RecipeModalProps {
   recipe: Recipe;
   onClose: () => void;
-  onFork: (forkedRecipe: Partial<Recipe>) => void;
+  onFork: (recipeId: string, forkedRecipe: Partial<Recipe>) => void | Promise<void>;
   onDelete?: (recipeId: string) => void;
   onEdit?: (recipe: Recipe) => void;
 }
@@ -49,7 +49,7 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
 
   const handleSaveFork = () => {
     if (editedRecipe) {
-      onFork({
+      void onFork(recipe._id, {
         ...editedRecipe,
         _id: undefined,
         createdBy: currentUserId,

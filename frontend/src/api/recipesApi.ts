@@ -1,5 +1,5 @@
 import type { Recipe } from '../types';
-import { getAuthHeaders } from './authApi';
+import { clearAuthData, getAuthHeaders } from './authApi';
 
 export type ApiIngredient = {
   name: string;
@@ -45,7 +45,27 @@ export type CreateRecipeInput = {
   tags?: string[];
 };
 
+export type UpdateRecipeInput = Partial<CreateRecipeInput>;
+
 const API_URL = import.meta.env.VITE_API_URL + '/api/v1';
+const SESSION_ENDED_MESSAGE = 'Din session har gått ut. Logga in igen.';
+
+const getErrorMessage = async (
+  response: Response,
+  fallbackMessage: string
+): Promise<string> => {
+  if (response.status === 401) {
+    clearAuthData(SESSION_ENDED_MESSAGE);
+    return SESSION_ENDED_MESSAGE;
+  }
+
+  try {
+    const errorData = await response.json();
+    return errorData.message || fallbackMessage;
+  } catch {
+    return fallbackMessage;
+  }
+};
 
 const fetchRecipesPage = async (page: number): Promise<RecipesResponse> => {
   const response = await fetch(`${API_URL}/recipes?page=${page}&limit=100`);
@@ -88,26 +108,46 @@ export const createRecipe = async (
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    console.error("--- SERVERNS DETALJERADE FEL (create) ---", JSON.stringify(errorData, null, 2));
-    throw new Error(errorData.message || 'Kunde inte skapa recept');
+    throw new Error(await getErrorMessage(response, 'Kunde inte skapa recept'));
   }
   return response.json() as Promise<ApiRecipe>;
 };
 
-export const forkRecipe = async (recipeId: string): Promise<Recipe> => {
+export const updateRecipe = async (
+  recipeId: string,
+  recipe: UpdateRecipeInput
+): Promise<ApiRecipe> => {
+  const response = await fetch(`${API_URL}/recipes/${recipeId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAuthHeaders(),
+    },
+    body: JSON.stringify(recipe),
+  });
+
+  if (!response.ok) {
+    throw new Error(await getErrorMessage(response, 'Kunde inte uppdatera receptet'));
+  }
+
+  return response.json() as Promise<ApiRecipe>;
+};
+
+export const forkRecipe = async (
+  recipeId: string,
+  changes: UpdateRecipeInput
+): Promise<Recipe> => {
   const response = await fetch(`${API_URL}/recipes/${recipeId}/fork`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       ...getAuthHeaders(),
     },
+    body: JSON.stringify(changes),
   });
   
   if (!response.ok) {
-    const errorData = await response.json();
-    console.error("--- SERVERNS DETALJERADE FEL (fork) ---", JSON.stringify(errorData, null, 2));
-    throw new Error(errorData.message || "Kunde inte forka");
+    throw new Error(await getErrorMessage(response, 'Kunde inte kopiera receptet'));
   }
   
   return response.json();
@@ -122,8 +162,6 @@ export const deleteRecipe = async (id: string): Promise<void> => {
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
-    console.error("--- SERVERNS DETALJERADE FEL (delete) ---", JSON.stringify(errorData, null, 2));
-    throw new Error('Kunde inte radera receptet');
+    throw new Error(await getErrorMessage(response, 'Kunde inte radera receptet'));
   }
 };

@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Navbar from "../navbar/Navbar";
 import Footer from "../footer/Footer";
 import UserLogin from "../userLogin/UserLogin";
-import { clearAuthData, getAuthData, type AuthUser } from "../../api/authApi";
+import {
+  AUTH_SESSION_ENDED_EVENT,
+  clearAuthData,
+  getAuthData,
+  type AuthUser,
+} from "../../api/authApi";
 
 const Layout = () => {
   const initialAuth = getAuthData();
@@ -14,6 +19,17 @@ const Layout = () => {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(
     initialAuth?.user ?? null
   );
+
+  useEffect(() => {
+    const handleSessionEnded = (event: Event) => {
+      const customEvent = event as CustomEvent<{ message?: string }>;
+      setCurrentUser(null);
+      setAuthStatusMessage(customEvent.detail?.message ?? null);
+    };
+
+    window.addEventListener(AUTH_SESSION_ENDED_EVENT, handleSessionEnded);
+    return () => window.removeEventListener(AUTH_SESSION_ENDED_EVENT, handleSessionEnded);
+  }, []);
 
   const handleAuthSuccess = (user: AuthUser) => {
     setCurrentUser(user);

@@ -4,7 +4,7 @@ import RecipeCard from "../recipeCard/RecipeCard";
 import RecipeModal from "../recipeModal/RecipeModal";
 import AddRecipeForm from "../addRecipe/AddRecipeForm";
 import type { Recipe } from "../../types";
-import { getAllRecipes } from "../../api/recipesApi";
+import { forkRecipe, getAllRecipes } from "../../api/recipesApi";
 import { getAuthData } from "../../api/authApi";
 import { Plus } from "lucide-react";
 
@@ -88,9 +88,35 @@ const RecipeGrid = () => {
         <RecipeModal 
           recipe={selected} 
           onClose={() => setSelected(null)} 
-          onFork={(forkedData) => {
-            setSelected(null);
-            alert(`Grid: Kopian "${forkedData.title}" förbereds för dina ändringar!`);
+          onFork={async (recipeId, forkedData) => {
+            try {
+              await forkRecipe(recipeId, {
+                title: forkedData.title || "Nytt recept",
+                ingredients: (forkedData.ingredients ?? [])
+                  .filter((ingredient) => ingredient.name.trim())
+                  .map((ingredient) => ({
+                    name: ingredient.name.trim(),
+                    quantity: Number(ingredient.quantity) || 0,
+                    unit: ingredient.unit.trim(),
+                  })),
+                steps: (forkedData.steps ?? [])
+                  .map((step) => step.trim())
+                  .filter(Boolean),
+                tags: forkedData.tags ?? [],
+                difficulty: forkedData.difficulty || "Medel",
+                ...(forkedData.imageUrl?.trim()
+                  ? { imageUrl: forkedData.imageUrl.trim() }
+                  : {}),
+                ...(forkedData.time?.trim()
+                  ? { time: forkedData.time.trim() }
+                  : {}),
+              });
+              setSelected(null);
+              alert("Receptet har kopierats till dina recept!");
+            } catch (err) {
+              console.error("Det gick inte att forka receptet:", err);
+              alert(err instanceof Error ? err.message : "Kunde inte kopiera receptet.");
+            }
           }}
           onEdit={(recipeToEdit) => {
             setSelected(null);

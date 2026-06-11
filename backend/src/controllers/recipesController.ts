@@ -148,14 +148,15 @@ export const forkRecipe = asyncHandler(async (req, res): Promise<void> => {
   const original = await getRecipeOrThrow(id);
   const forkedRecipe = await Recipe.create({
     title: original.title,
-    createdBy: userId,
-    createdByUsername: req.user?.username ?? UNKNOWN_CREATOR_NAME,
     imageUrl: original.imageUrl,
     time: original.time,
     difficulty: original.difficulty,
     tags: original.tags,
     ingredients: original.ingredients,
     steps: original.steps,
+    ...req.validatedBody,
+    createdBy: userId,
+    createdByUsername: req.user?.username ?? UNKNOWN_CREATOR_NAME,
     originalRef: original._id,
   });
   res.status(201).json(forkedRecipe);

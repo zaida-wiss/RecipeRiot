@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuthData } from '../../api/authApi';
-import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
+import { getAllRecipes, deleteRecipe, forkRecipe } from '../../api/recipesApi';
 import { getFavorites } from '../../api/favoritesApi';
 import RecipeCard from '../recipeCard/RecipeCard';
 import RecipeModal from '../recipeModal/RecipeModal';
@@ -19,26 +19,6 @@ const profileTabs: Array<{ value: Tab; label: string }> = [
 
 const filterRecipesByUser = (recipes: Recipe[], userId?: string) =>
   recipes.filter((recipe) => String(recipe.createdBy) === String(userId));
-
-const normalizeForkedRecipe = (forkedRecipe: Partial<Recipe>) => {
-  const cleanedIngredients = (forkedRecipe.ingredients ?? []).map((ingredient) => ({
-    ...ingredient,
-    quantity:
-      typeof ingredient.quantity === 'string'
-        ? Number(ingredient.quantity)
-        : (ingredient.quantity as number),
-  }));
-
-  return {
-    title: forkedRecipe.title || 'Nytt recept',
-    ingredients: cleanedIngredients,
-    steps: forkedRecipe.steps || [],
-    ...(forkedRecipe.imageUrl?.trim()
-      ? { imageUrl: forkedRecipe.imageUrl.trim() }
-      : {}),
-    createdBy: forkedRecipe.createdBy,
-  };
-};
 
 type ProfileTabsProps = {
   activeTab: Tab;
@@ -172,6 +152,7 @@ const ProfilePage = () => {
   const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
   const [favorites, setFavorites] = useState<Recipe[]>([]);
   const [selected, setSelected] = useState<Recipe | null>(null);
+  const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -229,15 +210,33 @@ const ProfilePage = () => {
     fetchData();
   }, [user?.id]);
 
-  const handleForkRecipe = async (forkedRecipe: Partial<Recipe>) => {
+  const handleForkRecipe = async (recipeId: string, forkedRecipe: Partial<Recipe>) => {
     try {
-      await createRecipe(normalizeForkedRecipe(forkedRecipe));
+      const ingredients = (forkedRecipe.ingredients ?? [])
+        .filter((ingredient) => ingredient.name.trim())
+        .map((ingredient) => ({
+          name: ingredient.name.trim(),
+          quantity: Number(ingredient.quantity) || 0,
+          unit: ingredient.unit.trim(),
+        }));
+
+      await forkRecipe(recipeId, {
+        title: forkedRecipe.title || 'Nytt recept',
+        ingredients,
+        steps: (forkedRecipe.steps ?? []).map((step) => step.trim()).filter(Boolean),
+        tags: forkedRecipe.tags ?? [],
+        difficulty: forkedRecipe.difficulty || 'Medel',
+        ...(forkedRecipe.imageUrl?.trim()
+          ? { imageUrl: forkedRecipe.imageUrl.trim() }
+          : {}),
+        ...(forkedRecipe.time?.trim() ? { time: forkedRecipe.time.trim() } : {}),
+      });
       await fetchMyRecipes();
       setSelected(null);
       alert('Receptet har kopierats till dina recept!');
     } catch (err) {
       console.error('Det gick inte att forka receptet:', err);
-      alert('Kunde inte skapa receptet. Kontrollera konsolen för detaljer.');
+      alert(err instanceof Error ? err.message : 'Kunde inte kopiera receptet.');
     }
   };
 
@@ -249,6 +248,11 @@ const ProfilePage = () => {
 
   const handleAddRecipeSuccess = async () => {
     setShowAddForm(false);
+    await fetchMyRecipes();
+  };
+
+  const handleEditRecipeSuccess = async () => {
+    setRecipeToEdit(null);
     await fetchMyRecipes();
   };
 
@@ -320,6 +324,10 @@ const ProfilePage = () => {
           onClose={() => setSelected(null)}
           onFork={handleForkRecipe}
           onDelete={handleDeleteRecipe}
+          onEdit={(recipe) => {
+            setSelected(null);
+            setRecipeToEdit(recipe);
+          }}
         />
       )}
 
@@ -327,6 +335,14 @@ const ProfilePage = () => {
         <AddRecipeForm
           onClose={() => setShowAddForm(false)}
           onSuccess={handleAddRecipeSuccess}
+        />
+      )}
+
+      {recipeToEdit && (
+        <AddRecipeForm
+          recipe={recipeToEdit}
+          onClose={() => setRecipeToEdit(null)}
+          onSuccess={handleEditRecipeSuccess}
         />
       )}
     </div>

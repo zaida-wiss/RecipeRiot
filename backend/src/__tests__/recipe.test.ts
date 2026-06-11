@@ -141,6 +141,91 @@ describe('GET /api/v1/recipes/:id', () => {
   });
 });
 
+describe('PATCH /api/v1/recipes/:id', () => {
+  test('ska låta ägaren redigera receptet och ta bort bild-URL', async () => {
+    const token = await getAuthToken();
+    const createRes = await request(app)
+      .post('/api/v1/recipes')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Pannkakor',
+        imageUrl: 'https://example.com/pannkakor.jpg',
+        tags: ['Frukost'],
+      });
+
+    const updateRes = await request(app)
+      .patch(`/api/v1/recipes/${createRes.body._id}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        title: 'Blåbärspannkakor',
+        imageUrl: '',
+        time: '30 min',
+      });
+
+    expect(updateRes.status).toBe(200);
+    expect(updateRes.body.title).toBe('Blåbärspannkakor');
+    expect(updateRes.body.imageUrl).toBe('');
+    expect(updateRes.body.time).toBe('30 min');
+    expect(updateRes.body.tags).toEqual(['Frukost']);
+  });
+
+  test('ska neka en annan användare att redigera receptet', async () => {
+    const ownerToken = await registerAndLoginUser(
+      'PatchOwner',
+      'patch-owner@example.com'
+    );
+    const otherToken = await registerAndLoginUser(
+      'PatchOther',
+      'patch-other@example.com'
+    );
+    const createRes = await request(app)
+      .post('/api/v1/recipes')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({ title: 'Ägarens recept' });
+
+    const updateRes = await request(app)
+      .patch(`/api/v1/recipes/${createRes.body._id}`)
+      .set('Authorization', `Bearer ${otherToken}`)
+      .send({ title: 'Otillåten ändring' });
+
+    expect(updateRes.status).toBe(403);
+  });
+});
+
+describe('POST /api/v1/recipes/:id/fork', () => {
+  test('ska skapa en redigerad kopia med länk till originalet', async () => {
+    const ownerToken = await registerAndLoginUser(
+      'ForkOwner',
+      'fork-owner@example.com'
+    );
+    const forkToken = await registerAndLoginUser(
+      'ForkUser',
+      'fork-user@example.com'
+    );
+    const createRes = await request(app)
+      .post('/api/v1/recipes')
+      .set('Authorization', `Bearer ${ownerToken}`)
+      .send({
+        title: 'Originalrecept',
+        ingredients: [{ name: 'Mjöl', quantity: 2, unit: 'dl' }],
+      });
+
+    const forkRes = await request(app)
+      .post(`/api/v1/recipes/${createRes.body._id}/fork`)
+      .set('Authorization', `Bearer ${forkToken}`)
+      .send({
+        title: 'Min variant',
+        ingredients: [{ name: 'Havremjöl', quantity: 2, unit: 'dl' }],
+      });
+
+    expect(forkRes.status).toBe(201);
+    expect(forkRes.body.title).toBe('Min variant');
+    expect(forkRes.body.ingredients[0].name).toBe('Havremjöl');
+    expect(forkRes.body.originalRef).toBe(createRes.body._id);
+    expect(forkRes.body.createdBy).not.toBe(createRes.body.createdBy);
+  });
+});
+
 
 async function registerAndLoginUser(
   username: string,

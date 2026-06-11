@@ -1,6 +1,7 @@
 // API-basens adress kommer från Vite-miljön, så frontend inte behöver hårdkoda backend-url överallt.
 const BASE_URL = import.meta.env.VITE_API_URL;
 const API_TIMEOUT = 10000;
+export const AUTH_SESSION_ENDED_EVENT = 'auth-session-ended';
 
 // Helpers
 // AbortController gör att ett anrop inte kan hänga hur länge som helst.
@@ -133,6 +134,23 @@ export const saveAuthData = (token: string, user: AuthUser): void => {
   localStorage.setItem('user', JSON.stringify(user));
 };
 
+const isTokenExpired = (token: string): boolean => {
+  try {
+    const payloadPart = token.split('.')[1];
+    if (!payloadPart) return true;
+
+    const normalizedPayload = payloadPart
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+      .padEnd(Math.ceil(payloadPart.length / 4) * 4, '=');
+    const payload = JSON.parse(atob(normalizedPayload)) as { exp?: number };
+
+    return typeof payload.exp !== 'number' || payload.exp * 1000 <= Date.now();
+  } catch {
+    return true;
+  }
+};
+
 // Hämtar sparad auth-data. Om JSON är trasig rensas datan så appen inte hamnar i ett konstigt läge.
 export const getAuthData = (): { token: string; user: AuthUser } | null => {
   const token = localStorage.getItem('authToken');
@@ -143,6 +161,11 @@ export const getAuthData = (): { token: string; user: AuthUser } | null => {
   }
 
   try {
+    if (isTokenExpired(token)) {
+      clearAuthData('Din session har gått ut. Logga in igen.');
+      return null;
+    }
+
     return { token, user: JSON.parse(userStr) };
   } catch {
     clearAuthData();
@@ -151,9 +174,13 @@ export const getAuthData = (): { token: string; user: AuthUser } | null => {
 };
 
 // Logout i frontend betyder att vi glömmer token lokalt.
-export const clearAuthData = (): void => {
+export const clearAuthData = (message?: string): void => {
   localStorage.removeItem('authToken');
   localStorage.removeItem('user');
+
+  window.dispatchEvent(new CustomEvent(AUTH_SESSION_ENDED_EVENT, {
+    detail: { message },
+  }));
 };
 
 
