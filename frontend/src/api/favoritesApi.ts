@@ -4,15 +4,6 @@ import type { Recipe } from '../types';
 
 const BASE_URL = import.meta.env.VITE_API_URL;
 
-const getFavoritesErrorMessage = async (response: Response): Promise<string> => {
-  try {
-    const data = await response.json();
-    return data.message || `Fel (${response.status})`;
-  } catch {
-    return `Fel (${response.status})`;
-  }
-};
-
 export const getFavorites = async (): Promise<Recipe[]> => {
   const res = await fetch(`${BASE_URL}/api/v1/favorites`, {
     headers: getAuthHeaders(),
@@ -27,7 +18,7 @@ export const getFavorites = async (): Promise<Recipe[]> => {
 };
 
 export const addFavorite = async (recipeId: string): Promise<void> => {
-  const res = await fetch(`${BASE_URL}/api/v1/favorites/${recipeId}`, {
+  await fetch(`${BASE_URL}/api/v1/favorites/${recipeId}`, {
     method: 'POST',
     headers: getAuthHeaders(),
   });
@@ -38,7 +29,7 @@ export const addFavorite = async (recipeId: string): Promise<void> => {
 };
 
 export const removeFavorite = async (recipeId: string): Promise<void> => {
-  const res = await fetch(`${BASE_URL}/api/v1/favorites/${recipeId}`, {
+  await fetch(`${BASE_URL}/api/v1/favorites/${recipeId}`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });
