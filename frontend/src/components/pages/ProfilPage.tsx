@@ -229,9 +229,12 @@ const ProfilePage = () => {
     fetchData();
   }, [user?.id]);
 
-  const handleForkRecipe = async (forkedRecipe: Partial<Recipe>) => {
+  const handleForkRecipe = async (recipeId: string, forkedRecipe: Partial<Recipe>) => {
     try {
-      await createRecipe(normalizeForkedRecipe(forkedRecipe));
+      await createRecipe({
+        ...normalizeForkedRecipe(forkedRecipe),
+        originalRef: recipeId,
+      });
       await fetchMyRecipes();
       setSelected(null);
       alert('Receptet har kopierats till dina recept!');
@@ -320,6 +323,7 @@ const ProfilePage = () => {
           onClose={() => setSelected(null)}
           onFork={handleForkRecipe}
           onDelete={handleDeleteRecipe}
+          onOpenRecipe={(recipe) => setSelected(recipe)}
         />
       )}
 

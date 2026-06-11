@@ -8,12 +8,13 @@ import { recipeFallbackImage } from "../../constants/recipeImage";
 interface RecipeModalProps {
   recipe: Recipe;
   onClose: () => void;
-  onFork: (forkedRecipe: Partial<Recipe>) => void;
+  onFork: (recipeId: string, forkedRecipe: Partial<Recipe>) => void | Promise<void>;
   onDelete?: (recipeId: string) => void;
   onEdit?: (recipe: Recipe) => void;
+  onOpenRecipe?: (recipe: Recipe) => void;
 }
 
-const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalProps) => {
+const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit, onOpenRecipe }: RecipeModalProps) => {
   const [activeTab, setActiveTab] = useState<"ingredients" | "steps">("ingredients");
   const [isForking, setIsForking] = useState(false);
   const [editedRecipe, setEditedRecipe] = useState<Recipe | null>(null);
@@ -49,7 +50,7 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
 
   const handleSaveFork = () => {
     if (editedRecipe) {
-      onFork({
+      onFork(recipe._id, {
         ...editedRecipe,
         _id: undefined,
         createdBy: currentUserId,
@@ -130,6 +131,18 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
                 </span>
                 <span className="modal__meta-item modal__meta-author">
                   <Users size={13} /> Av {authorName}
+                  {recipe.originalRef && typeof recipe.originalRef === 'object' && (
+                    <>
+                      {' · '}
+                      <button
+                        type="button"
+                        style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                        onClick={() => onOpenRecipe?.(recipe.originalRef as unknown as Recipe)}
+                      >
+                        forkat från {(recipe.originalRef as any).createdByUsername || 'original'}
+                      </button>
+                    </>
+                  )}
                 </span>
               </div>
               {(recipe.tags ?? []).length > 0 && (

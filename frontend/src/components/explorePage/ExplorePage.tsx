@@ -51,7 +51,7 @@ const ExplorePage: React.FC = () => {
     return matchesSearch && matchesTag && matchesDiff;
   });
 
-  const handleFork = async (forkedRecipe: Partial<Recipe>) => {
+  const handleFork = async (_recipeId: string, forkedRecipe: Partial<Recipe>) => {
     try {
       // Tvätta datan för att undvika 400 Bad Request
       const cleanedIngredients = (forkedRecipe.ingredients || []).map(ing => ({
@@ -69,14 +69,15 @@ const ExplorePage: React.FC = () => {
         tags: forkedRecipe.tags || [],
         difficulty: forkedRecipe.difficulty || "Medel",
         ...(forkedRecipe.time?.trim() ? { time: forkedRecipe.time.trim() } : {}),
+        originalRef: _recipeId,
       };
 
       await createRecipe(recipeToSave);
-      
+
       // Stäng modalen men stanna på sidan
       setSelectedRecipe(null);
       alert("Receptet har lagts till i dina recept!");
-      
+
     } catch (err) {
       console.error("Det gick inte att forka receptet:", err);
       alert("Kunde inte kopiera receptet. Kontrollera att du är inloggad.");
@@ -165,6 +166,7 @@ const ExplorePage: React.FC = () => {
               console.error("Kunde inte radera recept", err);
             }
           }}
+          onOpenRecipe={(recipe) => setSelectedRecipe(recipe)}
         />
       )}
     </div>

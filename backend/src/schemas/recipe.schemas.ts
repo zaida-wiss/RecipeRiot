@@ -25,7 +25,7 @@ export const createRecipeSchema = z.object({
   steps: z.array(
     z.string().min(1, "Steg får inte vara tomt").max(1000).trim()
   ).optional().default([]),
-  /// originalRef sätts av fork-logiken, inte av klienten vid vanlig skapelse
+  originalRef: z.string().optional(),
 });
 
 // ─── PATCH /recipes/:id ───────────────────────────────────────────────────────
