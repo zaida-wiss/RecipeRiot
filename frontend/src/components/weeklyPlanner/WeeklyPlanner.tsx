@@ -11,11 +11,22 @@ const WeeklyPlanner = () => {
   const navigate = useNavigate();
 
   const [activeDay, setActiveDay] = useState<string | null>(null);
-  const [selectedMeals, setSelectedMeals] = useState<Record<string, Recipe>>({});
+
+  // Läser sparade måltider från localStorage vid start
+  const [selectedMeals, setSelectedMeals] = useState<Record<string, Recipe>>(() => {
+    const saved = localStorage.getItem('plannedMeals');
+    try {
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+
   const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [sent, setSent] = useState(false);
 
+  // Spara måltider till localStorage när de ändras
   useEffect(() => {
     localStorage.setItem('plannedMeals', JSON.stringify(selectedMeals));
   }, [selectedMeals]);
@@ -25,7 +36,6 @@ const WeeklyPlanner = () => {
       setLoading(true);
       try {
         const allRecipes = await getAllRecipes();
-        // Filtrera bort dubletter
         const unique = [...new Map(allRecipes.map(r => [r._id, r])).values()];
         setMyRecipes(unique);
         try { await getFavorites(); } catch { /* ignorera */ }

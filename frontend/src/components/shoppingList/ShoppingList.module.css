@@ -47,6 +47,25 @@
   margin: 0;
 }
 
+.clearButton {
+  margin-left: auto;
+  background: none;
+  border: 1px solid #f0ebe8;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  color: #817878;
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+}
+
+.clearButton:hover {
+  background: #faf4f2;
+  color: #c56a2d;
+  border-color: #c56a2d;
+}
+
 /* =========================
    TOM LISTA
 ========================= */
@@ -90,6 +109,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 .row {
@@ -98,6 +118,8 @@
   gap: 12px;
   font-size: 0.95rem;
   color: #1d1813;
+  flex: 1;
+  cursor: pointer;
 }
 
 .row input[type="checkbox"] { display: none; }
@@ -112,6 +134,7 @@
   background: #fff;
   margin-right: 10px;
   vertical-align: middle;
+  flex-shrink: 0;
   transition: 0.2s;
 }
 
@@ -127,7 +150,7 @@
 
 .amount {
   color: #817878;
-  font-size: 14px;
+  font-size: 13px;
   white-space: nowrap;
 }
 
@@ -144,17 +167,15 @@
   transition: 0.2s;
   min-width: 32px;
   min-height: 32px;
+  opacity: 1;
 }
-
-/* På mobil — alltid synlig */
-.deleteButton { opacity: 1; }
 
 .deleteButton:hover {
   color: #c56a2d;
   background: #faf4f2;
 }
 
-/* På desktop — visa vid hover */
+/* På desktop — visa bara vid hover */
 @media (min-width: 640px) {
   .deleteButton { opacity: 0; }
   .item:hover .deleteButton { opacity: 1; }
@@ -188,10 +209,11 @@
 .input:focus {
   outline: none;
   border-color: #c56a2d;
+  box-shadow: 0 0 0 1px #c56a2d;
 }
 
 .amountInput {
-  width: 80px;
+  width: 75px;
   padding: 11px 10px;
   border-radius: 10px;
   border: 1px solid #e6e0dc;
@@ -207,7 +229,7 @@
 }
 
 .unitSelect {
-  width: 75px;
+  width: 70px;
   padding: 11px 8px;
   border-radius: 10px;
   border: 1px solid #e6e0dc;
@@ -262,7 +284,10 @@
   min-height: 44px;
 }
 
-.recipeCard:hover { background: #f0ebe8; }
+.recipeCard:hover {
+  background: #f0ebe8;
+  border-color: #c56a2d;
+}
 
 .recipeCard img {
   width: 50px;
@@ -280,7 +305,7 @@
 }
 
 /* =========================
-   INGREDIENSER
+   RECEPT DETALJ
 ========================= */
 .recipeDetail h2 {
   font-family: "Playfair Display", serif;
@@ -306,7 +331,10 @@
   background: #faf7f5;
   border: 1px solid #f0ebe8;
   min-height: 44px;
+  transition: background 0.2s;
 }
+
+.ingredients li:hover { background: #f0ebe8; }
 
 .ingredients li label {
   display: flex;
@@ -315,6 +343,7 @@
   cursor: pointer;
   width: 100%;
   font-size: 0.95rem;
+  color: #1d1813;
 }
 
 .ingredients li input {
@@ -322,6 +351,7 @@
   width: 18px;
   height: 18px;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 /* =========================
