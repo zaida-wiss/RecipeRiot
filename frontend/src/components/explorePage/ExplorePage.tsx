@@ -5,7 +5,7 @@ import RecipeModal from '../recipeModal/RecipeModal';
 import RecipeCard from '../recipeCard/RecipeCard';
 import AddRecipeForm from '../addRecipe/AddRecipeForm';
 import type { Recipe } from '../../types';
-import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
+import { getAllRecipes, deleteRecipe, forkRecipe } from '../../api/recipesApi';
 import './ExplorePage.css';
 
 const ExplorePage: React.FC = () => {
@@ -53,7 +53,7 @@ const ExplorePage: React.FC = () => {
     return matchesSearch && matchesTag && matchesDiff;
   });
 
-  const handleFork = async (forkedRecipe: Partial<Recipe>) => {
+  const handleFork = async (recipeId: string, forkedRecipe: Partial<Recipe>) => {
     try {
       // Tvätta datan för att undvika 400 Bad Request
       const cleanedIngredients = (forkedRecipe.ingredients || []).map(ing => ({
@@ -73,7 +73,7 @@ const ExplorePage: React.FC = () => {
         ...(forkedRecipe.time?.trim() ? { time: forkedRecipe.time.trim() } : {}),
       };
 
-      await createRecipe(recipeToSave);
+      await forkRecipe(recipeId, recipeToSave);
       
       // Stäng modalen men stanna på sidan
       setSelectedRecipe(null);
@@ -158,6 +158,7 @@ const ExplorePage: React.FC = () => {
             setSelectedRecipe(null);
             setRecipeToEdit(recipe);
           }}
+          onOpenRecipe={setSelectedRecipe}
           onDelete={async (recipeId) => {
             if (!window.confirm(`Är du säker på att du vill radera "${selectedRecipe.title}"?`)) return;
             try {
