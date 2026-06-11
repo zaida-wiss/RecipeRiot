@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuthData } from '../../api/authApi';
-import { getAllRecipes, deleteRecipe, forkRecipe } from '../../api/recipesApi';
+import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
 import { getFavorites } from '../../api/favoritesApi';
 import RecipeCard from '../recipeCard/RecipeCard';
 import RecipeModal from '../recipeModal/RecipeModal';
@@ -253,11 +253,6 @@ const ProfilePage = () => {
     setSelected(null);
   };
 
-  const handleAddRecipeSuccess = async () => {
-    setShowAddForm(false);
-    await fetchMyRecipes();
-  };
-
   const renderActiveTab = () => {
     if (loading) {
       return <p className="profile-loading">Laddar...</p>;
@@ -347,17 +342,6 @@ const ProfilePage = () => {
             void fetchMyRecipes();
           }}
           recipeToEdit={recipeToEdit || undefined}
-        />
-      )}
-
-      {recipeToEdit && (
-        <AddRecipeForm
-          recipe={recipeToEdit}
-          onClose={() => setRecipeToEdit(null)}
-          onSuccess={async () => {
-            await fetchMyRecipes();
-            setRecipeToEdit(null);
-          }}
         />
       )}
     </div>
