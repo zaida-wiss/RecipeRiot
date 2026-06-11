@@ -23,7 +23,7 @@ app.use(helmet());
 
 // CORS
 app.use(cors({
-  origin: env.CORS_ORIGIN ?? 'http://localhost:5173',
+  origin: (env.CORS_ORIGIN ?? 'http://localhost:5173').replace(/\/$/, ''),
   credentials: true,
 }));
 
