@@ -48,6 +48,7 @@ export type CreateRecipeInput = {
   time?: string;
   difficulty?: string;
   tags?: string[];
+  originalRef?: string;
 };
 
 const API_URL = import.meta.env.VITE_API_URL + '/api/v1';

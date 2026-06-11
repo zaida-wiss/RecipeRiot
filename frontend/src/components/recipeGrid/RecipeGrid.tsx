@@ -140,7 +140,7 @@ const RecipeGrid = () => {
 
       {recipeToEdit && (
         <AddRecipeForm
-          recipe={recipeToEdit}
+          recipeToEdit={recipeToEdit}
           onClose={() => setRecipeToEdit(null)}
           onSuccess={() => {
             setLoading(true);

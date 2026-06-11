@@ -3,7 +3,6 @@ import { Clock, Users, ShoppingCart, ChefHat, Trash2, Edit3, GitFork, Save, Plus
 import "./recipes.css";
 import type { Recipe } from "../../types";
 import { getAuthData } from "../../api/authApi";
-import { getRecipeById } from "../../api/recipesApi";
 import { recipeFallbackImage } from "../../constants/recipeImage";
 
 interface RecipeModalProps {
@@ -86,18 +85,6 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit, onOpenRecipe }
 
   const isOwner = isLoggedIn && !!currentUserId && String(currentUserId).trim() === String(recipeCreatorId).trim();
 
-  const handleOpenOriginal = async () => {
-    if (!recipe.originalRecipe) return;
-
-    try {
-      const originalRecipe = await getRecipeById(recipe.originalRecipe._id);
-      onOpenRecipe?.(originalRecipe);
-    } catch (error) {
-      console.error("Kunde inte öppna originalreceptet:", error);
-      alert("Kunde inte öppna originalreceptet.");
-    }
-  };
-
   return (
     <>
       <div className="modal-backdrop" onClick={onClose} aria-hidden="true" />
@@ -144,18 +131,20 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit, onOpenRecipe }
                 </span>
                 <span className="modal__meta-item modal__meta-author">
                   <Users size={13} /> Av {authorName}
+                  {recipe.originalRef && typeof recipe.originalRef === 'object' && (
+                    <>
+                      {' · '}
+                      <button
+                        type="button"
+                        style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+                        onClick={() => onOpenRecipe?.(recipe.originalRef as unknown as Recipe)}
+                      >
+                        forkat från {(recipe.originalRef as any).createdByUsername || 'original'}
+                      </button>
+                    </>
+                  )}
                 </span>
               </div>
-              {recipe.originalRecipe && (
-                <button
-                  type="button"
-                  className="modal__original-link"
-                  onClick={handleOpenOriginal}
-                >
-                  <GitFork size={13} />
-                  Original: {recipe.originalRecipe.title} av {recipe.originalRecipe.createdByUsername}
-                </button>
-              )}
               {(recipe.tags ?? []).length > 0 && (
                 <div className="modal__tags">
                   {recipe.tags!.map((t) => <span key={t} className="modal__tag">{t}</span>)}

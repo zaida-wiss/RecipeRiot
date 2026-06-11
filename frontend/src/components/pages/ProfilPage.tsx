@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuthData } from '../../api/authApi';
-import { getAllRecipes, deleteRecipe, forkRecipe } from '../../api/recipesApi';
+import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
 import { getFavorites } from '../../api/favoritesApi';
 import RecipeCard from '../recipeCard/RecipeCard';
 import RecipeModal from '../recipeModal/RecipeModal';
@@ -174,9 +174,9 @@ const ProfilePage = () => {
   const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
   const [favorites, setFavorites] = useState<Recipe[]>([]);
   const [selected, setSelected] = useState<Recipe | null>(null);
-  const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
 
   const authData = getAuthData();
   const user = authData?.user;
@@ -234,7 +234,10 @@ const ProfilePage = () => {
 
   const handleForkRecipe = async (recipeId: string, forkedRecipe: Partial<Recipe>) => {
     try {
-      await forkRecipe(recipeId, normalizeForkedRecipe(forkedRecipe));
+      await createRecipe({
+        ...normalizeForkedRecipe(forkedRecipe),
+        originalRef: recipeId,
+      });
       await fetchMyRecipes();
       setSelected(null);
       alert('Receptet har kopierats till dina recept!');
@@ -248,11 +251,6 @@ const ProfilePage = () => {
     await deleteRecipe(id);
     setMyRecipes((prev) => prev.filter((recipe) => recipe._id !== id));
     setSelected(null);
-  };
-
-  const handleAddRecipeSuccess = async () => {
-    setShowAddForm(false);
-    await fetchMyRecipes();
   };
 
   const renderActiveTab = () => {
@@ -323,29 +321,27 @@ const ProfilePage = () => {
           onClose={() => setSelected(null)}
           onFork={handleForkRecipe}
           onDelete={handleDeleteRecipe}
+          onOpenRecipe={(recipe) => setSelected(recipe)}
           onEdit={(recipe) => {
-            setSelected(null);
             setRecipeToEdit(recipe);
+            setSelected(null);
+            setShowAddForm(true);
           }}
-          onOpenRecipe={setSelected}
         />
       )}
 
       {showAddForm && (
         <AddRecipeForm
-          onClose={() => setShowAddForm(false)}
-          onSuccess={handleAddRecipeSuccess}
-        />
-      )}
-
-      {recipeToEdit && (
-        <AddRecipeForm
-          recipe={recipeToEdit}
-          onClose={() => setRecipeToEdit(null)}
-          onSuccess={async () => {
-            await fetchMyRecipes();
+          onClose={() => {
+            setShowAddForm(false);
             setRecipeToEdit(null);
           }}
+          onSuccess={() => {
+            setShowAddForm(false);
+            setRecipeToEdit(null);
+            void fetchMyRecipes();
+          }}
+          recipeToEdit={recipeToEdit || undefined}
         />
       )}
     </div>

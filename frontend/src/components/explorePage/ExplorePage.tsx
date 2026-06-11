@@ -3,9 +3,8 @@ import { Search } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import RecipeModal from '../recipeModal/RecipeModal';
 import RecipeCard from '../recipeCard/RecipeCard';
-import AddRecipeForm from '../addRecipe/AddRecipeForm';
 import type { Recipe } from '../../types';
-import { getAllRecipes, deleteRecipe, forkRecipe } from '../../api/recipesApi';
+import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
 import './ExplorePage.css';
 
 const ExplorePage: React.FC = () => {
@@ -18,7 +17,6 @@ const ExplorePage: React.FC = () => {
   const [activeTag, setActiveTag] = useState('Alla');
   const [activeDifficulty, setActiveDifficulty] = useState('Alla');
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
-  const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
 
   useEffect(() => {
     setSearchTerm(urlQuery);
@@ -53,7 +51,7 @@ const ExplorePage: React.FC = () => {
     return matchesSearch && matchesTag && matchesDiff;
   });
 
-  const handleFork = async (recipeId: string, forkedRecipe: Partial<Recipe>) => {
+  const handleFork = async (_recipeId: string, forkedRecipe: Partial<Recipe>) => {
     try {
       // Tvätta datan för att undvika 400 Bad Request
       const cleanedIngredients = (forkedRecipe.ingredients || []).map(ing => ({
@@ -71,14 +69,15 @@ const ExplorePage: React.FC = () => {
         tags: forkedRecipe.tags || [],
         difficulty: forkedRecipe.difficulty || "Medel",
         ...(forkedRecipe.time?.trim() ? { time: forkedRecipe.time.trim() } : {}),
+        originalRef: _recipeId,
       };
 
-      await forkRecipe(recipeId, recipeToSave);
-      
+      await createRecipe(recipeToSave);
+
       // Stäng modalen men stanna på sidan
       setSelectedRecipe(null);
       alert("Receptet har lagts till i dina recept!");
-      
+
     } catch (err) {
       console.error("Det gick inte att forka receptet:", err);
       alert("Kunde inte kopiera receptet. Kontrollera att du är inloggad.");
@@ -154,11 +153,6 @@ const ExplorePage: React.FC = () => {
           recipe={selectedRecipe}
           onClose={() => setSelectedRecipe(null)}
           onFork={handleFork}
-          onEdit={(recipe) => {
-            setSelectedRecipe(null);
-            setRecipeToEdit(recipe);
-          }}
-          onOpenRecipe={setSelectedRecipe}
           onDelete={async (recipeId) => {
             if (!window.confirm(`Är du säker på att du vill radera "${selectedRecipe.title}"?`)) return;
             try {
@@ -169,17 +163,7 @@ const ExplorePage: React.FC = () => {
               console.error("Kunde inte radera recept", err);
             }
           }}
-        />
-      )}
-
-      {recipeToEdit && (
-        <AddRecipeForm
-          recipe={recipeToEdit}
-          onClose={() => setRecipeToEdit(null)}
-          onSuccess={async () => {
-            setRecipes(await getAllRecipes());
-            setRecipeToEdit(null);
-          }}
+          onOpenRecipe={(recipe) => setSelectedRecipe(recipe)}
         />
       )}
     </div>

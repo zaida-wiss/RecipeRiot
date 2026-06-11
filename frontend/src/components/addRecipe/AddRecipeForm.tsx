@@ -1,34 +1,41 @@
-import { useState } from 'react';
-import { getAuthHeaders } from '../../api/authApi';
+import { useState, useEffect } from 'react';
 import type { Recipe } from '../../types';
+import { getAuthHeaders } from '../../api/authApi';
 import BulkUpload from './BulkUpload';
 import './AddRecipeForm.css';
 
 type Ingredient = { name: string; quantity: number; unit: string };
 type View = 'single' | 'bulk';
 
-type AddRecipeFormProps = {
+type Props = {
   onClose: () => void;
-  onSuccess: () => void | Promise<void>;
-  recipe?: Recipe;
+  onSuccess: () => void;
+  recipeToEdit?: Recipe;
 };
 
-const AddRecipeForm = ({ onClose, onSuccess, recipe }: AddRecipeFormProps) => {
-  const isEditing = !!recipe;
+const AddRecipeForm = ({ onClose, onSuccess, recipeToEdit }: Props) => {
+  const isEditing = !!recipeToEdit;
   const [view, setView] = useState<View>('single');
 
-  const [title, setTitle] = useState(recipe?.title ?? '');
-  const [imageUrl, setImageUrl] = useState(recipe?.imageUrl ?? '');
-  const [time, setTime] = useState(recipe?.time ?? '');
-  const [difficulty, setDifficulty] = useState(recipe?.difficulty || 'Medel');
-  const [steps, setSteps] = useState(recipe?.steps?.length ? recipe.steps : ['']);
-  const [ingredients, setIngredients] = useState<Ingredient[]>(
-    recipe?.ingredients?.length
-      ? recipe.ingredients.map(({ name, quantity, unit }) => ({ name, quantity, unit }))
-      : [{ name: '', quantity: 0, unit: '' }]
-  );
+  const [title, setTitle] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [time, setTime] = useState('');
+  const [difficulty, setDifficulty] = useState('Medel');
+  const [steps, setSteps] = useState(['']);
+  const [ingredients, setIngredients] = useState<Ingredient[]>([{ name: '', quantity: 0, unit: '' }]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isEditing && recipeToEdit) {
+      setTitle(recipeToEdit.title);
+      setImageUrl(recipeToEdit.imageUrl || '');
+      setTime(recipeToEdit.time || '');
+      setDifficulty(recipeToEdit.difficulty || 'Medel');
+      setSteps(recipeToEdit.steps?.length ? recipeToEdit.steps : ['']);
+      setIngredients(recipeToEdit.ingredients?.length ? recipeToEdit.ingredients : [{ name: '', quantity: 0, unit: '' }]);
+    }
+  }, [isEditing, recipeToEdit]);
 
   const addIngredient = () => setIngredients([...ingredients, { name: '', quantity: 0, unit: '' }]);
 
@@ -46,40 +53,28 @@ const AddRecipeForm = ({ onClose, onSuccess, recipe }: AddRecipeFormProps) => {
     setSteps(updated);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const cleanedIngredients = ingredients
-        .filter((ingredient) => ingredient.name.trim())
-        .map((ingredient) => ({
-          name: ingredient.name.trim(),
-          quantity: ingredient.quantity,
-          unit: ingredient.unit.trim(),
-        }));
-      const cleanedSteps = steps.map((step) => step.trim()).filter(Boolean);
+      const method = isEditing ? 'PATCH' : 'POST';
+      const endpoint = isEditing ? `/api/v1/recipes/${recipeToEdit?._id}` : '/api/v1/recipes';
 
-      const res = await fetch(
-        recipe ? `/api/v1/recipes/${recipe._id}` : '/api/v1/recipes',
-        {
-        method: recipe ? 'PATCH' : 'POST',
+      const res = await fetch(endpoint, {
+        method,
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({
-          title,
-          ingredients: cleanedIngredients,
-          steps: cleanedSteps,
-          difficulty,
-          ...(recipe ? { tags: recipe.tags ?? [] } : {}),
+          title, ingredients, steps, difficulty,
           ...(imageUrl.trim() ? { imageUrl: imageUrl.trim() } : {}),
-          ...(recipe || time.trim() ? { time: time.trim() } : {}),
+          ...(time.trim() ? { time: time.trim() } : {}),
         }),
       });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.message || 'Något gick fel');
       }
-      await onSuccess();
+      onSuccess();
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Något gick fel');
@@ -155,13 +150,13 @@ const AddRecipeForm = ({ onClose, onSuccess, recipe }: AddRecipeFormProps) => {
               <button type="button" className="add-btn" onClick={addStep}>+ Steg</button>
 
               <button type="submit" className="submit-btn" disabled={loading}>
-                {loading ? 'Sparar...' : isEditing ? 'Spara ändringar' : 'Spara recept'}
+                {loading ? 'Sparar...' : 'Spara recept'}
               </button>
             </form>
           </>
         )}
 
-        {!isEditing && view === 'bulk' && <BulkUpload onSuccess={onSuccess} />}
+        {view === 'bulk' && <BulkUpload onSuccess={onSuccess} />}
       </div>
     </div>
   );

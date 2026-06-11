@@ -90,7 +90,7 @@ const getAuthenticatedUserId = (req: Request): string => {
 };
 
 const getRecipeOrThrow = async (id: string): Promise<IRecipe> => {
-  const recipe = await Recipe.findOne({ _id: id, deletedAt: null });
+  const recipe = await Recipe.findOne({ _id: id, deletedAt: null }).populate('originalRef');
   if (!recipe) throw new NotFoundError('Receptet hittades inte');
   return recipe;
 };
@@ -122,7 +122,7 @@ export const getAllRecipes = asyncHandler(async (req, res): Promise<void> => {
   const skip = (page - 1) * limit;
 
   const [recipes, total] = await Promise.all([
-    Recipe.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit),
+    Recipe.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('originalRef'),
     Recipe.countDocuments(filter),
   ]);
   const recipesWithCreatorNames = await withCreatorUsernames(recipes);
