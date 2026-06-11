@@ -83,6 +83,25 @@
   color: #7a6254;
   font-weight: 700;
 }
+.modal__original-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #a85525;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+.modal__original-link:hover {
+  color: #7f3f1c;
+  text-decoration: underline;
+}
 .modal__rating-wrap { margin-left: auto; display: flex; align-items: center; gap: 6px; }
 .modal__rating-text { font-size: 12px; color: #bbb; }
 

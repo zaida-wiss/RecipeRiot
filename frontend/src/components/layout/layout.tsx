@@ -1,9 +1,14 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import Navbar from "../navbar/Navbar";
 import Footer from "../footer/Footer";
 import UserLogin from "../userLogin/UserLogin";
-import { clearAuthData, getAuthData, type AuthUser } from "../../api/authApi";
+import {
+  clearAuthData,
+  getAuthData,
+  getTokenExpiration,
+  type AuthUser,
+} from "../../api/authApi";
 
 const Layout = () => {
   const initialAuth = getAuthData();
@@ -14,6 +19,22 @@ const Layout = () => {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(
     initialAuth?.user ?? null
   );
+
+  useEffect(() => {
+    const authData = getAuthData();
+    if (!authData) return;
+
+    const expiresAt = getTokenExpiration(authData.token);
+    if (!expiresAt) return;
+
+    const timeoutId = window.setTimeout(() => {
+      clearAuthData();
+      setCurrentUser(null);
+      setAuthStatusMessage("Din session har gått ut. Logga in igen.");
+    }, Math.max(0, expiresAt - Date.now()));
+
+    return () => window.clearTimeout(timeoutId);
+  }, [currentUser]);
 
   const handleAuthSuccess = (user: AuthUser) => {
     setCurrentUser(user);

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getAuthData } from '../../api/authApi';
-import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
+import { getAllRecipes, deleteRecipe, forkRecipe } from '../../api/recipesApi';
 import { getFavorites } from '../../api/favoritesApi';
 import RecipeCard from '../recipeCard/RecipeCard';
 import RecipeModal from '../recipeModal/RecipeModal';
@@ -36,7 +36,9 @@ const normalizeForkedRecipe = (forkedRecipe: Partial<Recipe>) => {
     ...(forkedRecipe.imageUrl?.trim()
       ? { imageUrl: forkedRecipe.imageUrl.trim() }
       : {}),
-    createdBy: forkedRecipe.createdBy,
+    tags: forkedRecipe.tags || [],
+    difficulty: forkedRecipe.difficulty || 'Medel',
+    ...(forkedRecipe.time?.trim() ? { time: forkedRecipe.time.trim() } : {}),
   };
 };
 
@@ -172,6 +174,7 @@ const ProfilePage = () => {
   const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
   const [favorites, setFavorites] = useState<Recipe[]>([]);
   const [selected, setSelected] = useState<Recipe | null>(null);
+  const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -229,9 +232,9 @@ const ProfilePage = () => {
     fetchData();
   }, [user?.id]);
 
-  const handleForkRecipe = async (forkedRecipe: Partial<Recipe>) => {
+  const handleForkRecipe = async (recipeId: string, forkedRecipe: Partial<Recipe>) => {
     try {
-      await createRecipe(normalizeForkedRecipe(forkedRecipe));
+      await forkRecipe(recipeId, normalizeForkedRecipe(forkedRecipe));
       await fetchMyRecipes();
       setSelected(null);
       alert('Receptet har kopierats till dina recept!');
@@ -320,6 +323,11 @@ const ProfilePage = () => {
           onClose={() => setSelected(null)}
           onFork={handleForkRecipe}
           onDelete={handleDeleteRecipe}
+          onEdit={(recipe) => {
+            setSelected(null);
+            setRecipeToEdit(recipe);
+          }}
+          onOpenRecipe={setSelected}
         />
       )}
 
@@ -327,6 +335,17 @@ const ProfilePage = () => {
         <AddRecipeForm
           onClose={() => setShowAddForm(false)}
           onSuccess={handleAddRecipeSuccess}
+        />
+      )}
+
+      {recipeToEdit && (
+        <AddRecipeForm
+          recipe={recipeToEdit}
+          onClose={() => setRecipeToEdit(null)}
+          onSuccess={async () => {
+            await fetchMyRecipes();
+            setRecipeToEdit(null);
+          }}
         />
       )}
     </div>

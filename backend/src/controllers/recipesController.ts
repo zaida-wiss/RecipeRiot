@@ -36,9 +36,23 @@ const hasUsefulCreatorName = (name?: string): boolean => {
 
 const withCreatorUsernames = async (recipes: IRecipe[]) => {
   const recipeObjects = recipes.map((recipe) => recipe.toObject());
-  const creatorIds = Array.from(new Set(
+  const originalIds = Array.from(new Set(
     recipeObjects
-      .map((recipe) => String(recipe.createdBy))
+      .map((recipe) => recipe.originalRef?.toString())
+      .filter((id): id is string => !!id && mongoose.Types.ObjectId.isValid(id))
+  ));
+  const originals = await Recipe.find({
+    _id: { $in: originalIds },
+    deletedAt: null,
+  }).select('title createdBy createdByUsername').lean();
+  const originalsById = new Map(
+    originals.map((original) => [String(original._id), original])
+  );
+  const creatorIds = Array.from(new Set(
+    [
+      ...recipeObjects.map((recipe) => String(recipe.createdBy)),
+      ...originals.map((original) => String(original.createdBy)),
+    ]
       .filter((id) => mongoose.Types.ObjectId.isValid(id))
   ));
 
@@ -47,12 +61,27 @@ const withCreatorUsernames = async (recipes: IRecipe[]) => {
     .lean();
   const usernamesById = new Map(users.map((user) => [String(user._id), user.username]));
 
-  return recipeObjects.map((recipe) => ({
-    ...recipe,
-    createdByUsername: hasUsefulCreatorName(recipe.createdByUsername)
-      ? recipe.createdByUsername
-      : usernamesById.get(String(recipe.createdBy)) ?? UNKNOWN_CREATOR_NAME,
-  }));
+  return recipeObjects.map((recipe) => {
+    const original = recipe.originalRef
+      ? originalsById.get(String(recipe.originalRef))
+      : undefined;
+
+    return {
+      ...recipe,
+      createdByUsername: hasUsefulCreatorName(recipe.createdByUsername)
+        ? recipe.createdByUsername
+        : usernamesById.get(String(recipe.createdBy)) ?? UNKNOWN_CREATOR_NAME,
+      ...(original && {
+        originalRecipe: {
+          _id: String(original._id),
+          title: original.title,
+          createdByUsername: hasUsefulCreatorName(original.createdByUsername)
+            ? original.createdByUsername
+            : usernamesById.get(String(original.createdBy)) ?? UNKNOWN_CREATOR_NAME,
+        },
+      }),
+    };
+  });
 };
 
 const getAuthenticatedUserId = (req: Request): string => {
@@ -148,14 +177,15 @@ export const forkRecipe = asyncHandler(async (req, res): Promise<void> => {
   const original = await getRecipeOrThrow(id);
   const forkedRecipe = await Recipe.create({
     title: original.title,
-    createdBy: userId,
-    createdByUsername: req.user?.username ?? UNKNOWN_CREATOR_NAME,
     imageUrl: original.imageUrl,
     time: original.time,
     difficulty: original.difficulty,
     tags: original.tags,
     ingredients: original.ingredients,
     steps: original.steps,
+    ...req.validatedBody,
+    createdBy: userId,
+    createdByUsername: req.user?.username ?? UNKNOWN_CREATOR_NAME,
     originalRef: original._id,
   });
   res.status(201).json(forkedRecipe);
