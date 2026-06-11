@@ -4,7 +4,7 @@ import RecipeCard from "../recipeCard/RecipeCard";
 import RecipeModal from "../recipeModal/RecipeModal";
 import AddRecipeForm from "../addRecipe/AddRecipeForm";
 import type { Recipe } from "../../types";
-import { getAllRecipes } from "../../api/recipesApi";
+import { forkRecipe, getAllRecipes } from "../../api/recipesApi";
 import { getAuthData } from "../../api/authApi";
 import { Plus } from "lucide-react";
 
@@ -14,6 +14,7 @@ const RecipeGrid = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
   // Denna state hjälper oss att ladda om listan utan regelbrott
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -88,14 +89,35 @@ const RecipeGrid = () => {
         <RecipeModal 
           recipe={selected} 
           onClose={() => setSelected(null)} 
-          onFork={(forkedData) => {
-            setSelected(null);
-            alert(`Grid: Kopian "${forkedData.title}" förbereds för dina ändringar!`);
+          onFork={async (recipeId, forkedData) => {
+            try {
+              await forkRecipe(recipeId, {
+                title: forkedData.title || "Nytt recept",
+                ingredients: (forkedData.ingredients ?? []).map(({ name, quantity, unit }) => ({
+                  name,
+                  quantity: Number(quantity),
+                  unit,
+                })),
+                steps: forkedData.steps ?? [],
+                tags: forkedData.tags ?? [],
+                difficulty: forkedData.difficulty || "Medel",
+                ...(forkedData.imageUrl?.trim() ? { imageUrl: forkedData.imageUrl.trim() } : {}),
+                ...(forkedData.time?.trim() ? { time: forkedData.time.trim() } : {}),
+              });
+              setSelected(null);
+              setLoading(true);
+              setRefreshTrigger(prev => prev + 1);
+              alert("Receptet har kopierats till dina recept!");
+            } catch (error) {
+              console.error("Det gick inte att forka receptet:", error);
+              alert(error instanceof Error ? error.message : "Kunde inte kopiera receptet.");
+            }
           }}
           onEdit={(recipeToEdit) => {
             setSelected(null);
-            alert(`Grid: Öppnar ändrings-vy för "${recipeToEdit.title}"`);
+            setRecipeToEdit(recipeToEdit);
           }}
+          onOpenRecipe={setSelected}
           onDelete={async () => {
             if (!window.confirm(`Är du säker på att du vill radera "${selected.title}"?`)) return;
             alert("Receptet raderat!");
@@ -112,6 +134,18 @@ const RecipeGrid = () => {
             // Ökar numret med 1, vilket får useEffect att köra hämta-logiken på nytt!
             setRefreshTrigger(prev => prev + 1);
             setShowAddForm(false);
+          }}
+        />
+      )}
+
+      {recipeToEdit && (
+        <AddRecipeForm
+          recipe={recipeToEdit}
+          onClose={() => setRecipeToEdit(null)}
+          onSuccess={() => {
+            setLoading(true);
+            setRefreshTrigger(prev => prev + 1);
+            setRecipeToEdit(null);
           }}
         />
       )}

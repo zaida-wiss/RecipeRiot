@@ -3,17 +3,19 @@ import { Clock, Users, ShoppingCart, ChefHat, Trash2, Edit3, GitFork, Save, Plus
 import "./recipes.css";
 import type { Recipe } from "../../types";
 import { getAuthData } from "../../api/authApi";
+import { getRecipeById } from "../../api/recipesApi";
 import { recipeFallbackImage } from "../../constants/recipeImage";
 
 interface RecipeModalProps {
   recipe: Recipe;
   onClose: () => void;
-  onFork: (forkedRecipe: Partial<Recipe>) => void;
+  onFork: (recipeId: string, forkedRecipe: Partial<Recipe>) => void | Promise<void>;
   onDelete?: (recipeId: string) => void;
   onEdit?: (recipe: Recipe) => void;
+  onOpenRecipe?: (recipe: Recipe) => void;
 }
 
-const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalProps) => {
+const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit, onOpenRecipe }: RecipeModalProps) => {
   const [activeTab, setActiveTab] = useState<"ingredients" | "steps">("ingredients");
   const [isForking, setIsForking] = useState(false);
   const [editedRecipe, setEditedRecipe] = useState<Recipe | null>(null);
@@ -49,7 +51,7 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
 
   const handleSaveFork = () => {
     if (editedRecipe) {
-      onFork({
+      void onFork(recipe._id, {
         ...editedRecipe,
         _id: undefined,
         createdBy: currentUserId,
@@ -83,6 +85,18 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
     : recipe.createdBy;
 
   const isOwner = isLoggedIn && !!currentUserId && String(currentUserId).trim() === String(recipeCreatorId).trim();
+
+  const handleOpenOriginal = async () => {
+    if (!recipe.originalRecipe) return;
+
+    try {
+      const originalRecipe = await getRecipeById(recipe.originalRecipe._id);
+      onOpenRecipe?.(originalRecipe);
+    } catch (error) {
+      console.error("Kunde inte öppna originalreceptet:", error);
+      alert("Kunde inte öppna originalreceptet.");
+    }
+  };
 
   return (
     <>
@@ -132,6 +146,16 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
                   <Users size={13} /> Av {authorName}
                 </span>
               </div>
+              {recipe.originalRecipe && (
+                <button
+                  type="button"
+                  className="modal__original-link"
+                  onClick={handleOpenOriginal}
+                >
+                  <GitFork size={13} />
+                  Original: {recipe.originalRecipe.title} av {recipe.originalRecipe.createdByUsername}
+                </button>
+              )}
               {(recipe.tags ?? []).length > 0 && (
                 <div className="modal__tags">
                   {recipe.tags!.map((t) => <span key={t} className="modal__tag">{t}</span>)}
@@ -163,7 +187,9 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit }: RecipeModalP
                   ) : (
                     <>
                       <span className="ingredient-item__name">{ing.name}</span>
-                      <span className="ingredient-item__amount">{ing.quantity} {ing.unit}</span>
+                      <span className="ingredient-item__amount">
+                        {ing.quantity > 0 ? ing.quantity : ''}{ing.unit ? ' ' + ing.unit : ''}
+                      </span>
                     </>
                   )}
                 </li>
