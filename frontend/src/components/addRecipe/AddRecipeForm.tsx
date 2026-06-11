@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { Recipe } from '../../types';
 import { getAuthHeaders } from '../../api/authApi';
 import BulkUpload from './BulkUpload';
 import './AddRecipeForm.css';
@@ -6,7 +7,14 @@ import './AddRecipeForm.css';
 type Ingredient = { name: string; quantity: number; unit: string };
 type View = 'single' | 'bulk';
 
-const AddRecipeForm = ({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) => {
+type Props = {
+  onClose: () => void;
+  onSuccess: () => void;
+  recipeToEdit?: Recipe;
+};
+
+const AddRecipeForm = ({ onClose, onSuccess, recipeToEdit }: Props) => {
+  const isEditing = !!recipeToEdit;
   const [view, setView] = useState<View>('single');
 
   const [title, setTitle] = useState('');
@@ -17,6 +25,17 @@ const AddRecipeForm = ({ onClose, onSuccess }: { onClose: () => void; onSuccess:
   const [ingredients, setIngredients] = useState<Ingredient[]>([{ name: '', quantity: 0, unit: '' }]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (isEditing && recipeToEdit) {
+      setTitle(recipeToEdit.title);
+      setImageUrl(recipeToEdit.imageUrl || '');
+      setTime(recipeToEdit.time || '');
+      setDifficulty(recipeToEdit.difficulty || 'Medel');
+      setSteps(recipeToEdit.steps?.length ? recipeToEdit.steps : ['']);
+      setIngredients(recipeToEdit.ingredients?.length ? recipeToEdit.ingredients : [{ name: '', quantity: 0, unit: '' }]);
+    }
+  }, [isEditing, recipeToEdit]);
 
   const addIngredient = () => setIngredients([...ingredients, { name: '', quantity: 0, unit: '' }]);
 
@@ -34,13 +53,16 @@ const AddRecipeForm = ({ onClose, onSuccess }: { onClose: () => void; onSuccess:
     setSteps(updated);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('/api/v1/recipes', {
-        method: 'POST',
+      const method = isEditing ? 'PATCH' : 'POST';
+      const endpoint = isEditing ? `/api/v1/recipes/${recipeToEdit?._id}` : '/api/v1/recipes';
+
+      const res = await fetch(endpoint, {
+        method,
         headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
         body: JSON.stringify({
           title, ingredients, steps, difficulty,
@@ -65,24 +87,26 @@ const AddRecipeForm = ({ onClose, onSuccess }: { onClose: () => void; onSuccess:
     <div className="add-recipe-backdrop" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="add-recipe-modal">
         <button className="add-recipe-close" type="button" onClick={onClose}>×</button>
-        <h2>Lägg till recept</h2>
+        <h2>{isEditing ? 'Redigera recept' : 'Lägg till recept'}</h2>
 
-        <div className="bulk-tabs">
-          <button
-            type="button"
-            className={`bulk-tab-btn ${view === 'single' ? 'active' : ''}`}
-            onClick={() => setView('single')}
-          >
-            Enskilt recept
-          </button>
-          <button
-            type="button"
-            className={`bulk-tab-btn ${view === 'bulk' ? 'active' : ''}`}
-            onClick={() => setView('bulk')}
-          >
-            Massuppladdning
-          </button>
-        </div>
+        {!isEditing && (
+          <div className="bulk-tabs">
+            <button
+              type="button"
+              className={`bulk-tab-btn ${view === 'single' ? 'active' : ''}`}
+              onClick={() => setView('single')}
+            >
+              Enskilt recept
+            </button>
+            <button
+              type="button"
+              className={`bulk-tab-btn ${view === 'bulk' ? 'active' : ''}`}
+              onClick={() => setView('bulk')}
+            >
+              Massuppladdning
+            </button>
+          </div>
+        )}
 
         {view === 'single' && (
           <>

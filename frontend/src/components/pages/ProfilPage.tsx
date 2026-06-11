@@ -174,6 +174,7 @@ const ProfilePage = () => {
   const [selected, setSelected] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
 
   const authData = getAuthData();
   const user = authData?.user;
@@ -324,13 +325,26 @@ const ProfilePage = () => {
           onFork={handleForkRecipe}
           onDelete={handleDeleteRecipe}
           onOpenRecipe={(recipe) => setSelected(recipe)}
+          onEdit={(recipe) => {
+            setRecipeToEdit(recipe);
+            setSelected(null);
+            setShowAddForm(true);
+          }}
         />
       )}
 
       {showAddForm && (
         <AddRecipeForm
-          onClose={() => setShowAddForm(false)}
-          onSuccess={handleAddRecipeSuccess}
+          onClose={() => {
+            setShowAddForm(false);
+            setRecipeToEdit(null);
+          }}
+          onSuccess={() => {
+            setShowAddForm(false);
+            setRecipeToEdit(null);
+            void fetchMyRecipes();
+          }}
+          recipeToEdit={recipeToEdit || undefined}
         />
       )}
     </div>
