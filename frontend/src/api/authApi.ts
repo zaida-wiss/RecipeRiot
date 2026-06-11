@@ -133,6 +133,27 @@ export const saveAuthData = (token: string, user: AuthUser): void => {
   localStorage.setItem('user', JSON.stringify(user));
 };
 
+type JwtExpirationPayload = {
+  exp?: number;
+};
+
+export const getTokenExpiration = (token: string): number | null => {
+  try {
+    const payloadPart = token.split('.')[1];
+    if (!payloadPart) return null;
+
+    const normalizedPayload = payloadPart
+      .replace(/-/g, '+')
+      .replace(/_/g, '/')
+      .padEnd(Math.ceil(payloadPart.length / 4) * 4, '=');
+    const payload = JSON.parse(atob(normalizedPayload)) as JwtExpirationPayload;
+
+    return typeof payload.exp === 'number' ? payload.exp * 1000 : null;
+  } catch {
+    return null;
+  }
+};
+
 // Hämtar sparad auth-data. Om JSON är trasig rensas datan så appen inte hamnar i ett konstigt läge.
 export const getAuthData = (): { token: string; user: AuthUser } | null => {
   const token = localStorage.getItem('authToken');
@@ -143,6 +164,12 @@ export const getAuthData = (): { token: string; user: AuthUser } | null => {
   }
 
   try {
+    const expiresAt = getTokenExpiration(token);
+    if (!expiresAt || expiresAt <= Date.now()) {
+      clearAuthData();
+      return null;
+    }
+
     return { token, user: JSON.parse(userStr) };
   } catch {
     clearAuthData();
