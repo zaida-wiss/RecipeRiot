@@ -5,6 +5,7 @@ import type { Recipe } from "../../types";
 import { getAuthData } from "../../api/authApi";
 import { addFavorite, removeFavorite } from "../../api/favoritesApi";
 import { recipeFallbackImage } from "../../constants/recipeImage";
+import { optimizeImageUrl } from "../../utils/imageOptimization";
 
 type RecipeCardProps = {
   recipe: Recipe;
@@ -51,7 +52,7 @@ const RecipeCard = ({
   return (
     <div className="card" onClick={onClick}>
       <div className="card-image-wrapper">
-        <img src={recipe.imageUrl || recipeFallbackImage} alt={recipe.title} />
+        <img src={optimizeImageUrl(recipe.imageUrl, 400) || recipeFallbackImage} alt={recipe.title} loading="lazy" />
         <div className="card-image-meta" aria-label="Receptinformation">
           <span className="difficulty">{difficulty}</span>
           <span className="card-time">
