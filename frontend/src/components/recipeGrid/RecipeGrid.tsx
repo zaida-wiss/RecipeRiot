@@ -14,6 +14,7 @@ const RecipeGrid = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
   // Denna state hjälper oss att ladda om listan utan regelbrott
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -94,7 +95,7 @@ const RecipeGrid = () => {
           }}
           onEdit={(recipeToEdit) => {
             setSelected(null);
-            alert(`Grid: Öppnar ändrings-vy för "${recipeToEdit.title}"`);
+            setRecipeToEdit(recipeToEdit);
           }}
           onDelete={async () => {
             if (!window.confirm(`Är du säker på att du vill radera "${selected.title}"?`)) return;
@@ -112,6 +113,18 @@ const RecipeGrid = () => {
             // Ökar numret med 1, vilket får useEffect att köra hämta-logiken på nytt!
             setRefreshTrigger(prev => prev + 1);
             setShowAddForm(false);
+          }}
+        />
+      )}
+
+      {recipeToEdit && (
+        <AddRecipeForm
+          recipe={recipeToEdit}
+          onClose={() => setRecipeToEdit(null)}
+          onSuccess={() => {
+            setLoading(true);
+            setRefreshTrigger(prev => prev + 1);
+            setRecipeToEdit(null);
           }}
         />
       )}

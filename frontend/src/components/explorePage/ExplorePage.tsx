@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import RecipeModal from '../recipeModal/RecipeModal';
 import RecipeCard from '../recipeCard/RecipeCard';
+import AddRecipeForm from '../addRecipe/AddRecipeForm';
 import type { Recipe } from '../../types';
 import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
 import './ExplorePage.css';
@@ -17,6 +18,7 @@ const ExplorePage: React.FC = () => {
   const [activeTag, setActiveTag] = useState('Alla');
   const [activeDifficulty, setActiveDifficulty] = useState('Alla');
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
 
   useEffect(() => {
     setSearchTerm(urlQuery);
@@ -152,8 +154,9 @@ const ExplorePage: React.FC = () => {
           recipe={selectedRecipe}
           onClose={() => setSelectedRecipe(null)}
           onFork={handleFork}
-          onEdit={() => {
+          onEdit={(recipe) => {
             setSelectedRecipe(null);
+            setRecipeToEdit(recipe);
           }}
           onDelete={async (recipeId) => {
             if (!window.confirm(`Är du säker på att du vill radera "${selectedRecipe.title}"?`)) return;
@@ -164,6 +167,17 @@ const ExplorePage: React.FC = () => {
             } catch (err) {
               console.error("Kunde inte radera recept", err);
             }
+          }}
+        />
+      )}
+
+      {recipeToEdit && (
+        <AddRecipeForm
+          recipe={recipeToEdit}
+          onClose={() => setRecipeToEdit(null)}
+          onSuccess={async () => {
+            setRecipes(await getAllRecipes());
+            setRecipeToEdit(null);
           }}
         />
       )}

@@ -172,6 +172,7 @@ const ProfilePage = () => {
   const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
   const [favorites, setFavorites] = useState<Recipe[]>([]);
   const [selected, setSelected] = useState<Recipe | null>(null);
+  const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
 
@@ -320,6 +321,10 @@ const ProfilePage = () => {
           onClose={() => setSelected(null)}
           onFork={handleForkRecipe}
           onDelete={handleDeleteRecipe}
+          onEdit={(recipe) => {
+            setSelected(null);
+            setRecipeToEdit(recipe);
+          }}
         />
       )}
 
@@ -327,6 +332,17 @@ const ProfilePage = () => {
         <AddRecipeForm
           onClose={() => setShowAddForm(false)}
           onSuccess={handleAddRecipeSuccess}
+        />
+      )}
+
+      {recipeToEdit && (
+        <AddRecipeForm
+          recipe={recipeToEdit}
+          onClose={() => setRecipeToEdit(null)}
+          onSuccess={async () => {
+            await fetchMyRecipes();
+            setRecipeToEdit(null);
+          }}
         />
       )}
     </div>
