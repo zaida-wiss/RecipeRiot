@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Clock, Heart } from "lucide-react";
 import "./RecipeCard.css";
 import type { Recipe } from "../../types";
@@ -25,10 +25,6 @@ const RecipeCard = ({
   const difficulty = recipe.difficulty?.trim() || "Ej angiven";
   const time = recipe.time?.trim() || "Tid saknas";
   const authorName = recipe.createdByUsername?.trim() || "RecipeRiot";
-
-  useEffect(() => {
-    setIsFavorite(initialFavorite);
-  }, [initialFavorite]);
 
   const handleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
