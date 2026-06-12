@@ -4,6 +4,7 @@ import "./recipes.css";
 import type { Recipe } from "../../types";
 import { getAuthData } from "../../api/authApi";
 import { recipeFallbackImage } from "../../constants/recipeImage";
+import { optimizeImageUrl } from "../../utils/imageOptimization";
 
 interface RecipeModalProps {
   recipe: Recipe;
@@ -84,13 +85,14 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit, onOpenRecipe }
     : recipe.createdBy;
 
   const isOwner = isLoggedIn && !!currentUserId && String(currentUserId).trim() === String(recipeCreatorId).trim();
+  const originalRecipe = recipe.originalRef && typeof recipe.originalRef === 'object' ? recipe.originalRef : null;
 
   return (
     <>
       <div className="modal-backdrop" onClick={onClose} aria-hidden="true" />
       <div className="modal" role="dialog" aria-modal="true">
         <div className="modal__hero">
-          <img className="modal__hero-image" src={recipe.imageUrl || recipeFallbackImage} alt={recipe.title} />
+          <img className="modal__hero-image" src={optimizeImageUrl(recipe.imageUrl, 800) || recipeFallbackImage} alt={recipe.title} />
           <div className="modal__hero-gradient" aria-hidden="true" />
           <button className="modal__close" onClick={onClose}>×</button>
           <div className="modal__hero-title-wrap">
@@ -131,15 +133,15 @@ const RecipeModal = ({ recipe, onClose, onFork, onDelete, onEdit, onOpenRecipe }
                 </span>
                 <span className="modal__meta-item modal__meta-author">
                   <Users size={13} /> Av {authorName}
-                  {recipe.originalRef && typeof recipe.originalRef === 'object' && (
+                  {originalRecipe && (
                     <>
                       {' · '}
                       <button
                         type="button"
                         style={{ background: 'none', border: 'none', color: 'inherit', cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
-                        onClick={() => onOpenRecipe?.(recipe.originalRef as unknown as Recipe)}
+                        onClick={() => onOpenRecipe?.(originalRecipe)}
                       >
-                        forkat från {(recipe.originalRef as any).createdByUsername || 'original'}
+                        forkat från {originalRecipe.createdByUsername || 'original'}
                       </button>
                     </>
                   )}
