@@ -5,6 +5,8 @@ import RecipeModal from '../recipeModal/RecipeModal';
 import RecipeCard from '../recipeCard/RecipeCard';
 import type { Recipe } from '../../types';
 import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
+import { getFavorites } from '../../api/favoritesApi';
+import { getAuthData } from '../../api/authApi';
 import './ExplorePage.css';
 
 type TimeFilter = 'Alla' | 'Snabb' | 'Medel' | 'Lång';
@@ -39,6 +41,7 @@ const ExplorePage: React.FC = () => {
   const urlQuery = searchParams.get('q') ?? '';
 
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  const [favorites, setFavorites] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTags, setActiveTags] = useState<string[]>([]);
   const [activeDifficulties, setActiveDifficulties] = useState<string[]>([]);
@@ -46,20 +49,38 @@ const ExplorePage: React.FC = () => {
   const [openFilter, setOpenFilter] = useState<OpenFilter>(null);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const filterSectionRef = useRef<HTMLElement>(null);
+  const isLoggedIn = getAuthData() !== null;
 
   useEffect(() => {
-    const fetchRecipes = async () => {
+    const fetchPageData = async () => {
       try {
-        const data = await getAllRecipes();
-        setRecipes(data);
+        const [recipeData, favoriteData] = await Promise.all([
+          getAllRecipes(),
+          isLoggedIn ? getFavorites() : Promise.resolve([]),
+        ]);
+        setRecipes(recipeData);
+        setFavorites(favoriteData);
       } catch (err) {
-        console.error('Kunde inte hämta recept', err);
+        console.error('Kunde inte hämta recept eller favoriter', err);
       } finally {
         setLoading(false);
       }
     };
-    fetchRecipes();
-  }, []);
+    fetchPageData();
+  }, [isLoggedIn]);
+
+  const refreshFavorites = async () => {
+    if (!isLoggedIn) {
+      setFavorites([]);
+      return;
+    }
+
+    try {
+      setFavorites(await getFavorites());
+    } catch (err) {
+      console.error('Kunde inte uppdatera favoriter', err);
+    }
+  };
 
   useEffect(() => {
     if (!openFilter) return;
@@ -115,6 +136,7 @@ const ExplorePage: React.FC = () => {
 
   const hasActiveFilters =
     activeTags.length > 0 || activeDifficulties.length > 0 || activeTimes.length > 0;
+  const favoriteIds = new Set(favorites.map((recipe) => recipe._id));
 
   const clearFilters = () => {
     setActiveTags([]);
@@ -379,6 +401,8 @@ const ExplorePage: React.FC = () => {
               <RecipeCard
                 key={recipe._id}
                 recipe={recipe}
+                isFavorite={favoriteIds.has(recipe._id)}
+                onFavoriteChanged={refreshFavorites}
                 onClick={() => setSelectedRecipe(recipe)}
               />
             ))
