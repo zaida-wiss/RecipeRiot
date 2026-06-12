@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowUpDown, ChevronDown, Search } from 'lucide-react';
 import { getAuthData } from '../../api/authApi';
 import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
 import { getFavorites } from '../../api/favoritesApi';
@@ -10,6 +11,9 @@ import type { Recipe } from '../../types';
 import './ProfilePage.css';
 
 type Tab = 'mina-recept' | 'favoriter' | 'installningar';
+type TimeFilter = 'Snabb' | 'Medel' | 'Lång';
+type FavoriteSort = 'newest' | 'title' | 'time';
+type OpenFavoriteFilter = 'type' | 'difficulty' | 'time' | null;
 
 const profileTabs: Array<{ value: Tab; label: string }> = [
   { value: 'mina-recept', label: 'Mina recept' },
@@ -19,6 +23,29 @@ const profileTabs: Array<{ value: Tab; label: string }> = [
 
 const filterRecipesByUser = (recipes: Recipe[], userId?: string) =>
   recipes.filter((recipe) => String(recipe.createdBy) === String(userId));
+
+const favoriteTimeOptions: Array<{ value: TimeFilter; label: string }> = [
+  { value: 'Snabb', label: 'Högst 30 min' },
+  { value: 'Medel', label: '31-60 min' },
+  { value: 'Lång', label: 'Mer än 60 min' },
+];
+
+const getRecipeTimeInMinutes = (time?: string): number | null => {
+  if (!time?.trim()) return null;
+
+  const normalizedTime = time.toLowerCase().replace(',', '.');
+  const hoursMatch = normalizedTime.match(/(\d+(?:\.\d+)?)\s*(?:h|tim)/);
+  const minutesMatch = normalizedTime.match(/(\d+)\s*(?:min|m)\b/);
+
+  if (hoursMatch || minutesMatch) {
+    const hours = hoursMatch ? Number(hoursMatch[1]) * 60 : 0;
+    const minutes = minutesMatch ? Number(minutesMatch[1]) : 0;
+    return hours + minutes;
+  }
+
+  const numberMatch = normalizedTime.match(/\d+(?:\.\d+)?/);
+  return numberMatch ? Number(numberMatch[0]) : null;
+};
 
 const normalizeForkedRecipe = (forkedRecipe: Partial<Recipe>) => {
   const cleanedIngredients = (forkedRecipe.ingredients ?? []).map((ingredient) => ({
@@ -114,25 +141,297 @@ const FavoritesSection = ({
   onSelectRecipe,
   favoriteIds,
   onFavoriteChanged,
-}: RecipeSectionProps) => (
-  <div className="profile-grid">
-    {recipes.length > 0 ? (
-      recipes.map((recipe) => (
-        <RecipeCard
-          key={recipe._id}
-          recipe={recipe}
-          isFavorite={favoriteIds.has(recipe._id)}
-          onClick={() => onSelectRecipe(recipe)}
-          onFavoriteChanged={onFavoriteChanged}
-        />
-      ))
-    ) : (
+}: RecipeSectionProps) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTags, setActiveTags] = useState<string[]>([]);
+  const [activeDifficulties, setActiveDifficulties] = useState<string[]>([]);
+  const [activeTimes, setActiveTimes] = useState<TimeFilter[]>([]);
+  const [sortBy, setSortBy] = useState<FavoriteSort>('newest');
+  const [openFilter, setOpenFilter] = useState<OpenFavoriteFilter>(null);
+  const filterSectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!openFilter) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        filterSectionRef.current
+        && !filterSectionRef.current.contains(event.target as Node)
+      ) {
+        setOpenFilter(null);
+      }
+    };
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpenFilter(null);
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [openFilter]);
+
+  const allTags = useMemo(
+    () => Array.from(new Set(recipes.flatMap((recipe) => recipe.tags ?? []))).sort(),
+    [recipes],
+  );
+
+  const filteredRecipes = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLocaleLowerCase('sv');
+
+    return recipes
+      .filter((recipe) => {
+        const recipeDifficulty = recipe.difficulty?.trim() || 'Ej angiven';
+        const timeInMinutes = getRecipeTimeInMinutes(recipe.time);
+        const matchesSearch =
+          !normalizedQuery
+          || recipe.title.toLocaleLowerCase('sv').includes(normalizedQuery);
+        const matchesTag =
+          activeTags.length === 0
+          || activeTags.some((tag) => (recipe.tags ?? []).includes(tag));
+        const matchesDifficulty =
+          activeDifficulties.length === 0
+          || activeDifficulties.includes(recipeDifficulty);
+        const matchesTime =
+          activeTimes.length === 0
+          || activeTimes.some((timeFilter) =>
+            (timeFilter === 'Snabb' && timeInMinutes !== null && timeInMinutes <= 30)
+            || (timeFilter === 'Medel'
+              && timeInMinutes !== null
+              && timeInMinutes > 30
+              && timeInMinutes <= 60)
+            || (timeFilter === 'Lång' && timeInMinutes !== null && timeInMinutes > 60)
+          );
+
+        return matchesSearch && matchesTag && matchesDifficulty && matchesTime;
+      })
+      .sort((firstRecipe, secondRecipe) => {
+        if (sortBy === 'title') {
+          return firstRecipe.title.localeCompare(secondRecipe.title, 'sv');
+        }
+        if (sortBy === 'time') {
+          return (
+            (getRecipeTimeInMinutes(firstRecipe.time) ?? Number.POSITIVE_INFINITY)
+            - (getRecipeTimeInMinutes(secondRecipe.time) ?? Number.POSITIVE_INFINITY)
+          );
+        }
+        return (
+          new Date(secondRecipe.createdAt).getTime()
+          - new Date(firstRecipe.createdAt).getTime()
+        );
+      });
+  }, [recipes, searchQuery, activeTags, activeDifficulties, activeTimes, sortBy]);
+
+  const hasActiveFilters =
+    searchQuery.trim().length > 0
+    || activeTags.length > 0
+    || activeDifficulties.length > 0
+    || activeTimes.length > 0;
+
+  const toggleArrayValue = <T,>(values: T[], value: T): T[] =>
+    values.includes(value)
+      ? values.filter((currentValue) => currentValue !== value)
+      : [...values, value];
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setActiveTags([]);
+    setActiveDifficulties([]);
+    setActiveTimes([]);
+  };
+
+  if (recipes.length === 0) {
+    return (
       <div className="profile-empty">
         <p>Du har inga favoriter än.</p>
       </div>
-    )}
-  </div>
-);
+    );
+  }
+
+  return (
+    <div>
+      <section
+        ref={filterSectionRef}
+        className="favorite-filter-section"
+        aria-label="Filtrera favoritrecept"
+      >
+        <div className="favorite-controls-row">
+          <div className="favorite-search">
+            <span className="favorite-search-icon" aria-hidden="true">
+              <Search size={17} />
+            </span>
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="Sök favoriter..."
+              aria-label="Sök bland favoritrecept"
+            />
+          </div>
+
+          <label className="favorite-sort">
+            <span className="favorite-sort-icon" aria-hidden="true">
+              <ArrowUpDown size={15} />
+            </span>
+            <span className="favorite-sort-text">
+              <span>Sortera</span>
+              <strong>
+                {sortBy === 'newest'
+                  ? 'Nyast först'
+                  : sortBy === 'title'
+                    ? 'Namn A-Ö'
+                    : 'Kortast tid'}
+              </strong>
+            </span>
+            <select
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value as FavoriteSort)}
+              aria-label="Sortera favoritrecept"
+            >
+              <option value="newest">Nyast först</option>
+              <option value="title">Namn A-Ö</option>
+              <option value="time">Kortast tid</option>
+            </select>
+          </label>
+
+          <div className="favorite-filter-group">
+            <button
+              type="button"
+              className={`favorite-filter-trigger ${activeTags.length > 0 ? 'active' : ''}`}
+              aria-expanded={openFilter === 'type'}
+              onClick={() => setOpenFilter(openFilter === 'type' ? null : 'type')}
+            >
+              Typ av rätt
+              <ChevronDown size={17} className={openFilter === 'type' ? 'open' : ''} />
+            </button>
+            {openFilter === 'type' && (
+              <div className="favorite-filter-menu">
+                <button
+                  type="button"
+                  className={activeTags.length === 0 ? 'selected' : ''}
+                  onClick={() => setActiveTags([])}
+                >
+                  Alla typer
+                </button>
+                {allTags.map((tag) => (
+                  <button
+                    key={tag}
+                    type="button"
+                    className={activeTags.includes(tag) ? 'selected' : ''}
+                    onClick={() => setActiveTags((current) => toggleArrayValue(current, tag))}
+                  >
+                    {tag}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="favorite-filter-group">
+            <button
+              type="button"
+              className={`favorite-filter-trigger ${activeDifficulties.length > 0 ? 'active' : ''}`}
+              aria-expanded={openFilter === 'difficulty'}
+              onClick={() => setOpenFilter(openFilter === 'difficulty' ? null : 'difficulty')}
+            >
+              Svårighetsgrad
+              <ChevronDown size={17} className={openFilter === 'difficulty' ? 'open' : ''} />
+            </button>
+            {openFilter === 'difficulty' && (
+              <div className="favorite-filter-menu">
+                {['Alla', 'Lätt', 'Medel', 'Svår', 'Ej angiven'].map((difficulty) => (
+                  <button
+                    key={difficulty}
+                    type="button"
+                    className={
+                      difficulty === 'Alla'
+                        ? activeDifficulties.length === 0 ? 'selected' : ''
+                        : activeDifficulties.includes(difficulty) ? 'selected' : ''
+                    }
+                    onClick={() => setActiveDifficulties((current) =>
+                      difficulty === 'Alla' ? [] : toggleArrayValue(current, difficulty)
+                    )}
+                  >
+                    {difficulty === 'Alla' ? 'Alla nivåer' : difficulty}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="favorite-filter-group">
+            <button
+              type="button"
+              className={`favorite-filter-trigger ${activeTimes.length > 0 ? 'active' : ''}`}
+              aria-expanded={openFilter === 'time'}
+              onClick={() => setOpenFilter(openFilter === 'time' ? null : 'time')}
+            >
+              Tid
+              <ChevronDown size={17} className={openFilter === 'time' ? 'open' : ''} />
+            </button>
+            {openFilter === 'time' && (
+              <div className="favorite-filter-menu">
+                <button
+                  type="button"
+                  className={activeTimes.length === 0 ? 'selected' : ''}
+                  onClick={() => setActiveTimes([])}
+                >
+                  Alla tider
+                </button>
+                {favoriteTimeOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    className={activeTimes.includes(option.value) ? 'selected' : ''}
+                    onClick={() => setActiveTimes((current) =>
+                      toggleArrayValue(current, option.value)
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="favorite-filter-footer">
+          <p aria-live="polite">
+            {filteredRecipes.length} av {recipes.length} favoriter
+          </p>
+          {hasActiveFilters && (
+            <button type="button" onClick={clearFilters}>
+              Rensa filter
+            </button>
+          )}
+        </div>
+      </section>
+
+      {filteredRecipes.length > 0 ? (
+        <div className="profile-grid">
+          {filteredRecipes.map((recipe) => (
+            <RecipeCard
+              key={recipe._id}
+              recipe={recipe}
+              isFavorite={favoriteIds.has(recipe._id)}
+              onClick={() => onSelectRecipe(recipe)}
+              onFavoriteChanged={onFavoriteChanged}
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="profile-empty">
+          <p>Inga favoriter matchar dina filter.</p>
+          <button type="button" className="favorite-clear-empty" onClick={clearFilters}>
+            Rensa filter
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
 
 type SettingsSectionProps = {
   isAdmin: boolean;
