@@ -48,7 +48,7 @@ const RecipeCard = ({
   return (
     <div className="card" onClick={onClick}>
       <div className="card-image-wrapper">
-        <img src={optimizeImageUrl(recipe.imageUrl, 400) || recipeFallbackImage} alt={recipe.title} loading="lazy" />
+        <img src={optimizeImageUrl(recipe.imageUrl) || recipeFallbackImage} alt={recipe.title} loading="lazy" />
         <div className="card-image-meta" aria-label="Receptinformation">
           <span className="difficulty">{difficulty}</span>
           <span className="card-time">
