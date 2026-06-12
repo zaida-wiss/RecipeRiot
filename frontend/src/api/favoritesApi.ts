@@ -26,6 +26,9 @@ export const addFavorite = async (recipeId: string): Promise<void> => {
     method: 'POST',
     headers: getAuthHeaders(),
   });
+  if (!res.ok) {
+    throw new Error(await getFavoritesErrorMessage(res));
+  }
 };
 
 export const removeFavorite = async (recipeId: string): Promise<void> => {
@@ -33,4 +36,7 @@ export const removeFavorite = async (recipeId: string): Promise<void> => {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });
+  if (!res.ok) {
+    throw new Error(await getFavoritesErrorMessage(res));
+  }
 };
