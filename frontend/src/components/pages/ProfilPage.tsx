@@ -2,6 +2,13 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { getAuthData, clearAuthData, deleteMyAccount } from '../../api/authApi';
+import DeleteAccountModal from '../deleteAccountModal/DeleteAccountModal';
+
+declare global {
+  interface Window {
+    onAccountDeleted?: () => void;
+  }
+}
 import { useRecipeFilter } from '../../hooks/useRecipeFilter';
 import { useRecipeOperations } from '../../hooks/useRecipeOperations';
 import { useProfileData } from '../../hooks/useProfileData';
@@ -218,6 +225,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const authData = getAuthData();
   const user = authData?.user;
@@ -262,23 +270,23 @@ const ProfilePage = () => {
     await removeRecipe(id);
   };
 
-  const handleDeleteAccount = async () => {
-    const confirmed = window.confirm(
-      'Är du helt säker? Ditt konto och all din data raderas permanent. Denna åtgärd kan inte ångras.'
-    );
+  const handleDeleteAccount = () => {
+    setShowDeleteModal(true);
+  };
 
-    if (!confirmed) {
-      return;
-    }
-
+  const handleConfirmDelete = async (password: string) => {
     try {
-      await deleteMyAccount();
+      await deleteMyAccount(password);
       clearAuthData();
-      navigate('/');
     } catch (err) {
       console.error('Kunde inte radera kontot:', err);
-      alert('Kunde inte radera kontot. Försök igen senare.');
+      throw err;
     }
+  };
+
+  const handleDeleteSuccess = () => {
+    window.onAccountDeleted?.();
+    navigate('/');
   };
 
   const renderActiveTab = () => {
@@ -371,6 +379,15 @@ const ProfilePage = () => {
             void fetchMyRecipes();
           }}
           recipeToEdit={recipeToEdit || undefined}
+        />
+      )}
+
+      {showDeleteModal && user && (
+        <DeleteAccountModal
+          username={user.username}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setShowDeleteModal(false)}
+          onSuccess={handleDeleteSuccess}
         />
       )}
     </div>

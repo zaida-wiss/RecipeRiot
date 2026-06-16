@@ -205,11 +205,20 @@ export const getAuthHeaders = (): HeadersInit => {
 };
 
 // Permanent borttagning av användarkonto (GDPR hard delete)
-export const deleteMyAccount = async (): Promise<void> => {
-  return requestJson(`${BASE_URL}/api/v1/gdpr/me/hard`, {
+export const deleteMyAccount = async (password: string): Promise<void> => {
+  const response = await fetchWithTimeout(`${BASE_URL}/api/v1/gdpr/me/hard`, {
     method: 'DELETE',
-    headers: getAuthHeaders(),
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ password }),
   });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({})) as any;
+    throw new Error(errorData.message || 'Kunde inte radera kontot');
+  }
 };
 
 // Exportera användarens data (GDPR export)
