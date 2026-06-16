@@ -467,8 +467,20 @@ const SettingsSection = ({ onExportData, onDeleteAccount, isDeleting = false }: 
     </div>
 
     <div className="settings-card settings-danger">
-      <h3>Radera konto</h3>
-      <p>Permanent borttagning av ditt konto och all relaterad data. Denna åtgärd kan inte ångras.</p>
+      <h3>Radera konto (GDPR)</h3>
+      <p>Permanent och omedelbar borttagning av ditt konto och all relaterad data enligt GDPR rätt till radering.</p>
+      <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '12px', padding: '8px', backgroundColor: '#fff5f5', borderRadius: '4px' }}>
+        <strong>Vad som raderas:</strong>
+        <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
+          <li>Ditt användarkonto</li>
+          <li>Alla dina recept och recepthistorik</li>
+          <li>Dina favoriter och användardata</li>
+          <li>All personlig information</li>
+        </ul>
+        <p style={{ marginTop: '8px', marginBottom: '0' }}>
+          <strong>Obs:</strong> Du kan INTE logga in igen efter radering, och data kan INTE återställas.
+        </p>
+      </div>
       <button
         type="button"
         className="settings-btn settings-btn-danger"
@@ -577,11 +589,18 @@ const ProfilePage = () => {
   };
 
   const handleDeleteAccount = async () => {
-    const confirmed = window.confirm(
-      'Är du helt säker? Ditt konto och all din data raderas permanent. Denna åtgärd kan inte ångras.'
-    );
+    const confirmMessage = `VARNING: Detta raderar ditt konto PERMANENT och OMEDELBAR.
 
-    if (!confirmed) {
+Vad som händer:
+- Ditt konto och all data (recept, favoriter, osv) raderas direkt
+- Du kan INTE logga in igen efter detta
+- Du kan INTE ångra denna åtgärd
+
+Skriv "RADERA" för att bekräfta att du förstår:`;
+
+    const confirmed = window.prompt(confirmMessage);
+
+    if (confirmed !== 'RADERA') {
       return;
     }
 
