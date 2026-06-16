@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowUpDown, ChevronDown, Search } from 'lucide-react';
-import { getAuthData, clearAuthData, deleteMyAccount, exportMyData } from '../../api/authApi';
-import { useFavoriteFilter, type FavoriteSort } from '../../hooks/useFavoriteFilter';
+import { Search } from 'lucide-react';
+import { getAuthData, clearAuthData, deleteMyAccount } from '../../api/authApi';
+import { useRecipeFilter } from '../../hooks/useRecipeFilter';
 import { useRecipeOperations } from '../../hooks/useRecipeOperations';
 import { useProfileData } from '../../hooks/useProfileData';
+import RecipeFilterBar from '../recipeFilterBar/RecipeFilterBar';
 import RecipeCard from '../recipeCard/RecipeCard';
 import RecipeModal from '../recipeModal/RecipeModal';
 import AddRecipeForm from '../addRecipe/AddRecipeForm';
@@ -17,12 +18,6 @@ const profileTabs: Array<{ value: Tab; label: string }> = [
   { value: 'mina-recept', label: 'Mina recept' },
   { value: 'favoriter', label: 'Favoriter' },
   { value: 'installningar', label: 'Inställningar' },
-];
-
-const favoriteTimeOptions: Array<{ value: 'Snabb' | 'Medel' | 'Lång'; label: string }> = [
-  { value: 'Snabb', label: 'Högst 30 min' },
-  { value: 'Medel', label: '31-60 min' },
-  { value: 'Lång', label: 'Mer än 60 min' },
 ];
 
 type ProfileTabsProps = {
@@ -61,36 +56,62 @@ const MyRecipesSection = ({
   onSelectRecipe,
   favoriteIds,
   onFavoriteChanged,
-}: MyRecipesSectionProps) => (
-  <div>
-    <button className="profile-add-btn" onClick={onAddRecipe}>
-      + Lägg till nytt recept
-    </button>
+}: MyRecipesSectionProps) => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const filterHook = useRecipeFilter(recipes, searchQuery);
+  const { filteredRecipes } = filterHook;
 
-    {recipes.length > 0 ? (
-      <div className="profile-grid">
-        {recipes.map((recipe) => (
-          <RecipeCard
-            key={recipe._id}
-            recipe={recipe}
-            isFavorite={favoriteIds.has(recipe._id)}
-            onClick={() => onSelectRecipe(recipe)}
-            onFavoriteChanged={onFavoriteChanged}
-          />
-        ))}
-      </div>
-    ) : (
-      <div className="profile-cta">
-        <div className="profile-cta-icon">🍳</div>
-        <h3>Du har inga recept än</h3>
-        <p>Dela ditt första recept med communityn!</p>
-        <button className="profile-add-btn" onClick={onAddRecipe}>
-          + Lägg till ditt första recept
-        </button>
-      </div>
-    )}
-  </div>
-);
+  return (
+    <div>
+      <button className="profile-add-btn" onClick={onAddRecipe}>
+        + Lägg till nytt recept
+      </button>
+
+      {recipes.length > 0 && (
+        <>
+          <div className="search-wrapper" style={{ marginBottom: '1.5rem' }}>
+            <Search className="search-icon-svg" size={20} color="#817878" />
+            <input
+              type="text"
+              placeholder="Sök på recepttitel..."
+              className="search-input"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <RecipeFilterBar {...filterHook} />
+        </>
+      )}
+
+      {filteredRecipes.length > 0 ? (
+        <div className="profile-grid">
+          {filteredRecipes.map((recipe) => (
+            <RecipeCard
+              key={recipe._id}
+              recipe={recipe}
+              isFavorite={favoriteIds.has(recipe._id)}
+              onClick={() => onSelectRecipe(recipe)}
+              onFavoriteChanged={onFavoriteChanged}
+            />
+          ))}
+        </div>
+      ) : recipes.length === 0 ? (
+        <div className="profile-cta">
+          <div className="profile-cta-icon">🍳</div>
+          <h3>Du har inga recept än</h3>
+          <p>Dela ditt första recept med communityn!</p>
+          <button className="profile-add-btn" onClick={onAddRecipe}>
+            + Lägg till ditt första recept
+          </button>
+        </div>
+      ) : (
+        <div className="profile-empty">
+          <p>Inga recept matchar dina filter.</p>
+        </div>
+      )}
+    </div>
+  );
+};
 
 const FavoritesSection = ({
   recipes,
@@ -98,26 +119,9 @@ const FavoritesSection = ({
   favoriteIds,
   onFavoriteChanged,
 }: RecipeSectionProps) => {
-  const {
-    searchQuery,
-    setSearchQuery,
-    activeTags,
-    setActiveTags,
-    activeDifficulties,
-    setActiveDifficulties,
-    activeTimes,
-    setActiveTimes,
-    sortBy,
-    setSortBy,
-    openFilter,
-    setOpenFilter,
-    filterSectionRef,
-    allTags,
-    filteredRecipes,
-    hasActiveFilters,
-    toggleArrayValue,
-    clearFilters,
-  } = useFavoriteFilter(recipes);
+  const [searchQuery, setSearchQuery] = useState('');
+  const filterHook = useRecipeFilter(recipes, searchQuery);
+  const { filteredRecipes } = filterHook;
 
   if (recipes.length === 0) {
     return (
@@ -129,162 +133,17 @@ const FavoritesSection = ({
 
   return (
     <div>
-      <section
-        ref={filterSectionRef}
-        className="favorite-filter-section"
-        aria-label="Filtrera favoritrecept"
-      >
-        <div className="favorite-controls-row">
-          <div className="favorite-search">
-            <span className="favorite-search-icon" aria-hidden="true">
-              <Search size={17} />
-            </span>
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(event) => setSearchQuery(event.target.value)}
-              placeholder="Sök favoriter..."
-              aria-label="Sök bland favoritrecept"
-            />
-          </div>
-
-          <label className="favorite-sort">
-            <span className="favorite-sort-icon" aria-hidden="true">
-              <ArrowUpDown size={15} />
-            </span>
-            <span className="favorite-sort-text">
-              <span>Sortera</span>
-              <strong>
-                {sortBy === 'newest'
-                  ? 'Nyast först'
-                  : sortBy === 'title'
-                    ? 'Namn A-Ö'
-                    : 'Kortast tid'}
-              </strong>
-            </span>
-            <select
-              value={sortBy}
-              onChange={(event) => setSortBy(event.target.value as FavoriteSort)}
-              aria-label="Sortera favoritrecept"
-            >
-              <option value="newest">Nyast först</option>
-              <option value="title">Namn A-Ö</option>
-              <option value="time">Kortast tid</option>
-            </select>
-          </label>
-
-          <div className="favorite-filter-group">
-            <button
-              type="button"
-              className={`favorite-filter-trigger ${activeTags.length > 0 ? 'active' : ''}`}
-              aria-expanded={openFilter === 'type'}
-              onClick={() => setOpenFilter(openFilter === 'type' ? null : 'type')}
-            >
-              Typ av rätt
-              <ChevronDown size={17} className={openFilter === 'type' ? 'open' : ''} />
-            </button>
-            {openFilter === 'type' && (
-              <div className="favorite-filter-menu">
-                <button
-                  type="button"
-                  className={activeTags.length === 0 ? 'selected' : ''}
-                  onClick={() => setActiveTags([])}
-                >
-                  Alla typer
-                </button>
-                {allTags.map((tag) => (
-                  <button
-                    key={tag}
-                    type="button"
-                    className={activeTags.includes(tag) ? 'selected' : ''}
-                    onClick={() => setActiveTags((current) => toggleArrayValue(current, tag))}
-                  >
-                    {tag}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="favorite-filter-group">
-            <button
-              type="button"
-              className={`favorite-filter-trigger ${activeDifficulties.length > 0 ? 'active' : ''}`}
-              aria-expanded={openFilter === 'difficulty'}
-              onClick={() => setOpenFilter(openFilter === 'difficulty' ? null : 'difficulty')}
-            >
-              Svårighetsgrad
-              <ChevronDown size={17} className={openFilter === 'difficulty' ? 'open' : ''} />
-            </button>
-            {openFilter === 'difficulty' && (
-              <div className="favorite-filter-menu">
-                {['Alla', 'Lätt', 'Medel', 'Svår', 'Ej angiven'].map((difficulty) => (
-                  <button
-                    key={difficulty}
-                    type="button"
-                    className={
-                      difficulty === 'Alla'
-                        ? activeDifficulties.length === 0 ? 'selected' : ''
-                        : activeDifficulties.includes(difficulty) ? 'selected' : ''
-                    }
-                    onClick={() => setActiveDifficulties((current) =>
-                      difficulty === 'Alla' ? [] : toggleArrayValue(current, difficulty)
-                    )}
-                  >
-                    {difficulty === 'Alla' ? 'Alla nivåer' : difficulty}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="favorite-filter-group">
-            <button
-              type="button"
-              className={`favorite-filter-trigger ${activeTimes.length > 0 ? 'active' : ''}`}
-              aria-expanded={openFilter === 'time'}
-              onClick={() => setOpenFilter(openFilter === 'time' ? null : 'time')}
-            >
-              Tid
-              <ChevronDown size={17} className={openFilter === 'time' ? 'open' : ''} />
-            </button>
-            {openFilter === 'time' && (
-              <div className="favorite-filter-menu">
-                <button
-                  type="button"
-                  className={activeTimes.length === 0 ? 'selected' : ''}
-                  onClick={() => setActiveTimes([])}
-                >
-                  Alla tider
-                </button>
-                {favoriteTimeOptions.map((option) => (
-                  <button
-                    key={option.value}
-                    type="button"
-                    className={activeTimes.includes(option.value) ? 'selected' : ''}
-                    onClick={() => setActiveTimes((current) =>
-                      toggleArrayValue(current, option.value)
-                    )}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="favorite-filter-footer">
-          <p aria-live="polite">
-            {filteredRecipes.length} av {recipes.length} favoriter
-          </p>
-          {hasActiveFilters && (
-            <button type="button" onClick={clearFilters}>
-              Rensa filter
-            </button>
-          )}
-        </div>
-      </section>
+      <div className="search-wrapper" style={{ marginBottom: '1.5rem' }}>
+        <Search className="search-icon-svg" size={20} color="#817878" />
+        <input
+          type="text"
+          placeholder="Sök på recepttitel..."
+          className="search-input"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
+      <RecipeFilterBar {...filterHook} />
 
       {filteredRecipes.length > 0 ? (
         <div className="profile-grid">
@@ -301,9 +160,6 @@ const FavoritesSection = ({
       ) : (
         <div className="profile-empty">
           <p>Inga favoriter matchar dina filter.</p>
-          <button type="button" className="favorite-clear-empty" onClick={clearFilters}>
-            Rensa filter
-          </button>
         </div>
       )}
     </div>
@@ -311,12 +167,12 @@ const FavoritesSection = ({
 };
 
 type SettingsSectionProps = {
-  onExportData: () => void;
+  isAdmin: boolean;
+  onOpenAdmin: () => void;
   onDeleteAccount: () => void;
-  isDeleting?: boolean;
 };
 
-const SettingsSection = ({ onExportData, onDeleteAccount, isDeleting = false }: SettingsSectionProps) => (
+const SettingsSection = ({ isAdmin, onOpenAdmin, onDeleteAccount }: SettingsSectionProps) => (
   <div className="profile-settings">
     <div className="settings-card">
       <h3>Byt lösenord</h3>
@@ -333,36 +189,21 @@ const SettingsSection = ({ onExportData, onDeleteAccount, isDeleting = false }: 
       </form>
     </div>
 
-    <div className="settings-card">
-      <h3>Exportera din data</h3>
-      <p>Ladda ned en kopia av ditt konto och dina recept i JSON-format enligt GDPR.</p>
-      <button type="button" className="settings-btn" onClick={onExportData}>
-        Exportera data
-      </button>
-    </div>
+    {isAdmin && (
+      <div className="settings-card">
+        <h3>Adminbehörigheter</h3>
+        <p>Hantera användare och recept.</p>
+        <button type="button" className="settings-btn" onClick={onOpenAdmin}>
+          Öppna adminverktyg
+        </button>
+      </div>
+    )}
 
     <div className="settings-card settings-danger">
-      <h3>Radera konto (GDPR)</h3>
-      <p>Permanent och omedelbar borttagning av ditt konto och all relaterad data enligt GDPR rätt till radering.</p>
-      <div style={{ fontSize: '0.85rem', color: '#666', marginTop: '12px', padding: '8px', backgroundColor: '#fff5f5', borderRadius: '4px' }}>
-        <strong>Vad som raderas:</strong>
-        <ul style={{ marginTop: '4px', paddingLeft: '20px' }}>
-          <li>Ditt användarkonto</li>
-          <li>Alla dina recept och recepthistorik</li>
-          <li>Dina favoriter och användardata</li>
-          <li>All personlig information</li>
-        </ul>
-        <p style={{ marginTop: '8px', marginBottom: '0' }}>
-          <strong>Obs:</strong> Du kan INTE logga in igen efter radering, och data kan INTE återställas.
-        </p>
-      </div>
-      <button
-        type="button"
-        className="settings-btn settings-btn-danger"
-        onClick={onDeleteAccount}
-        disabled={isDeleting}
-      >
-        {isDeleting ? 'Raderar...' : 'Radera mitt konto'}
+      <h3>Radera konto</h3>
+      <p>Permanent borttagning av ditt konto och all relaterad data. Denna åtgärd kan inte ångras.</p>
+      <button type="button" className="settings-btn settings-btn-danger" onClick={onDeleteAccount}>
+        Radera mitt konto
       </button>
     </div>
   </div>
@@ -371,67 +212,72 @@ const SettingsSection = ({ onExportData, onDeleteAccount, isDeleting = false }: 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('mina-recept');
+  const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
+  const [favorites, setFavorites] = useState<Recipe[]>([]);
   const [selected, setSelected] = useState<Recipe | null>(null);
+  const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const authData = getAuthData();
   const user = authData?.user;
+  const favoriteIds = new Set(favorites.map((recipe) => recipe._id));
 
   const {
-    myRecipes,
-    favorites,
-    loading,
-    fetchMyRecipes,
+    myRecipes: hookMyRecipes,
+    favorites: hookFavorites,
     refreshFavorites,
-    removeRecipeFromMyRecipes,
+    loading: hookLoading,
+    fetchMyRecipes,
   } = useProfileData(user?.id);
 
   const { forkRecipe, removeRecipe } = useRecipeOperations(
-    fetchMyRecipes,
-    (id) => {
-      removeRecipeFromMyRecipes(id);
+    () => {
+      void fetchMyRecipes();
       setSelected(null);
     },
+    (id: string) => {
+      setMyRecipes((prev) => prev.filter((recipe) => recipe._id !== id));
+      setSelected(null);
+    }
   );
 
-  const favoriteIds = new Set(favorites.map((recipe) => recipe._id));
+  useEffect(() => {
+    setMyRecipes(hookMyRecipes);
+  }, [hookMyRecipes]);
 
-  const handleExportData = async () => {
-    try {
-      await exportMyData();
-    } catch (err) {
-      console.error('Kunde inte exportera data:', err);
-      alert('Kunde inte exportera data. Försök igen senare.');
-    }
+  useEffect(() => {
+    setFavorites(hookFavorites);
+  }, [hookFavorites]);
+
+  useEffect(() => {
+    setLoading(hookLoading);
+  }, [hookLoading]);
+
+  const handleForkRecipe = async (recipeId: string, forkedRecipe: Partial<Recipe>) => {
+    await forkRecipe(recipeId, forkedRecipe);
+  };
+
+  const handleDeleteRecipe = async (id: string) => {
+    await removeRecipe(id);
   };
 
   const handleDeleteAccount = async () => {
-    const confirmMessage = `VARNING: Detta raderar ditt konto PERMANENT och OMEDELBAR.
+    const confirmed = window.confirm(
+      'Är du helt säker? Ditt konto och all din data raderas permanent. Denna åtgärd kan inte ångras.'
+    );
 
-Vad som händer:
-- Ditt konto och all data (recept, favoriter, osv) raderas direkt
-- Du kan INTE logga in igen efter detta
-- Du kan INTE ångra denna åtgärd
-
-Skriv "RADERA" för att bekräfta att du förstår:`;
-
-    const confirmed = window.prompt(confirmMessage);
-
-    if (confirmed !== 'RADERA') {
+    if (!confirmed) {
       return;
     }
 
-    setIsDeleting(true);
     try {
       await deleteMyAccount();
       clearAuthData();
       navigate('/');
     } catch (err) {
       console.error('Kunde inte radera kontot:', err);
-      alert(err instanceof Error ? err.message : 'Kunde inte radera kontot. Försök igen senare.');
-      setIsDeleting(false);
+      alert('Kunde inte radera kontot. Försök igen senare.');
     }
   };
 
@@ -465,9 +311,9 @@ Skriv "RADERA" för att bekräfta att du förstår:`;
 
     return (
       <SettingsSection
-        onExportData={handleExportData}
+        isAdmin={user?.role === 'admin'}
+        onOpenAdmin={() => navigate('/admin')}
         onDeleteAccount={handleDeleteAccount}
-        isDeleting={isDeleting}
       />
     );
   };
@@ -502,8 +348,8 @@ Skriv "RADERA" för att bekräfta att du förstår:`;
         <RecipeModal
           recipe={selected}
           onClose={() => setSelected(null)}
-          onFork={forkRecipe}
-          onDelete={removeRecipe}
+          onFork={handleForkRecipe}
+          onDelete={handleDeleteRecipe}
           onOpenRecipe={(recipe) => setSelected(recipe)}
           onEdit={(recipe) => {
             setRecipeToEdit(recipe);
