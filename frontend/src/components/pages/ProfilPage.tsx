@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+<<<<<<< HEAD
 import { ArrowUpDown, ChevronDown, Search } from 'lucide-react';
-import { getAuthData, clearAuthData, deleteMyAccount } from '../../api/authApi';
+import { getAuthData, clearAuthData, deleteMyAccount, exportMyData } from '../../api/authApi';
+>>>>>>> 4251ff5 (Byt adminbehörigheter mot GDPR-dataexport i inställningar)
 import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
 import { getFavorites } from '../../api/favoritesApi';
 import RecipeCard from '../recipeCard/RecipeCard';
@@ -434,12 +436,11 @@ const FavoritesSection = ({
 };
 
 type SettingsSectionProps = {
-  isAdmin: boolean;
-  onOpenAdmin: () => void;
+  onExportData: () => void;
   onDeleteAccount: () => void;
 };
 
-const SettingsSection = ({ isAdmin, onOpenAdmin, onDeleteAccount }: SettingsSectionProps) => (
+const SettingsSection = ({ onExportData, onDeleteAccount }: SettingsSectionProps) => (
   <div className="profile-settings">
     <div className="settings-card">
       <h3>Byt lösenord</h3>
@@ -456,15 +457,13 @@ const SettingsSection = ({ isAdmin, onOpenAdmin, onDeleteAccount }: SettingsSect
       </form>
     </div>
 
-    {isAdmin && (
-      <div className="settings-card">
-        <h3>Adminbehörigheter</h3>
-        <p>Hantera användare och recept.</p>
-        <button type="button" className="settings-btn" onClick={onOpenAdmin}>
-          Öppna adminverktyg
-        </button>
-      </div>
-    )}
+    <div className="settings-card">
+      <h3>Exportera din data</h3>
+      <p>Ladda ned en kopia av ditt konto och dina recept i JSON-format enligt GDPR.</p>
+      <button type="button" className="settings-btn" onClick={onExportData}>
+        Exportera data
+      </button>
+    </div>
 
     <div className="settings-card settings-danger">
       <h3>Radera konto</h3>
@@ -562,6 +561,15 @@ const ProfilePage = () => {
     setSelected(null);
   };
 
+  const handleExportData = async () => {
+    try {
+      await exportMyData();
+    } catch (err) {
+      console.error('Kunde inte exportera data:', err);
+      alert('Kunde inte exportera data. Försök igen senare.');
+    }
+  };
+
   const handleDeleteAccount = async () => {
     const confirmed = window.confirm(
       'Är du helt säker? Ditt konto och all din data raderas permanent. Denna åtgärd kan inte ångras.'
@@ -613,8 +621,7 @@ const ProfilePage = () => {
 
     return (
       <SettingsSection
-        isAdmin={user?.role === 'admin'}
-        onOpenAdmin={() => navigate('/admin')}
+        onExportData={handleExportData}
         onDeleteAccount={handleDeleteAccount}
       />
     );
