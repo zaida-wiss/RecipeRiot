@@ -189,9 +189,12 @@ const AdminPage = () => {
 
     const isSelf = user._id === currentUserId;
     const confirmed = window.confirm(
-      isSelf
-        ? "Vill du soft delete:a ditt eget konto? Du loggas ut direkt efteråt."
-        : `Vill du soft delete:a användaren ${user.username}?`
+      `Soft delete ${isSelf ? "ditt konto" : `användaren ${user.username}`}?\n\n` +
+      `Det här kommer att:\n` +
+      `• Markera kontot som borttaget\n` +
+      `• Användaren kan inte logga in\n` +
+      `• Data sparas i 90 dagar\n` +
+      `• Efter 90 dagar raderas allt permanent automatiskt`
     );
 
     if (!confirmed) {
@@ -229,7 +232,12 @@ const AdminPage = () => {
 
   const handleDeleteRecipe = async (recipe: Recipe) => {
     const confirmed = window.confirm(
-      `Vill du soft delete:a receptet "${recipe.title}"?`
+      `Soft delete receptet "${recipe.title}"?\n\n` +
+      `Det här kommer att:\n` +
+      `• Markera receptet som borttaget\n` +
+      `• Receptet syns inte längre\n` +
+      `• Data sparas i 90 dagar\n` +
+      `• Efter 90 dagar raderas det permanent automatiskt`
     );
 
     if (!confirmed) {
