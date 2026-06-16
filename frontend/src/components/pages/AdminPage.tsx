@@ -11,6 +11,7 @@ import {
   type ApiStatusError,
 } from "../../api/adminApi";
 import { clearAuthData, getAuthData } from "../../api/authApi";
+import SoftDeleteModal from "../softDeleteModal/SoftDeleteModal";
 import type { Recipe } from "../../types";
 import "./AdminPage.css";
 
@@ -60,6 +61,11 @@ const AdminPage = () => {
     useState<UserRoleFilter>("all");
   const [recipeSearch, setRecipeSearch] = useState("");
   const [recipeFilter, setRecipeFilter] = useState<RecipeFilter>("all");
+  const [softDeleteModal, setSoftDeleteModal] = useState<{
+    type: 'user' | 'recipe';
+    user?: AdminUser;
+    recipe?: Recipe;
+  } | null>(null);
 
   const handleAdminApiError = (error: unknown): boolean => {
     const status = (error as ApiStatusError).status;
@@ -187,19 +193,19 @@ const AdminPage = () => {
       return;
     }
 
-    const isSelf = user._id === currentUserId;
-    const confirmed = window.confirm(
-      `Soft delete ${isSelf ? "ditt konto" : `användaren ${user.username}`}?\n\n` +
-      `Det här kommer att:\n` +
-      `• Markera kontot som borttaget\n` +
-      `• Användaren kan inte logga in\n` +
-      `• Data sparas i 90 dagar\n` +
-      `• Efter 90 dagar raderas allt permanent automatiskt`
-    );
+    setSoftDeleteModal({
+      type: 'user',
+      user,
+    });
+  };
 
-    if (!confirmed) {
+  const handleConfirmDeleteUser = async () => {
+    if (!softDeleteModal || softDeleteModal.type !== 'user' || !softDeleteModal.user) {
       return;
     }
+
+    const user = softDeleteModal.user;
+    const isSelf = user._id === currentUserId;
 
     setPendingAction(`user:${user._id}`);
     setFeedbackMessage(null);
@@ -207,6 +213,8 @@ const AdminPage = () => {
 
     try {
       await softDeleteUserAsAdmin(user._id);
+
+      setSoftDeleteModal(null);
 
       if (isSelf) {
         clearAuthData();
@@ -231,18 +239,18 @@ const AdminPage = () => {
   };
 
   const handleDeleteRecipe = async (recipe: Recipe) => {
-    const confirmed = window.confirm(
-      `Soft delete receptet "${recipe.title}"?\n\n` +
-      `Det här kommer att:\n` +
-      `• Markera receptet som borttaget\n` +
-      `• Receptet syns inte längre\n` +
-      `• Data sparas i 90 dagar\n` +
-      `• Efter 90 dagar raderas det permanent automatiskt`
-    );
+    setSoftDeleteModal({
+      type: 'recipe',
+      recipe,
+    });
+  };
 
-    if (!confirmed) {
+  const handleConfirmDeleteRecipe = async () => {
+    if (!softDeleteModal || softDeleteModal.type !== 'recipe' || !softDeleteModal.recipe) {
       return;
     }
+
+    const recipe = softDeleteModal.recipe;
 
     setPendingAction(`recipe:${recipe._id}`);
     setFeedbackMessage(null);
@@ -250,6 +258,7 @@ const AdminPage = () => {
 
     try {
       await softDeleteRecipeAsAdmin(recipe._id);
+      setSoftDeleteModal(null);
       setRecipes((prev) => prev.filter((item) => item._id !== recipe._id));
       setFeedbackMessage(`Receptet "${recipe.title}" har soft delete:ats.`);
     } catch (error) {
@@ -469,6 +478,26 @@ const AdminPage = () => {
             </ul>
           </section>
         </div>
+      )}
+
+      {softDeleteModal && softDeleteModal.type === 'user' && softDeleteModal.user && (
+        <SoftDeleteModal
+          type="user"
+          name={softDeleteModal.user.username}
+          onConfirm={handleConfirmDeleteUser}
+          onCancel={() => setSoftDeleteModal(null)}
+          additionalInfo={`E-post: ${softDeleteModal.user.email}`}
+        />
+      )}
+
+      {softDeleteModal && softDeleteModal.type === 'recipe' && softDeleteModal.recipe && (
+        <SoftDeleteModal
+          type="recipe"
+          name={softDeleteModal.recipe.title}
+          onConfirm={handleConfirmDeleteRecipe}
+          onCancel={() => setSoftDeleteModal(null)}
+          additionalInfo={`Skapad av: ${softDeleteModal.recipe.createdByUsername || 'RecipeRiot'}`}
+        />
       )}
     </div>
   );
