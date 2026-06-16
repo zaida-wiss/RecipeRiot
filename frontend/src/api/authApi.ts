@@ -201,3 +201,11 @@ export const getAuthHeaders = (): HeadersInit => {
     Authorization: `Bearer ${token}`,
   };
 };
+
+// Permanent borttagning av användarkonto (GDPR hard delete)
+export const deleteMyAccount = async (): Promise<void> => {
+  return requestJson(`${BASE_URL}/api/v1/gdpr/me/hard`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+};

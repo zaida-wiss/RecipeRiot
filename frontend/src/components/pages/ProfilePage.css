@@ -447,6 +447,24 @@
 
 .settings-btn:hover { background: #a85525; }
 
+.settings-card p {
+  color: #888;
+  font-size: 0.9rem;
+  margin: 0 0 12px;
+}
+
+.settings-danger {
+  border-color: #f5d9d0;
+  background: #fffbf9;
+}
+
+.settings-btn-danger {
+  background: #d32f2f;
+  margin-top: 8px;
+}
+
+.settings-btn-danger:hover { background: #b71c1c; }
+
 /* ── Tablet ── */
 @media (min-width: 560px) {
   .favorite-sort {

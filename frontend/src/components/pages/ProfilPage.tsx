@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowUpDown, ChevronDown, Search } from 'lucide-react';
-import { getAuthData } from '../../api/authApi';
+import { getAuthData, clearAuthData, deleteMyAccount } from '../../api/authApi';
 import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
 import { getFavorites } from '../../api/favoritesApi';
 import RecipeCard from '../recipeCard/RecipeCard';
@@ -436,9 +436,10 @@ const FavoritesSection = ({
 type SettingsSectionProps = {
   isAdmin: boolean;
   onOpenAdmin: () => void;
+  onDeleteAccount: () => void;
 };
 
-const SettingsSection = ({ isAdmin, onOpenAdmin }: SettingsSectionProps) => (
+const SettingsSection = ({ isAdmin, onOpenAdmin, onDeleteAccount }: SettingsSectionProps) => (
   <div className="profile-settings">
     <div className="settings-card">
       <h3>Byt lösenord</h3>
@@ -464,6 +465,14 @@ const SettingsSection = ({ isAdmin, onOpenAdmin }: SettingsSectionProps) => (
         </button>
       </div>
     )}
+
+    <div className="settings-card settings-danger">
+      <h3>Radera konto</h3>
+      <p>Permanent borttagning av ditt konto och all relaterad data. Denna åtgärd kan inte ångras.</p>
+      <button type="button" className="settings-btn settings-btn-danger" onClick={onDeleteAccount}>
+        Radera mitt konto
+      </button>
+    </div>
   </div>
 );
 
@@ -476,6 +485,7 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const authData = getAuthData();
   const user = authData?.user;
@@ -552,6 +562,27 @@ const ProfilePage = () => {
     setSelected(null);
   };
 
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      'Är du helt säker? Ditt konto och all din data raderas permanent. Denna åtgärd kan inte ångras.'
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deleteMyAccount();
+      clearAuthData();
+      navigate('/');
+    } catch (err) {
+      console.error('Kunde inte radera kontot:', err);
+      alert('Kunde inte radera kontot. Försök igen senare.');
+      setIsDeleting(false);
+    }
+  };
+
   const renderActiveTab = () => {
     if (loading) {
       return <p className="profile-loading">Laddar...</p>;
@@ -584,6 +615,7 @@ const ProfilePage = () => {
       <SettingsSection
         isAdmin={user?.role === 'admin'}
         onOpenAdmin={() => navigate('/admin')}
+        onDeleteAccount={handleDeleteAccount}
       />
     );
   };
