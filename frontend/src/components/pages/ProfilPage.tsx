@@ -438,9 +438,10 @@ const FavoritesSection = ({
 type SettingsSectionProps = {
   onExportData: () => void;
   onDeleteAccount: () => void;
+  isDeleting?: boolean;
 };
 
-const SettingsSection = ({ onExportData, onDeleteAccount }: SettingsSectionProps) => (
+const SettingsSection = ({ onExportData, onDeleteAccount, isDeleting = false }: SettingsSectionProps) => (
   <div className="profile-settings">
     <div className="settings-card">
       <h3>Byt lösenord</h3>
@@ -468,8 +469,13 @@ const SettingsSection = ({ onExportData, onDeleteAccount }: SettingsSectionProps
     <div className="settings-card settings-danger">
       <h3>Radera konto</h3>
       <p>Permanent borttagning av ditt konto och all relaterad data. Denna åtgärd kan inte ångras.</p>
-      <button type="button" className="settings-btn settings-btn-danger" onClick={onDeleteAccount}>
-        Radera mitt konto
+      <button
+        type="button"
+        className="settings-btn settings-btn-danger"
+        onClick={onDeleteAccount}
+        disabled={isDeleting}
+      >
+        {isDeleting ? 'Raderar...' : 'Radera mitt konto'}
       </button>
     </div>
   </div>
@@ -586,7 +592,7 @@ const ProfilePage = () => {
       navigate('/');
     } catch (err) {
       console.error('Kunde inte radera kontot:', err);
-      alert('Kunde inte radera kontot. Försök igen senare.');
+      alert(err instanceof Error ? err.message : 'Kunde inte radera kontot. Försök igen senare.');
       setIsDeleting(false);
     }
   };
@@ -623,6 +629,7 @@ const ProfilePage = () => {
       <SettingsSection
         onExportData={handleExportData}
         onDeleteAccount={handleDeleteAccount}
+        isDeleting={isDeleting}
       />
     );
   };
