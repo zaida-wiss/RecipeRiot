@@ -18,13 +18,13 @@ const fetchWithTimeout = async (
   }
 };
 
-// Backend skickar ofta { message: "..." }. Den här helpern gör om det till ett tydligt frontend-fel.
-const getResponseErrorMessage = async (response: Response): Promise<string> => {
+// Backend skickar ofta { message: "...", errors: [...] }. Den här helpern bevarar valideringsfel.
+const getResponseErrorMessage = async (response: Response): Promise<{ message: string; errors?: any[] }> => {
   try {
     const data = await response.json();
-    return data.message || `Fel (${response.status})`;
+    return { message: data.message || `Fel (${response.status})`, errors: data.errors };
   } catch {
-    return `Fel (${response.status})`;
+    return { message: `Fel (${response.status})` };
   }
 };
 
@@ -34,8 +34,10 @@ const requestJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
     const response = await fetchWithTimeout(url, init);
 
     if (!response.ok) {
-      const message = await getResponseErrorMessage(response);
-      throw new Error(message);
+      const errorData = await getResponseErrorMessage(response);
+      const error = new Error(errorData.message) as any;
+      if (errorData.errors) error.errors = errorData.errors;
+      throw error;
     }
 
     return response.json();
