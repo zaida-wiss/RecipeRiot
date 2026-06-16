@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { Recipe } from "../models/Recipe.js";
 import { User } from "../models/User.js";
-import { NotFoundError, UnauthorizedError } from "../errors/AppError.js";
+import { NotFoundError, UnauthorizedError, ForbiddenError } from "../errors/AppError.js";
 
 const SOFT_DELETE_RETENTION_DAYS = 90;
 
@@ -108,7 +108,7 @@ export const hardDeleteMe = async (
     });
 
     if (activeAdminCount <= 1) {
-      throw new Error("Den sista adminen kan inte raderas");
+      throw new ForbiddenError("Den sista adminen kan inte raderas");
     }
   }
 
@@ -133,13 +133,14 @@ export const cleanupExpiredSoftDeletedData = async (): Promise<void> => {
     deletedAt: { $lt: cutoffDate },
   });
 
+  let deletedCount = 0;
   for (const user of deletedUsers) {
     const userId = user._id.toString();
     await Recipe.deleteMany({ createdBy: userId });
     await User.findByIdAndDelete(user._id);
+    deletedCount++;
   }
 
-  const deletedCount = deletedUsers.length;
   if (deletedCount > 0) {
     console.log(
       `[GDPR Cleanup] Permanently deleted ${deletedCount} soft-deleted user(s) and their recipes`
