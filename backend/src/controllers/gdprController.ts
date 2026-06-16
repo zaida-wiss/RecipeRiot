@@ -3,6 +3,8 @@ import { Recipe } from "../models/Recipe.js";
 import { User } from "../models/User.js";
 import { NotFoundError, UnauthorizedError } from "../errors/AppError.js";
 
+const SOFT_DELETE_RETENTION_DAYS = 90;
+
 
 // GET /api/v1/gdpr/export
 export const exportMyData = async (
@@ -93,6 +95,23 @@ export const hardDeleteMe = async (
     throw new UnauthorizedError("Autentisering krävs");
   }
 
+  const user = await User.findById(req.user.id);
+  if (!user) {
+    throw new NotFoundError("Användaren hittades inte");
+  }
+
+  // Om användaren är admin, validera att det inte är den sista admin:n
+  if (user.role === "admin") {
+    const activeAdminCount = await User.countDocuments({
+      role: "admin",
+      isDeleted: false,
+    });
+
+    if (activeAdminCount <= 1) {
+      throw new Error("Den sista adminen kan inte raderas");
+    }
+  }
+
   await Recipe.deleteMany({ createdBy: req.user.id });
   await User.findByIdAndDelete(req.user.id);
 
@@ -102,4 +121,28 @@ export const hardDeleteMe = async (
   );
 
   res.status(204).send();
+};
+
+// Automatisk cleanup av soft-deleted data efter 90 dagar
+export const cleanupExpiredSoftDeletedData = async (): Promise<void> => {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - SOFT_DELETE_RETENTION_DAYS);
+
+  const deletedUsers = await User.find({
+    isDeleted: true,
+    deletedAt: { $lt: cutoffDate },
+  });
+
+  for (const user of deletedUsers) {
+    const userId = user._id.toString();
+    await Recipe.deleteMany({ createdBy: userId });
+    await User.findByIdAndDelete(user._id);
+  }
+
+  const deletedCount = deletedUsers.length;
+  if (deletedCount > 0) {
+    console.log(
+      `[GDPR Cleanup] Permanently deleted ${deletedCount} soft-deleted user(s) and their recipes`
+    );
+  }
 };
