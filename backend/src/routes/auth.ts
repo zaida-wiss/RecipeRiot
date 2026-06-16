@@ -8,6 +8,7 @@ import {
   login,
   getMe,
   getAdminStatus,
+  getAdminCount,
 } from '../controllers/authController.js';
 
 
@@ -27,5 +28,8 @@ router.get('/me', authenticate, getMe);
 
 // GET /api/v1/auth/admin
 router.get("/admin", authenticate, authorizeRoles("admin"), getAdminStatus);
+
+// GET /api/v1/auth/admin-count
+router.get("/admin-count", authenticate, getAdminCount);
 
 export default router;

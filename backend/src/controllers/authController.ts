@@ -164,3 +164,24 @@ export const getAdminStatus = async (
     next(error);
   }
 };
+
+export const getAdminCount = async (
+  req: Request,
+  res: Response<{ count: number }>,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      throw new UnauthorizedError('Autentisering krävs');
+    }
+
+    const adminCount = await User.countDocuments({
+      role: 'admin',
+      isDeleted: false,
+    });
+
+    res.json({ count: adminCount });
+  } catch (error) {
+    next(error);
+  }
+};

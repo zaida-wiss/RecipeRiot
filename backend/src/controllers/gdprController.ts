@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import bcrypt from "bcrypt";
 import { Recipe } from "../models/Recipe.js";
 import { User } from "../models/User.js";
 import { NotFoundError, UnauthorizedError, ForbiddenError } from "../errors/AppError.js";
@@ -95,9 +96,20 @@ export const hardDeleteMe = async (
     throw new UnauthorizedError("Autentisering krävs");
   }
 
-  const user = await User.findById(req.user.id);
+  const { password } = req.body;
+  if (!password) {
+    throw new UnauthorizedError("Lösenord är obligatoriskt");
+  }
+
+  const user = await User.findById(req.user.id).select('+passwordHash');
   if (!user) {
     throw new NotFoundError("Användaren hittades inte");
+  }
+
+  // Validera lösenordet
+  const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+  if (!isValidPassword) {
+    throw new UnauthorizedError("Felaktigt lösenord");
   }
 
   // Om användaren är admin, validera att det inte är den sista admin:n
