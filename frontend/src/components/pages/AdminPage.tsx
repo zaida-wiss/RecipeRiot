@@ -200,11 +200,12 @@ const AdminPage = () => {
   };
 
   const handleConfirmDeleteUser = async () => {
-    if (!softDeleteModal || softDeleteModal.type !== 'user' || !softDeleteModal.user) {
+    const isValidUserModal = softDeleteModal?.type === 'user' && softDeleteModal.user;
+    if (!isValidUserModal) {
       return;
     }
 
-    const user = softDeleteModal.user;
+    const user = softDeleteModal.user!;
     const isSelf = user._id === currentUserId;
 
     setPendingAction(`user:${user._id}`);
@@ -246,11 +247,12 @@ const AdminPage = () => {
   };
 
   const handleConfirmDeleteRecipe = async () => {
-    if (!softDeleteModal || softDeleteModal.type !== 'recipe' || !softDeleteModal.recipe) {
+    const isValidRecipeModal = softDeleteModal?.type === 'recipe' && softDeleteModal.recipe;
+    if (!isValidRecipeModal) {
       return;
     }
 
-    const recipe = softDeleteModal.recipe;
+    const recipe = softDeleteModal.recipe!;
 
     setPendingAction(`recipe:${recipe._id}`);
     setFeedbackMessage(null);
