@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import { getAuthData, clearAuthData, deleteMyAccount } from '../../api/authApi';
+import { getAuthData, clearAuthData, deleteMyAccount, exportMyData } from '../../api/authApi';
 import DeleteAccountModal from '../deleteAccountModal/DeleteAccountModal';
 
 declare global {
@@ -174,12 +174,11 @@ const FavoritesSection = ({
 };
 
 type SettingsSectionProps = {
-  isAdmin: boolean;
-  onOpenAdmin: () => void;
+  onExportData: () => void;
   onDeleteAccount: () => void;
 };
 
-const SettingsSection = ({ isAdmin, onOpenAdmin, onDeleteAccount }: SettingsSectionProps) => (
+const SettingsSection = ({ onExportData, onDeleteAccount }: SettingsSectionProps) => (
   <div className="profile-settings">
     <div className="settings-card">
       <h3>Byt lösenord</h3>
@@ -196,15 +195,13 @@ const SettingsSection = ({ isAdmin, onOpenAdmin, onDeleteAccount }: SettingsSect
       </form>
     </div>
 
-    {isAdmin && (
-      <div className="settings-card">
-        <h3>Adminbehörigheter</h3>
-        <p>Hantera användare och recept.</p>
-        <button type="button" className="settings-btn" onClick={onOpenAdmin}>
-          Öppna adminverktyg
-        </button>
-      </div>
-    )}
+    <div className="settings-card">
+      <h3>Exportera data</h3>
+      <p>Ladda ner en kopia av all din data enligt GDPR.</p>
+      <button type="button" className="settings-btn" onClick={onExportData}>
+        Exportera mina data
+      </button>
+    </div>
 
     <div className="settings-card settings-danger">
       <h3>Radera konto</h3>
@@ -289,6 +286,15 @@ const ProfilePage = () => {
     navigate('/');
   };
 
+  const handleExportData = async () => {
+    try {
+      await exportMyData();
+    } catch (err) {
+      console.error('Kunde inte exportera data:', err);
+      alert('Kunde inte exportera data. Försök igen senare.');
+    }
+  };
+
   const renderActiveTab = () => {
     if (loading) {
       return <p className="profile-loading">Laddar...</p>;
@@ -319,8 +325,7 @@ const ProfilePage = () => {
 
     return (
       <SettingsSection
-        isAdmin={user?.role === 'admin'}
-        onOpenAdmin={() => navigate('/admin')}
+        onExportData={handleExportData}
         onDeleteAccount={handleDeleteAccount}
       />
     );
