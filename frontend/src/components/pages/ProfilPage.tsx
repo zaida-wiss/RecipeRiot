@@ -1,11 +1,10 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-<<<<<<< HEAD
 import { ArrowUpDown, ChevronDown, Search } from 'lucide-react';
 import { getAuthData, clearAuthData, deleteMyAccount, exportMyData } from '../../api/authApi';
->>>>>>> 4251ff5 (Byt adminbehörigheter mot GDPR-dataexport i inställningar)
-import { getAllRecipes, deleteRecipe, createRecipe } from '../../api/recipesApi';
-import { getFavorites } from '../../api/favoritesApi';
+import { useFavoriteFilter, type FavoriteSort } from '../../hooks/useFavoriteFilter';
+import { useRecipeOperations } from '../../hooks/useRecipeOperations';
+import { useProfileData } from '../../hooks/useProfileData';
 import RecipeCard from '../recipeCard/RecipeCard';
 import RecipeModal from '../recipeModal/RecipeModal';
 import AddRecipeForm from '../addRecipe/AddRecipeForm';
@@ -13,9 +12,6 @@ import type { Recipe } from '../../types';
 import './ProfilePage.css';
 
 type Tab = 'mina-recept' | 'favoriter' | 'installningar';
-type TimeFilter = 'Snabb' | 'Medel' | 'Lång';
-type FavoriteSort = 'newest' | 'title' | 'time';
-type OpenFavoriteFilter = 'type' | 'difficulty' | 'time' | null;
 
 const profileTabs: Array<{ value: Tab; label: string }> = [
   { value: 'mina-recept', label: 'Mina recept' },
@@ -23,53 +19,11 @@ const profileTabs: Array<{ value: Tab; label: string }> = [
   { value: 'installningar', label: 'Inställningar' },
 ];
 
-const filterRecipesByUser = (recipes: Recipe[], userId?: string) =>
-  recipes.filter((recipe) => String(recipe.createdBy) === String(userId));
-
-const favoriteTimeOptions: Array<{ value: TimeFilter; label: string }> = [
+const favoriteTimeOptions: Array<{ value: 'Snabb' | 'Medel' | 'Lång'; label: string }> = [
   { value: 'Snabb', label: 'Högst 30 min' },
   { value: 'Medel', label: '31-60 min' },
   { value: 'Lång', label: 'Mer än 60 min' },
 ];
-
-const getRecipeTimeInMinutes = (time?: string): number | null => {
-  if (!time?.trim()) return null;
-
-  const normalizedTime = time.toLowerCase().replace(',', '.');
-  const hoursMatch = normalizedTime.match(/(\d+(?:\.\d+)?)\s*(?:h|tim)/);
-  const minutesMatch = normalizedTime.match(/(\d+)\s*(?:min|m)\b/);
-
-  if (hoursMatch || minutesMatch) {
-    const hours = hoursMatch ? Number(hoursMatch[1]) * 60 : 0;
-    const minutes = minutesMatch ? Number(minutesMatch[1]) : 0;
-    return hours + minutes;
-  }
-
-  const numberMatch = normalizedTime.match(/\d+(?:\.\d+)?/);
-  return numberMatch ? Number(numberMatch[0]) : null;
-};
-
-const normalizeForkedRecipe = (forkedRecipe: Partial<Recipe>) => {
-  const cleanedIngredients = (forkedRecipe.ingredients ?? []).map((ingredient) => ({
-    ...ingredient,
-    quantity:
-      typeof ingredient.quantity === 'string'
-        ? Number(ingredient.quantity)
-        : (ingredient.quantity as number),
-  }));
-
-  return {
-    title: forkedRecipe.title || 'Nytt recept',
-    ingredients: cleanedIngredients,
-    steps: forkedRecipe.steps || [],
-    ...(forkedRecipe.imageUrl?.trim()
-      ? { imageUrl: forkedRecipe.imageUrl.trim() }
-      : {}),
-    tags: forkedRecipe.tags || [],
-    difficulty: forkedRecipe.difficulty || 'Medel',
-    ...(forkedRecipe.time?.trim() ? { time: forkedRecipe.time.trim() } : {}),
-  };
-};
 
 type ProfileTabsProps = {
   activeTab: Tab;
@@ -144,105 +98,26 @@ const FavoritesSection = ({
   favoriteIds,
   onFavoriteChanged,
 }: RecipeSectionProps) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeTags, setActiveTags] = useState<string[]>([]);
-  const [activeDifficulties, setActiveDifficulties] = useState<string[]>([]);
-  const [activeTimes, setActiveTimes] = useState<TimeFilter[]>([]);
-  const [sortBy, setSortBy] = useState<FavoriteSort>('newest');
-  const [openFilter, setOpenFilter] = useState<OpenFavoriteFilter>(null);
-  const filterSectionRef = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    if (!openFilter) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        filterSectionRef.current
-        && !filterSectionRef.current.contains(event.target as Node)
-      ) {
-        setOpenFilter(null);
-      }
-    };
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpenFilter(null);
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [openFilter]);
-
-  const allTags = useMemo(
-    () => Array.from(new Set(recipes.flatMap((recipe) => recipe.tags ?? []))).sort(),
-    [recipes],
-  );
-
-  const filteredRecipes = useMemo(() => {
-    const normalizedQuery = searchQuery.trim().toLocaleLowerCase('sv');
-
-    return recipes
-      .filter((recipe) => {
-        const recipeDifficulty = recipe.difficulty?.trim() || 'Ej angiven';
-        const timeInMinutes = getRecipeTimeInMinutes(recipe.time);
-        const matchesSearch =
-          !normalizedQuery
-          || recipe.title.toLocaleLowerCase('sv').includes(normalizedQuery);
-        const matchesTag =
-          activeTags.length === 0
-          || activeTags.some((tag) => (recipe.tags ?? []).includes(tag));
-        const matchesDifficulty =
-          activeDifficulties.length === 0
-          || activeDifficulties.includes(recipeDifficulty);
-        const matchesTime =
-          activeTimes.length === 0
-          || activeTimes.some((timeFilter) =>
-            (timeFilter === 'Snabb' && timeInMinutes !== null && timeInMinutes <= 30)
-            || (timeFilter === 'Medel'
-              && timeInMinutes !== null
-              && timeInMinutes > 30
-              && timeInMinutes <= 60)
-            || (timeFilter === 'Lång' && timeInMinutes !== null && timeInMinutes > 60)
-          );
-
-        return matchesSearch && matchesTag && matchesDifficulty && matchesTime;
-      })
-      .sort((firstRecipe, secondRecipe) => {
-        if (sortBy === 'title') {
-          return firstRecipe.title.localeCompare(secondRecipe.title, 'sv');
-        }
-        if (sortBy === 'time') {
-          return (
-            (getRecipeTimeInMinutes(firstRecipe.time) ?? Number.POSITIVE_INFINITY)
-            - (getRecipeTimeInMinutes(secondRecipe.time) ?? Number.POSITIVE_INFINITY)
-          );
-        }
-        return (
-          new Date(secondRecipe.createdAt).getTime()
-          - new Date(firstRecipe.createdAt).getTime()
-        );
-      });
-  }, [recipes, searchQuery, activeTags, activeDifficulties, activeTimes, sortBy]);
-
-  const hasActiveFilters =
-    searchQuery.trim().length > 0
-    || activeTags.length > 0
-    || activeDifficulties.length > 0
-    || activeTimes.length > 0;
-
-  const toggleArrayValue = <T,>(values: T[], value: T): T[] =>
-    values.includes(value)
-      ? values.filter((currentValue) => currentValue !== value)
-      : [...values, value];
-
-  const clearFilters = () => {
-    setSearchQuery('');
-    setActiveTags([]);
-    setActiveDifficulties([]);
-    setActiveTimes([]);
-  };
+  const {
+    searchQuery,
+    setSearchQuery,
+    activeTags,
+    setActiveTags,
+    activeDifficulties,
+    setActiveDifficulties,
+    activeTimes,
+    setActiveTimes,
+    sortBy,
+    setSortBy,
+    openFilter,
+    setOpenFilter,
+    filterSectionRef,
+    allTags,
+    filteredRecipes,
+    hasActiveFilters,
+    toggleArrayValue,
+    clearFilters,
+  } = useFavoriteFilter(recipes);
 
   if (recipes.length === 0) {
     return (
@@ -496,88 +371,32 @@ const SettingsSection = ({ onExportData, onDeleteAccount, isDeleting = false }: 
 const ProfilePage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('mina-recept');
-  const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
-  const [favorites, setFavorites] = useState<Recipe[]>([]);
   const [selected, setSelected] = useState<Recipe | null>(null);
-  const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const authData = getAuthData();
   const user = authData?.user;
-  const favoriteIds = new Set(favorites.map((recipe) => recipe._id));
 
-  const fetchMyRecipes = async () => {
-    if (!user?.id) {
-      setMyRecipes([]);
-      return;
-    }
+  const {
+    myRecipes,
+    favorites,
+    loading,
+    fetchMyRecipes,
+    refreshFavorites,
+    removeRecipeFromMyRecipes,
+  } = useProfileData(user?.id);
 
-    try {
-      const allRecipes = await getAllRecipes();
-      setMyRecipes(filterRecipesByUser(allRecipes, user.id));
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  const refreshFavorites = async () => {
-    if (!user?.id) {
-      setFavorites([]);
-      return;
-    }
-
-    try {
-      const favs = await getFavorites();
-      setFavorites(favs);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user?.id) {
-        setLoading(false);
-        return;
-      }
-      try {
-        const [allRecipes, favs] = await Promise.all([
-          getAllRecipes(),
-          getFavorites(),
-        ]);
-        setMyRecipes(filterRecipesByUser(allRecipes, user.id));
-        setFavorites(favs);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [user?.id]);
-
-  const handleForkRecipe = async (recipeId: string, forkedRecipe: Partial<Recipe>) => {
-    try {
-      await createRecipe({
-        ...normalizeForkedRecipe(forkedRecipe),
-        originalRef: recipeId,
-      });
-      await fetchMyRecipes();
+  const { forkRecipe, removeRecipe } = useRecipeOperations(
+    fetchMyRecipes,
+    (id) => {
+      removeRecipeFromMyRecipes(id);
       setSelected(null);
-      alert('Receptet har kopierats till dina recept!');
-    } catch (err) {
-      console.error('Det gick inte att forka receptet:', err);
-      alert('Kunde inte skapa receptet. Kontrollera konsolen för detaljer.');
-    }
-  };
+    },
+  );
 
-  const handleDeleteRecipe = async (id: string) => {
-    await deleteRecipe(id);
-    setMyRecipes((prev) => prev.filter((recipe) => recipe._id !== id));
-    setSelected(null);
-  };
+  const favoriteIds = new Set(favorites.map((recipe) => recipe._id));
 
   const handleExportData = async () => {
     try {
@@ -683,8 +502,8 @@ Skriv "RADERA" för att bekräfta att du förstår:`;
         <RecipeModal
           recipe={selected}
           onClose={() => setSelected(null)}
-          onFork={handleForkRecipe}
-          onDelete={handleDeleteRecipe}
+          onFork={forkRecipe}
+          onDelete={removeRecipe}
           onOpenRecipe={(recipe) => setSelected(recipe)}
           onEdit={(recipe) => {
             setRecipeToEdit(recipe);
