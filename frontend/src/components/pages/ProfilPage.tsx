@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import { getAuthData, clearAuthData, deleteMyAccount, exportMyData } from '../../api/authApi';
-import DeleteAccountModal from '../deleteAccountModal/DeleteAccountModal';
+import { getAuthData } from '../../api/authApi';
+import ExportDataSection from '../exportDataSection/ExportDataSection';
+import HardDeleteAccountSection from '../hardDeleteAccountSection/HardDeleteAccountSection';
 
 declare global {
   interface Window {
@@ -173,48 +173,24 @@ const FavoritesSection = ({
   );
 };
 
-type SettingsSectionProps = {
-  onExportData: () => void;
-  onDeleteAccount: () => void;
-};
-
-const SettingsSection = ({ onExportData, onDeleteAccount }: SettingsSectionProps) => (
-  <div className="profile-settings">
-    <div className="settings-card">
-      <h3>Byt lösenord</h3>
-      <form className="settings-form">
-        <label>Nuvarande lösenord</label>
-        <input type="password" placeholder="••••••••" />
-        <label>Nytt lösenord</label>
-        <input type="password" placeholder="••••••••" />
-        <label>Bekräfta nytt lösenord</label>
-        <input type="password" placeholder="••••••••" />
-        <button type="submit" className="settings-btn">
-          Spara lösenord
-        </button>
-      </form>
-    </div>
-
-    <div className="settings-card">
-      <h3>Exportera data</h3>
-      <p>Ladda ner en kopia av all din data enligt GDPR.</p>
-      <button type="button" className="settings-btn" onClick={onExportData}>
-        Exportera mina data
+const ChangePasswordSection = () => (
+  <div className="settings-card">
+    <h3>Byt lösenord</h3>
+    <form className="settings-form">
+      <label>Nuvarande lösenord</label>
+      <input type="password" placeholder="••••••••" />
+      <label>Nytt lösenord</label>
+      <input type="password" placeholder="••••••••" />
+      <label>Bekräfta nytt lösenord</label>
+      <input type="password" placeholder="••••••••" />
+      <button type="submit" className="settings-btn">
+        Spara lösenord
       </button>
-    </div>
-
-    <div className="settings-card settings-danger">
-      <h3>Radera konto</h3>
-      <p>Permanent borttagning av ditt konto och all relaterad data. Denna åtgärd kan inte ångras.</p>
-      <button type="button" className="settings-btn settings-btn-danger" onClick={onDeleteAccount}>
-        Radera mitt konto
-      </button>
-    </div>
+    </form>
   </div>
 );
 
 const ProfilePage = () => {
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('mina-recept');
   const [myRecipes, setMyRecipes] = useState<Recipe[]>([]);
   const [favorites, setFavorites] = useState<Recipe[]>([]);
@@ -222,7 +198,6 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [recipeToEdit, setRecipeToEdit] = useState<Recipe | null>(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const authData = getAuthData();
   const user = authData?.user;
@@ -267,34 +242,6 @@ const ProfilePage = () => {
     await removeRecipe(id);
   };
 
-  const handleDeleteAccount = () => {
-    setShowDeleteModal(true);
-  };
-
-  const handleConfirmDelete = async (password: string) => {
-    try {
-      await deleteMyAccount(password);
-      clearAuthData();
-    } catch (err) {
-      console.error('Kunde inte radera kontot:', err);
-      throw err;
-    }
-  };
-
-  const handleDeleteSuccess = () => {
-    window.onAccountDeleted?.();
-    navigate('/');
-  };
-
-  const handleExportData = async () => {
-    try {
-      await exportMyData();
-    } catch (err) {
-      console.error('Kunde inte exportera data:', err);
-      alert('Kunde inte exportera data. Försök igen senare.');
-    }
-  };
-
   const renderActiveTab = () => {
     if (loading) {
       return <p className="profile-loading">Laddar...</p>;
@@ -324,10 +271,11 @@ const ProfilePage = () => {
     }
 
     return (
-      <SettingsSection
-        onExportData={handleExportData}
-        onDeleteAccount={handleDeleteAccount}
-      />
+      <div className="profile-settings">
+        <ChangePasswordSection />
+        <ExportDataSection />
+        {user && <HardDeleteAccountSection username={user.username} />}
+      </div>
     );
   };
 
@@ -384,15 +332,6 @@ const ProfilePage = () => {
             void fetchMyRecipes();
           }}
           recipeToEdit={recipeToEdit || undefined}
-        />
-      )}
-
-      {showDeleteModal && user && (
-        <DeleteAccountModal
-          username={user.username}
-          onConfirm={handleConfirmDelete}
-          onCancel={() => setShowDeleteModal(false)}
-          onSuccess={handleDeleteSuccess}
         />
       )}
     </div>
