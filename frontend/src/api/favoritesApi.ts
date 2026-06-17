@@ -17,11 +17,6 @@ export const getFavorites = async (): Promise<Recipe[]> => {
   const res = await fetch(`${BASE_URL}/api/v1/favorites`, {
     headers: getAuthHeaders(),
   });
-
-  if (!res.ok) {
-    throw new Error(await getFavoritesErrorMessage(res));
-  }
-
   const json = await res.json();
   return json.data ?? [];
 };
@@ -31,7 +26,6 @@ export const addFavorite = async (recipeId: string): Promise<void> => {
     method: 'POST',
     headers: getAuthHeaders(),
   });
-
   if (!res.ok) {
     throw new Error(await getFavoritesErrorMessage(res));
   }
@@ -42,7 +36,6 @@ export const removeFavorite = async (recipeId: string): Promise<void> => {
     method: 'DELETE',
     headers: getAuthHeaders(),
   });
-
   if (!res.ok) {
     throw new Error(await getFavoritesErrorMessage(res));
   }

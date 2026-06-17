@@ -18,13 +18,13 @@ const fetchWithTimeout = async (
   }
 };
 
-// Backend skickar ofta { message: "..." }. Den här helpern gör om det till ett tydligt frontend-fel.
-const getResponseErrorMessage = async (response: Response): Promise<string> => {
+// Backend skickar ofta { message: "...", errors: [...] }. Den här helpern bevarar valideringsfel.
+const getResponseErrorMessage = async (response: Response): Promise<{ message: string; errors?: any[] }> => {
   try {
     const data = await response.json();
-    return data.message || `Fel (${response.status})`;
+    return { message: data.message || `Fel (${response.status})`, errors: data.errors };
   } catch {
-    return `Fel (${response.status})`;
+    return { message: `Fel (${response.status})` };
   }
 };
 
@@ -34,8 +34,10 @@ const requestJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
     const response = await fetchWithTimeout(url, init);
 
     if (!response.ok) {
-      const message = await getResponseErrorMessage(response);
-      throw new Error(message);
+      const errorData = await getResponseErrorMessage(response);
+      const error = new Error(errorData.message) as any;
+      if (errorData.errors) error.errors = errorData.errors;
+      throw error;
     }
 
     return response.json();
@@ -200,4 +202,43 @@ export const getAuthHeaders = (): HeadersInit => {
   return {
     Authorization: `Bearer ${token}`,
   };
+};
+
+// Permanent borttagning av användarkonto (GDPR hard delete)
+export const deleteMyAccount = async (password: string): Promise<void> => {
+  const response = await fetchWithTimeout(`${BASE_URL}/api/v1/gdpr/me/hard`, {
+    method: 'DELETE',
+    headers: {
+      ...getAuthHeaders(),
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ password }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({})) as any;
+    throw new Error(errorData.message || 'Kunde inte radera kontot');
+  }
+};
+
+// Exportera användarens data (GDPR export)
+export const exportMyData = async (): Promise<void> => {
+  const response = await fetch(`${BASE_URL}/api/v1/gdpr/export`, {
+    method: 'GET',
+    headers: getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error('Kunde inte exportera data');
+  }
+
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `reciperiot-my-data-${new Date().toISOString().split('T')[0]}.json`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
 };

@@ -172,7 +172,15 @@ const UserLogin = ({ isOpen, onClose, onAuthSuccess }: UserLoginProps) => {
         setTimeout(onClose, 2000);
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Ett fel inträffade";
+      let message = "Ett fel inträffade";
+      if (err instanceof Error) {
+        const errorWithDetails = err as Error & { errors?: Array<{ message: string }> };
+        if (errorWithDetails.errors && Array.isArray(errorWithDetails.errors)) {
+          message = errorWithDetails.errors.map((e) => e.message).join('\n');
+        } else {
+          message = err.message;
+        }
+      }
       setError(message);
     } finally {
       setIsLoading(false);

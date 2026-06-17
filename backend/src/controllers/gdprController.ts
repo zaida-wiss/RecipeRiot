@@ -1,7 +1,10 @@
 import type { Request, Response } from "express";
+import bcrypt from "bcrypt";
 import { Recipe } from "../models/Recipe.js";
 import { User } from "../models/User.js";
-import { NotFoundError, UnauthorizedError } from "../errors/AppError.js";
+import { NotFoundError, UnauthorizedError, ForbiddenError } from "../errors/AppError.js";
+
+const SOFT_DELETE_RETENTION_DAYS = 90;
 
 
 // GET /api/v1/gdpr/export
@@ -93,6 +96,34 @@ export const hardDeleteMe = async (
     throw new UnauthorizedError("Autentisering krävs");
   }
 
+  const { password } = req.body;
+  if (!password) {
+    throw new UnauthorizedError("Lösenord är obligatoriskt");
+  }
+
+  const user = await User.findById(req.user.id).select('+passwordHash');
+  if (!user) {
+    throw new NotFoundError("Användaren hittades inte");
+  }
+
+  // Validera lösenordet
+  const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+  if (!isValidPassword) {
+    throw new UnauthorizedError("Felaktigt lösenord");
+  }
+
+  // Om användaren är admin, validera att det inte är den sista admin:n
+  if (user.role === "admin") {
+    const activeAdminCount = await User.countDocuments({
+      role: "admin",
+      isDeleted: false,
+    });
+
+    if (activeAdminCount <= 1) {
+      throw new ForbiddenError("Den sista adminen kan inte raderas");
+    }
+  }
+
   await Recipe.deleteMany({ createdBy: req.user.id });
   await User.findByIdAndDelete(req.user.id);
 
@@ -102,4 +133,29 @@ export const hardDeleteMe = async (
   );
 
   res.status(204).send();
+};
+
+// Automatisk cleanup av soft-deleted data efter 90 dagar
+export const cleanupExpiredSoftDeletedData = async (): Promise<void> => {
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - SOFT_DELETE_RETENTION_DAYS);
+
+  const deletedUsers = await User.find({
+    isDeleted: true,
+    deletedAt: { $lt: cutoffDate },
+  });
+
+  let deletedCount = 0;
+  for (const user of deletedUsers) {
+    const userId = user._id.toString();
+    await Recipe.deleteMany({ createdBy: userId });
+    await User.findByIdAndDelete(user._id);
+    deletedCount++;
+  }
+
+  if (deletedCount > 0) {
+    console.log(
+      `[GDPR Cleanup] Permanently deleted ${deletedCount} soft-deleted user(s) and their recipes`
+    );
+  }
 };
