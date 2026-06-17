@@ -21,7 +21,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "types": ["jest", "node"]
+    "types": ["node"]
   },
   "ts-node": {
     "esm": true,
