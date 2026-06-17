@@ -12,7 +12,6 @@ const RecipeFilterBar = ({
   activeTimes,
   setActiveTimes,
   openFilter,
-  setOpenFilter,
   filterSectionRef,
   allTags,
   difficulties,
