@@ -40,15 +40,16 @@ const Layout = () => {
   useEffect(() => {
     const checkAuthState = () => {
       const token = getAuthToken();
+      const authData = getAuthData();
 
-      if (!token && currentUser !== null) {
+      if (!token && authData) {
         setCurrentUser(null);
         return;
       }
 
       if (token) {
         const expiresAt = getTokenExpiration(token);
-        if (expiresAt && expiresAt <= Date.now() && currentUser !== null) {
+        if (expiresAt && expiresAt <= Date.now()) {
           clearAuthData();
           setCurrentUser(null);
         }
@@ -57,7 +58,7 @@ const Layout = () => {
 
     const interval = setInterval(checkAuthState, 1000);
     return () => clearInterval(interval);
-  }, [currentUser]);
+  }, []);
 
   const handleAuthSuccess = (user: AuthUser) => {
     setCurrentUser(user);
