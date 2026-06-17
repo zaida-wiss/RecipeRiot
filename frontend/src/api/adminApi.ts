@@ -1,6 +1,8 @@
 import type { Recipe } from "../types";
 import { getAuthHeaders } from "./authApi";
 
+const BASE_URL = import.meta.env.VITE_API_URL;
+
 export type AdminUser = {
   _id: string;
   username: string;
@@ -34,7 +36,7 @@ const getAdminHeaders = (): HeadersInit => ({
 });
 
 const requestAdminJson = async <T>(url: string, init?: RequestInit): Promise<T> => {
-  const response = await fetch(url, {
+  const response = await fetch(`${BASE_URL}${url}`, {
     ...init,
     headers: {
       ...getAdminHeaders(),
@@ -56,7 +58,7 @@ const requestAdminNoContent = async (
   url: string,
   init?: RequestInit
 ): Promise<void> => {
-  const response = await fetch(url, {
+  const response = await fetch(`${BASE_URL}${url}`, {
     ...init,
     headers: {
       ...getAdminHeaders(),
