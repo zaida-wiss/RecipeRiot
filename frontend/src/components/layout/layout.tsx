@@ -36,6 +36,15 @@ const Layout = () => {
     return () => window.clearTimeout(timeoutId);
   }, [currentUser]);
 
+  useEffect(() => {
+    const handleAuthDataCleared = () => {
+      setCurrentUser(null);
+    };
+
+    window.addEventListener('authDataCleared', handleAuthDataCleared);
+    return () => window.removeEventListener('authDataCleared', handleAuthDataCleared);
+  }, []);
+
   const handleAuthSuccess = (user: AuthUser) => {
     setCurrentUser(user);
     setAuthStatusMessage(null);

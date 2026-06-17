@@ -183,6 +183,7 @@ export const getAuthData = (): { token: string; user: AuthUser } | null => {
 export const clearAuthData = (): void => {
   localStorage.removeItem('authToken');
   localStorage.removeItem('user');
+  window.dispatchEvent(new Event('authDataCleared'));
 };
 
 
