@@ -18,8 +18,9 @@ const Layout = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [authStatusMessage, setAuthStatusMessage] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(
-    initialAuth?.user ?? null
+    initialAuth?.user || null
   );
+
 
   useEffect(() => {
     const authData = getAuthData();
@@ -35,14 +36,13 @@ const Layout = () => {
     }, Math.max(0, expiresAt - Date.now()));
 
     return () => window.clearTimeout(timeoutId);
-  }, [currentUser]);
+  }, []);
 
   useEffect(() => {
     const checkAuthState = () => {
       const token = getAuthToken();
-      const authData = getAuthData();
 
-      if (!token && authData) {
+      if (!token) {
         setCurrentUser(null);
         return;
       }
@@ -56,7 +56,7 @@ const Layout = () => {
       }
     };
 
-    const interval = setInterval(checkAuthState, 1000);
+    const interval = setInterval(checkAuthState, 500);
     return () => clearInterval(interval);
   }, []);
 
