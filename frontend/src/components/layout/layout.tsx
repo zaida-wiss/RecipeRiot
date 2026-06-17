@@ -7,6 +7,7 @@ import {
   clearAuthData,
   getAuthData,
   getTokenExpiration,
+  getAuthToken,
   type AuthUser,
 } from "../../api/authApi";
 
@@ -37,13 +38,26 @@ const Layout = () => {
   }, [currentUser]);
 
   useEffect(() => {
-    const handleAuthDataCleared = () => {
-      setCurrentUser(null);
+    const checkAuthState = () => {
+      const token = getAuthToken();
+
+      if (!token && currentUser !== null) {
+        setCurrentUser(null);
+        return;
+      }
+
+      if (token) {
+        const expiresAt = getTokenExpiration(token);
+        if (expiresAt && expiresAt <= Date.now() && currentUser !== null) {
+          clearAuthData();
+          setCurrentUser(null);
+        }
+      }
     };
 
-    window.addEventListener('authDataCleared', handleAuthDataCleared);
-    return () => window.removeEventListener('authDataCleared', handleAuthDataCleared);
-  }, []);
+    const interval = setInterval(checkAuthState, 1000);
+    return () => clearInterval(interval);
+  }, [currentUser]);
 
   const handleAuthSuccess = (user: AuthUser) => {
     setCurrentUser(user);

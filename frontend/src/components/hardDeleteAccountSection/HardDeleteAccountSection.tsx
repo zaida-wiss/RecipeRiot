@@ -17,8 +17,11 @@ const HardDeleteAccountSection = ({ username }: HardDeleteAccountSectionProps) =
 
   const handleConfirmDelete = async (password: string) => {
     try {
+      console.log('HardDeleteAccountSection: Before deleteMyAccount');
       await deleteMyAccount(password);
+      console.log('HardDeleteAccountSection: After deleteMyAccount, before clearAuthData');
       clearAuthData();
+      console.log('HardDeleteAccountSection: After clearAuthData');
     } catch (err) {
       console.error('Kunde inte radera kontot:', err);
       throw err;
