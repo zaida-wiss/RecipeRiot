@@ -20,8 +20,7 @@
     "isolatedModules": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "types": ["node"]
+    "noImplicitReturns": true
   },
   "ts-node": {
     "esm": true,
